@@ -11,6 +11,7 @@ app.use(cors());
 // Import routes
 const userRoutes = require('./routes/user_routes');
 const reviewRoutes = require('./routes/review_route');
+const specificUniversity = require('./routes/university');
 
 // Middleware
 app.use(bodyParser.json());
@@ -18,6 +19,7 @@ app.use(bodyParser.json());
 // Setup routes
 app.use('/api/users', userRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/specificUni', specificUniversity);
 
 // Test DB connection and start the server
 const { pool } = require('./config/db');

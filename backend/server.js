@@ -1,30 +1,31 @@
 const express = require("express");
 const cors = require("cors");
-const { Pool } = require("pg");
+const bodyParser = require('body-parser');
 require("dotenv").config();
 
+// Initialize the app
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Setup the database connection
-const pool = new Pool({
-    user: process.env.DB_USER,
-    host: process.env.DB_HOST,
-    database: process.env.DB_DATABASE,
-    password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT,
-});
+// Import routes
+const userRoutes = require('./routes/user_routes');
+const reviewRoutes = require('./routes/review_route');
 
-// Test DB connection
+// Middleware
+app.use(bodyParser.json());
+
+// Setup routes
+app.use('/api/users', userRoutes);
+app.use('/api/reviews', reviewRoutes);
+
+// Test DB connection and start the server
+const { pool } = require('./config/db');
 pool.connect()
     .then(() => console.log("Connected to the database"))
     .catch((err) => console.error("Error connecting to the database", err));
 
-app.get("/", (req, res) => {
-    res.send("Backend is running!");
-});
-
+// Start the server
 const PORT = process.env.PORT || 1234;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);

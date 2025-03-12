@@ -1,0 +1,64 @@
+const pool = require('../config/db');
+
+// Submit a Review
+const submitReview = async (req, res) => {
+  const {
+    university_id,
+    academic_rating,
+    campus_rating,
+    social_life_rating,
+    living_rating,
+    food_rating,
+    transportation_rating,
+    overall_rating,
+    review_text,
+    comments,
+    user_id,
+  } = req.body;
+
+  if (
+    !university_id ||
+    !academic_rating ||
+    !campus_rating ||
+    !social_life_rating ||
+    !living_rating ||
+    !food_rating ||
+    !transportation_rating ||
+    !overall_rating ||
+    !review_text
+  ) {
+    return res.status(400).json({ error: 'All required fields must be provided.' });
+  }
+
+  try {
+    const result = await pool.query(
+      `INSERT INTO reviews (
+        user_id, university_id, academic_rating, campus_rating, social_life_rating, 
+        living_rating, food_rating, transportation_rating, overall_rating, review_text, comments
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id`,
+      [
+        user_id || null,
+        university_id,
+        academic_rating,
+        campus_rating,
+        social_life_rating,
+        living_rating,
+        food_rating,
+        transportation_rating,
+        overall_rating,
+        review_text,
+        comments,
+      ]
+    );
+
+    res.status(201).json({
+      message: 'Review submitted successfully',
+      review_id: result.rows[0].id,
+    });
+  } catch (err) {
+    console.error('Error inserting review:', err);
+    res.status(500).json({ error: 'Failed to submit review' });
+  }
+};
+
+module.exports = { submitReview };

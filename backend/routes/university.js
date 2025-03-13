@@ -1,8 +1,12 @@
 const express = require('express');
 const router = express.Router();
-const { getReviewsByUniversity } = require('../controllers/university');
+const { getSpecificUniversity, getReviewFromUniversity } = require('../controllers/university');
 
-// Route to get a review
-router.get('/university/:university_id/reviews', getReviewsByUniversity);
+// Route to get the details of the university
+router.get('/', getSpecificUniversity);
+
+// Route to get the reviews of the specific university
+router.get('/:university_id/reviews', getReviewFromUniversity);
+
 
 module.exports = router;

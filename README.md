@@ -68,3 +68,30 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+
+Todo:
+
+All frontend
+
+Backend:
+
+1. User Authentication (JWT or Sessions):
+If you're not already handling authentication securely, this is crucial. Implementing user authentication ensures that only logged in users have access to their own profiles and are able to see all their previous reviews 
+
+Using JWT (JSON Web Tokens):
+
+When a user logs in, generate a JWT token and send it back to the frontend.
+Store the JWT token in the frontend (e.g., localStorage or sessionStorage).
+When making requests, the token is sent in the Authorization header to authenticate the user.
+On the backend, verify the JWT token on protected routes.
+
+Backend: Generate and verify JWT token (using jsonwebtoken package)
+
+2. Save User ID After Login (Frontend):
+Local Storage / Session Storage: After a user successfully logs in, you should save their user_id in the browser's localStorage or sessionStorage. This way, the ID is available across page reloads.
+Set Up the Navbar with User Info: Once the user ID is stored, you can fetch the user’s details (like username) and display them in the navbar.
+
+3. Logout Functionality (Frontend):
+Clear Stored User ID: When the user logs out, ensure that you clear the user_id from localStorage or sessionStorage.
+Update Navbar to Show Login/Signup: Change the navbar to show the login/signup buttons instead of user details when logged out.

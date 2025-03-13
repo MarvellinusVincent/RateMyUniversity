@@ -9,7 +9,7 @@ const InitialScreen = () => {
   // Fetch universities from the backend
   useEffect(() => {
     const loadUniversities = async () => {
-      if (!searchQuery.trim()) return; // Don't search if the query is empty
+      if (!searchQuery.trim()) return;
       try {
         const response = await fetch(`/api/searchUniversity?query=${searchQuery}`);
         if (!response.ok) {
@@ -22,7 +22,7 @@ const InitialScreen = () => {
       }
     };
     loadUniversities();
-  }, [searchQuery]); // Re-run whenever searchQuery changes
+  }, [searchQuery]);
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-500">

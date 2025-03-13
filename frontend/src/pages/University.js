@@ -6,6 +6,8 @@ const University = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const [university, setUniversity] = useState(null);
+  const [reviews, setReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const universityName = new URLSearchParams(location.search).get('name');
 
@@ -13,12 +15,21 @@ const University = () => {
   useEffect(() => {
     const fetchUniversityDetails = async () => {
       try {
-        const response = await fetch('/world_universities_and_domains.json');
-        const data = await response.json();
-        const uni = data.find((u) => u.name === universityName);
-        setUniversity(uni);
+        // Fetch university details from backend
+        const response = await fetch(`/api/specificUni?name=${universityName}`);
+        const universityData = await response.json();
+        setUniversity(universityData);
+
+        // Fetch reviews for the university
+        if (universityData.id) {
+          const reviewsResponse = await fetch(`/api/specificUni/${universityData.id}/reviews`);
+          const reviewsData = await reviewsResponse.json();
+          setReviews(reviewsData.reviews);
+        }
+        setLoading(false);
       } catch (error) {
         console.error('Error loading university details:', error);
+        setLoading(false);
       }
     };
     if (universityName) {
@@ -30,7 +41,9 @@ const University = () => {
     navigate(`/rate/${universityName}`);
   };
 
-  if (!university) return <p>Loading...</p>;
+  if (loading) return <p>Loading...</p>;
+
+  if (!university) return <p>University not found!</p>;
 
   return (
     <div className="flex flex-col items-center bg-gradient-to-r from-blue-500 to-purple-500 min-h-screen">
@@ -47,9 +60,20 @@ const University = () => {
         </a>
 
         <div className="mb-4">
-          <h2 className="text-xl font-semibold">Rating Distribution</h2>
-          {/* Your rating distribution logic here */}
-          <div>{/* Display rating distribution */}</div>
+          <h2 className="text-xl font-semibold">Reviews</h2>
+          <div className="mb-4">
+            {reviews.length === 0 ? (
+              <p>No reviews yet for this university.</p>
+            ) : (
+              reviews.map((review, index) => (
+                <div key={index} className="mb-4 p-4 border border-gray-300 rounded">
+                  <p><strong>{review.title}</strong></p>
+                  <p>{review.body}</p>
+                  <p>Rating: {review.rating}</p>
+                </div>
+              ))
+            )}
+          </div>
         </div>
 
         <div className="text-center mt-4">

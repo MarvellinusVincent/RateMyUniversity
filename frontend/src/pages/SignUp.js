@@ -1,69 +1,70 @@
-import { useContext, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { UserContext } from "../contexts/UserContext";
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const SignUp = () => {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const { emailPasswordSignup } = useContext(UserContext);
-  const [form, setForm] = useState({
-    email: "",
-    password: ""
-  });
-
-  const onFormInputChange = (event) => {
-    const { name, value } = event.target;
-    setForm({ ...form, [name]: value });
-  };
-
-  const redirectNow = () => {
-    const redirectTo = location.search.replace("?redirectTo=", "");
-    navigate(redirectTo ? redirectTo : "/");
-  };
-
-  const onSubmit = async () => {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!username || !email || !password) {
+      setError("All fields are required.");
+      return;
+    }
     try {
-      const user = await emailPasswordSignup(form.email, form.password);
-      if (user) {
-        redirectNow();
-      }
+      const response = await axios.post(
+        "https://rate-my-student-life-backend.onrender.com/api/users/signup",
+        { username, email, password }
+      );
+      setSuccessMessage(response.data.message);
+      setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
-      alert(error);
+      setError(error.response?.data?.error || "An error occurred. Please try again.");
     }
   };
 
   return (
-    <form className="flex flex-col max-w-xs mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Signup</h1>
-      <input
-        type="email"
-        name="email"
-        value={form.email}
-        onChange={onFormInputChange}
-        placeholder="Email"
-        className="mb-4 px-3 py-2 border border-gray-300 rounded"
-      />
-      <input
-        type="password"
-        name="password"
-        value={form.password}
-        onChange={onFormInputChange}
-        placeholder="Password"
-        className="mb-4 px-3 py-2 border border-gray-300 rounded"
-      />
-      <button
-        type="button"
-        onClick={onSubmit}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        Signup
-      </button>
-      <p className="mt-4">
-        Have an account already? <Link to="/login" className="text-blue-500 hover:underline">Login</Link>
-      </p>
-    </form>
+    <div>
+      <h2>Sign Up</h2>
+      {error && <div style={{ color: "red" }}>{error}</div>}
+      {successMessage && <div style={{ color: "green" }}>{successMessage}</div>}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Username</label>
+          <input
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Sign Up</button>
+      </form>
+    </div>
   );
-}
+};
 
 export default SignUp;

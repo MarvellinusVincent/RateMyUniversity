@@ -27,8 +27,6 @@ const University = () => {
   }, [universityName]);
 
   const handleRateClick = () => {
-    // Here, we can either navigate to a review page or trigger a popup.
-    // For now, let's just navigate to a placeholder review page.
     navigate(`/rate/${universityName}`);
   };
 

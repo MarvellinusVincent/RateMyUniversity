@@ -1,93 +1,56 @@
-import { useContext, useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
-import { UserContext } from "../contexts/UserContext";
+import { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
   const navigate = useNavigate();
-  const location = useLocation();
 
-  const { user, fetchUser, emailPasswordLogin } = useContext(UserContext);
-
-  const [form, setForm] = useState({
-    email: "",
-    password: ""
-  });
-
-  const onFormInputChange = (event) => {
-    const { name, value } = event.target;
-    setForm({ ...form, [name]: value });
-  };
-
-  const redirectNow = () => {
-    const redirectTo = location.search.replace("?redirectTo=", "");
-    navigate(redirectTo ? redirectTo : "/");
-  };
-
-  const loadUser = async () => {
-    if (!user) {
-      const fetchedUser = await fetchUser();
-      if (fetchedUser) {
-    
-        redirectNow();
-      }
-    }
-  };
-
-  useEffect(() => {
-    loadUser()
-  }, []);
-
-  const onSubmit = async (event) => {
-    event.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
     try {
-  
-  
-  
-      const user = await emailPasswordLogin(form.email, form.password);
-      if (user) {
-        redirectNow();
-      }
+      const response = await axios.post(
+        "https://rate-my-student-life-backend.onrender.com/api/users/login",
+        { email, password }
+      );
+      const { token, refreshToken } = response.data;
+      localStorage.setItem("authToken", token);
+      localStorage.setItem("refreshToken", refreshToken);
+      navigate("/university");
     } catch (error) {
-      if (error.statusCode === 401) {
-        alert("Invalid username/password. Try again!");
-      } else {
-        alert(error);
-      }
+      setError(error.response?.data?.error || "Invalid email or password.");
     }
   };
 
   return (
-    <form onSubmit={onSubmit} className="flex flex-col max-w-xs mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Login</h1>
-      <input
-        label="Email"
-        type="email"
-        name="email"
-        value={form.email}
-        onChange={onFormInputChange}
-        placeholder="Email"
-        className="mb-4 px-3 py-2 border border-gray-300 rounded"
-      />
-      <input
-        label="Password"
-        type="password"
-        name="password"
-        value={form.password}
-        onChange={onFormInputChange}
-        placeholder="Password"
-        className="mb-4 px-3 py-2 border border-gray-300 rounded"
-      />
-      <button
-        type="submit"
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        Login
-      </button>
-      <p className="mt-4">
-        Don't have an account? <Link to="/signup" className="text-blue-500 hover:underline">Signup</Link>
-      </p>
-    </form>
+    <div>
+      <h2>Login</h2>
+      {error && <div style={{ color: "red" }}>{error}</div>}
+      <form onSubmit={handleSubmit}>
+        <div>
+          <label>Email</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Password</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Login</button>
+      </form>
+    </div>
   );
-}
+};
 
 export default Login;

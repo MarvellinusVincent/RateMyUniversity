@@ -6,31 +6,23 @@ const InitialScreen = () => {
   const [universities, setUniversities] = useState([]);
   const [filteredUniversities, setFilteredUniversities] = useState([]);
 
-  // Fetch universites
+  // Fetch universities from the backend
   useEffect(() => {
     const loadUniversities = async () => {
+      if (!searchQuery.trim()) return; // Don't search if the query is empty
       try {
-        const response = await fetch('/world_universities_and_domains.json');
+        const response = await fetch(`/api/searchUniversity?query=${searchQuery}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch universities');
+        }
         const data = await response.json();
-        setUniversities(data.map((uni) => uni.name));
+        setFilteredUniversities(data);
       } catch (error) {
         console.error('Error loading universities:', error);
       }
     };
     loadUniversities();
-  }, []);
-
-  // Filter universities
-  useEffect(() => {
-    if (searchQuery.trim()) {
-      const filtered = universities.filter((uni) =>
-        uni.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setFilteredUniversities(filtered.slice(0, 10));
-    } else {
-      setFilteredUniversities([]);
-    }
-  }, [searchQuery, universities]);
+  }, [searchQuery]); // Re-run whenever searchQuery changes
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-500">

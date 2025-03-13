@@ -35,7 +35,8 @@ const login = async (req, res) => {
         if (!isMatch) {
             return res.status(400).json({ error: "Invalid email or password" });
         }
-        const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
+        const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });  // Create access token
+        const refreshToken = jwt.sign({ id: user.id }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });  // Create refresh token
         res.json({ message: "Login successful", token, refreshToken });
     } catch (error) {
         console.error("Error during login:", error);

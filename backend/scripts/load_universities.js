@@ -2,11 +2,10 @@ const fs = require('fs');
 const { Client } = require('pg');
 
 const client = new Client({
-    user: 'check env file',
-    host: 'check env file',
-    database: 'check env file',
-    password: 'check env file',
-    port: 5432,
+  connectionString: 'check env',
+  ssl: {
+      rejectUnauthorized: false,
+  },
 });
 
 async function loadUniversities() {

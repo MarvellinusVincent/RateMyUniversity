@@ -11,7 +11,8 @@ app.use(cors());
 // Import routes
 const userRoutes = require('./routes/user_routes');
 const reviewRoutes = require('./routes/review_route');
-const specificUniversity = require('./routes/university');
+const specificUniversityRoutes = require('./routes/university');
+const searchUniversityRoutes = require('./routes/search_university');
 
 // Middleware
 app.use(bodyParser.json());
@@ -19,7 +20,8 @@ app.use(bodyParser.json());
 // Setup routes
 app.use('/api/users', userRoutes);
 app.use('/api/reviews', reviewRoutes);
-app.use('/api/specificUni', specificUniversity);
+app.use('/api/specificUni', specificUniversityRoutes);
+app.use('/api/searchUniversity', searchUniversityRoutes);
 
 // Test DB connection and start the server
 const { pool } = require('./config/db');

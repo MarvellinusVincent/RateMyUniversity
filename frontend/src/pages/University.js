@@ -7,7 +7,6 @@ const University = () => {
   const navigate = useNavigate();
   const [university, setUniversity] = useState(null);
   const [reviews, setReviews] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   const universityName = new URLSearchParams(location.search).get('name');
 
@@ -24,12 +23,10 @@ const University = () => {
         if (universityData.id) {
           const reviewsResponse = await fetch(`/api/specificUni/${universityData.id}/reviews`);
           const reviewsData = await reviewsResponse.json();
-          setReviews(reviewsData.reviews);
+          setReviews(reviewsData.reviews || []);
         }
-        setLoading(false);
       } catch (error) {
         console.error('Error loading university details:', error);
-        setLoading(false);
       }
     };
     if (universityName) {
@@ -41,9 +38,15 @@ const University = () => {
     navigate(`/rate/${universityName}`);
   };
 
-  if (loading) return <p>Loading...</p>;
-
-  if (!university) return <p>University not found!</p>;
+  if (!university) {
+    return (
+      <div className="flex flex-col items-center bg-gradient-to-r from-blue-500 to-purple-500 min-h-screen">
+        <div className="bg-white p-8 rounded-lg shadow-lg max-w-3xl w-full mt-8">
+          <h1 className="text-2xl font-bold text-center mb-4">University not found!</h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center bg-gradient-to-r from-blue-500 to-purple-500 min-h-screen">
@@ -51,7 +54,7 @@ const University = () => {
         <h1 className="text-2xl font-bold text-center mb-4">{university.name}</h1>
         <p className="text-center mb-4">{university.country}</p>
         <a
-          href={university.web_pages[0]}
+          href={university.web_pages[0]?.replace(/^['"]+|['"]+$/g, '')}  // This ensures no quotes are present
           target="_blank"
           rel="noopener noreferrer"
           className="text-blue-500 underline mb-4"
@@ -62,7 +65,7 @@ const University = () => {
         <div className="mb-4">
           <h2 className="text-xl font-semibold">Reviews</h2>
           <div className="mb-4">
-            {reviews.length === 0 ? (
+            {reviews && reviews.length === 0 ? (
               <p>No reviews yet for this university.</p>
             ) : (
               reviews.map((review, index) => (

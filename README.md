@@ -71,27 +71,12 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 
 Todo:
-
-All frontend
-
-Backend:
-
-1. User Authentication (JWT or Sessions):
-If you're not already handling authentication securely, this is crucial. Implementing user authentication ensures that only logged in users have access to their own profiles and are able to see all their previous reviews 
-
-Using JWT (JSON Web Tokens):
-
-When a user logs in, generate a JWT token and send it back to the frontend.
-Store the JWT token in the frontend (e.g., localStorage or sessionStorage).
-When making requests, the token is sent in the Authorization header to authenticate the user.
-On the backend, verify the JWT token on protected routes.
-
-Backend: Generate and verify JWT token (using jsonwebtoken package)
-
-2. Save User ID After Login (Frontend):
-Local Storage / Session Storage: After a user successfully logs in, you should save their user_id in the browser's localStorage or sessionStorage. This way, the ID is available across page reloads.
-Set Up the Navbar with User Info: Once the user ID is stored, you can fetch the user’s details (like username) and display them in the navbar.
-
-3. Logout Functionality (Frontend):
-Clear Stored User ID: When the user logs out, ensure that you clear the user_id from localStorage or sessionStorage.
-Update Navbar to Show Login/Signup: Change the navbar to show the login/signup buttons instead of user details when logged out.
+1. The frontend UI's need to be completely revamped
+2. The navbar when the users log in needs to be fixed both backend and frontend
+    - backend needs api calls for ratings that they have made
+    - frontend needs to be fixed
+    - make sure that when the user changes password, email, or username, it first chekcs if its possible by calling a backend functionn to check
+        if its unique since the email and username ahs to be unique. if its possible, then when the user clicks save, it calls the backend function
+        to change the details so its saved in the database
+    - make sure that everything calls the user id to get the details not the user name as it will fcuk it up when the name or email is changed
+3. add links to rate my courses and rate my professor

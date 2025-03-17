@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 
 const InitialScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [universities, setUniversities] = useState([]);
   const [filteredUniversities, setFilteredUniversities] = useState([]);
 
   // Fetch universities from the backend
@@ -25,7 +24,7 @@ const InitialScreen = () => {
   }, [searchQuery]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-500">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-t from-gray-200 via-white to-gray-300">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full">
         <h1 className="text-2xl font-bold text-center mb-4">Rate My University Life</h1>
         <div className="flex flex-col items-center space-y-4">

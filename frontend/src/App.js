@@ -3,19 +3,24 @@ import InitialScreen from "./pages/InitialScreen";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
 import University from "./pages/University";
+import LeaveReview from "./pages/LeaveReview";
 import Navbar from "./pages/NavBar";
+import { UserProvider } from "./contexts/UserContexts";
 
 function App() {
   return (
-    <Router>
-      <Navbar/>
-      <Routes>
-        <Route path="/" element={<InitialScreen />} />
-        <Route exact path="/login" element={<Login />} />
-        <Route exact path="/signUp" element={<SignUp />} />
-        <Route path="/university" element={<University />} />
-      </Routes>
-    </Router>
+    <UserProvider>
+      <Router>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<InitialScreen />} />
+          <Route exact path="/login" element={<Login />} />
+          <Route exact path="/signUp" element={<SignUp />} />
+          <Route path="/university" element={<University />} />
+          <Route path="/leaveReview" element={<LeaveReview />} />
+        </Routes>
+      </Router>
+    </UserProvider>
   );
 }
 

@@ -1,40 +1,30 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import logo from './../assets/logo.png';
-import { jwtDecode } from 'jwt-decode';
+import { useUser } from '../contexts/UserContexts'
 
 const Navbar = () => {
-    const [user, setUser] = useState(null);
+    const { user, logout } = useUser();
     const navigate = useNavigate();
-
-    useEffect(() => {
-        const token = localStorage.getItem("authToken");
-        if (token) {
-            try {
-                const decoded = jwtDecode(token);
-                setUser({ name: decoded.username });
-            } catch (error) {
-                console.error("Invalid token", error);
-                localStorage.removeItem("authToken");
-            }
-        }
-    }, []);
 
     const onLogout = () => {
         const confirmLogout = window.confirm("Are you sure you want to log out?");
         if (confirmLogout) {
-            localStorage.removeItem("authToken");
-            setUser(null);
+            logout();
             navigate("/");
         }
     };
 
     return (
-        <nav style={{ backgroundColor: '#f8f9fa' }} className="p-4">
+        <nav style={{ backgroundColor: '#f8f9fa' }} className="fixed top-0 left-0 w-full z-50 p-4">
             <div className="flex justify-between items-center px-4">
                 <div className="flex items-center">
-                    <img src={logo} alt="Logo" className="h-8 w-8 mr-2" />
-                    <span className="text-black text-lg font-bold">Rate My University Life</span>
+                    <a href="https://marvellinus-vincent-portfolio.onrender.com" target="_blank" rel="noopener noreferrer">
+                        <img src={logo} alt="Logo" className="h-8 w-8 mr-2" />
+                    </a>
+                    <Link to="/">
+                        <span className="text-black text-lg font-bold">Rate My University Life</span>
+                    </Link>
                 </div>
                 <div>
                     {user ? (

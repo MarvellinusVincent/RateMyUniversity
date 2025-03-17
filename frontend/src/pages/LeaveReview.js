@@ -8,6 +8,7 @@ const LeaveReview = () => {
   const { user } = useUser();
 
   const universityId = new URLSearchParams(location.search).get('id');
+  const universityName = new URLSearchParams(location.search).get('name');
 
   const [formData, setFormData] = useState({
     academic_rating: '',
@@ -66,7 +67,7 @@ const LeaveReview = () => {
     const userId = user ? user.id : -1;
 
     try {
-      const response = await fetch(`/api/reviews/submit`, {
+      const response = await fetch(`http://localhost:1234/api/reviews/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -80,7 +81,7 @@ const LeaveReview = () => {
 
       if (response.ok) {
         alert('Review submitted successfully!');
-        navigate(`/university?id=${universityId}`);
+        navigate(`/university?name=${universityName}`);
       } else {
         const errorData = await response.json();
         alert(`Error: ${errorData.message}`);

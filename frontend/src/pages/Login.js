@@ -16,17 +16,37 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axios.post(
-        "https://rate-my-student-life-backend.onrender.com/api/users/login",
+        "http://localhost:1234/api/users/login",
         { email, password }
       );
+      
+      // Log the full response to see if token is present
+      console.log("Full response data:", response.data);
+  
       const { token, refreshToken } = response.data;
+  
+      // Check if token is a string and log it
+      if (typeof token !== "string") {
+        console.error("Token is not a valid string:", token);
+        return;
+      }
+  
+      console.log("Token from response:", token);
+      console.log("Refresh Token from response:", refreshToken);
+  
       const decoded = jwtDecode(token);
-      login(decoded.username, token, refreshToken)
+      console.log("Decoded token:", decoded);
+      console.log("Decoded username:", decoded.username);
+  
+      login(decoded.username, email, password, token, refreshToken);
       navigate("/");
     } catch (error) {
+      console.error("Error during handleSubmit:", error);
       setError(error.response?.data?.error || "Invalid email or password.");
     }
   };
+  
+  
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-t from-blue-500 via-blue-300 to-blue-100">

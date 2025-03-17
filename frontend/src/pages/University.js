@@ -7,7 +7,7 @@ const University = () => {
   const navigate = useNavigate();
   const [university, setUniversity] = useState(null);
   const [reviews, setReviews] = useState([]);
-  const [usernames, setUsernames] = useState({});  // Store usernames for reviews
+  const [usernames, setUsernames] = useState({});
 
   const universityName = new URLSearchParams(location.search).get('name');
 
@@ -16,30 +16,27 @@ const University = () => {
     const fetchUniversityDetails = async () => {
       try {
         // Fetch university details from backend
-        const response = await fetch(`/api/specificUni?name=${universityName}`);
+        const response = await fetch(`http://localhost:1234/api/specificUni?name=${universityName}`);
         const universityData = await response.json();
         console.log(universityData);
         setUniversity(universityData);
 
         // Fetch reviews for the university
         if (universityData.id) {
-          const reviewsResponse = await fetch(`api/specificUni/${universityData.id}/reviews`);
+          const reviewsResponse = await fetch(`http://localhost:1234/api/specificUni/${universityData.id}/reviews`);
           const reviewsData = await reviewsResponse.json();
           setReviews(reviewsData.reviews || []);
-
-          // Fetch usernames for reviews with a valid user_id
           const users = {};
           for (let review of reviewsData.reviews) {
             if (review.user_id) {
-              // Fetch the username for each review's user_id
-              const userResponse = await fetch(`api/users/getUser?userID=${review.user_id}`);
+              const userResponse = await fetch(`http://localhost:1234/api/users/getUser?userID=${review.user_id}`);
               const userData = await userResponse.json();
               users[review.user_id] = userData.username;
             } else {
-              users[review.id] = "Anonymous";  // Default to "Anonymous" if user_id is null
+              users[review.id] = "Anonymous";
             }
           }
-          setUsernames(users);  // Update the usernames state
+          setUsernames(users);
         }
       } catch (error) {
         console.error('Error loading university details:', error);
@@ -52,7 +49,7 @@ const University = () => {
   }, [universityName]);
 
   const handleRateClick = () => {
-    navigate(`/leaveReview?id=${university.id}`);
+    navigate(`/leaveReview?id=${university.id}&name=${university.name}`);
   };
 
   if (!university) {

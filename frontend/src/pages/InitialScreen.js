@@ -10,7 +10,7 @@ const InitialScreen = () => {
     const loadUniversities = async () => {
       if (!searchQuery.trim()) return;
       try {
-        const response = await fetch(`/api/searchUniversity?query=${searchQuery}`);
+        const response = await fetch(`http://localhost:1234/api/searchUniversity?query=${searchQuery}`);
         if (!response.ok) {
           throw new Error('Failed to fetch universities');
         }

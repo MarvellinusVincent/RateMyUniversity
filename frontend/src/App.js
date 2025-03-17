@@ -5,6 +5,7 @@ import SignUp from "./pages/SignUp";
 import University from "./pages/University";
 import LeaveReview from "./pages/LeaveReview";
 import Navbar from "./pages/NavBar";
+import Profile from "./pages/Profile"
 import { UserProvider } from "./contexts/UserContexts";
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
           <Route path="/" element={<InitialScreen />} />
           <Route exact path="/login" element={<Login />} />
           <Route exact path="/signUp" element={<SignUp />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="/university" element={<University />} />
           <Route path="/leaveReview" element={<LeaveReview />} />
         </Routes>

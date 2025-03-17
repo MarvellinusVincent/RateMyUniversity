@@ -19,7 +19,7 @@ const SignUp = () => {
     }
     try {
       const response = await axios.post(
-        "https://rate-my-student-life-backend.onrender.com/api/users/signup",
+        "http://localhost:1234/api/users/signup",
         { username, email, password }
       );
       setSuccessMessage(response.data.message);

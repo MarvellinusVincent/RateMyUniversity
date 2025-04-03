@@ -1,204 +1,222 @@
 import React, { useState } from "react";
 import { useUser } from "../contexts/UserContexts";
+import axios from "axios";
 
 const Profile = () => {
   const { user } = useUser();
-
-  // State for controlling the "Edit Details" button
   const [isEditingDetails, setIsEditingDetails] = useState(false);
-
-  // State for each editable field
   const [isEditingUsername, setIsEditingUsername] = useState(false);
-  const [isEditingEmail, setIsEditingEmail] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
-
-  const [newName, setNewName] = useState(user.name);
-  const [newEmail, setNewEmail] = useState(user.email);
+  const [newName, setNewName] = useState(user?.name || "");
   const [newPassword, setNewPassword] = useState("");
-  const [oldPassword, setOldPassword] = useState("");
   const [retypeNewPassword, setRetypeNewPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const saveDetails = async (type) => {
+    setLoading(true);
+    setErrorMessage("");
+
+    try {
+      let response;
+      if (type === "username") {
+        response = await axios.put("http://localhost:1234/users/updateUsername", { 
+          username: newName, 
+          userId: user.id 
+        });
+      } else if (type === "password") {
+        if (newPassword !== retypeNewPassword) {
+          throw new Error("Passwords do not match");
+        }
+        response = await axios.put("http://localhost:1234/users/updatePassword", { 
+          newPassword, 
+          userId: user.id 
+        });
+      }
+
+      if (response.status === 200) {
+        setIsEditingUsername(false);
+        setIsEditingPassword(false);
+        setIsEditingDetails(false);
+      }
+    } catch (error) {
+      setErrorMessage(error.response?.data?.message || error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (!user) {
-    return <div>Loading...</div>;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-t from-blue-500 via-blue-300 to-blue-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-auto mt-12">
-        <h2 className="text-3xl font-bold text-center mb-6 text-blue-600">
-          Profile
-        </h2>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 -left-20 w-96 h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
+        <div className="absolute bottom-1/3 -right-20 w-80 h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-tr from-yellow-100 to-transparent opacity-10 rounded-full blur-2xl"></div>
+      </div>
 
+      <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-pink-50/30 opacity-30"></div>
+          
+          <div className="relative p-8 md:p-10">
+            <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 mb-2">
+              Your Profile
+            </h1>
+            <p className="text-gray-600 mb-6">
+              Manage your account details
+            </p>
 
-        {/* Before Edit - Show Details */}
-        {!isEditingDetails ? (
-          <div>
-            <div className="space-y-4">
-              <div className="flex flex-col">
-                <label className="font-semibold text-gray-700">Username</label>
-                <p className="p-3 border border-gray-300 rounded-md bg-gray-100">
-                  {user.name}
-                </p>
+            {errorMessage && (
+              <div className="bg-red-50/90 backdrop-blur-sm border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg">
+                {errorMessage}
               </div>
-              <div className="flex flex-col">
-                <label className="font-semibold text-gray-700">Email</label>
-                <p className="p-3 border border-gray-300 rounded-md bg-gray-100">
-                  {user.email}
-                </p>
-              </div>
-              <div className="flex flex-col">
-                <label className="font-semibold text-gray-700">Password</label>
-                <p className="p-3 border border-gray-300 rounded-md bg-gray-100">
-                  ********
-                </p>
-              </div>
-            </div>
+            )}
 
-            <button
-              onClick={() => setIsEditingDetails(true)}
-              className="mt-4 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700 w-full"
-            >
-              Edit Details
-            </button>
+            {!isEditingDetails ? (
+              <div className="space-y-6">
+                <div className="bg-white/90 backdrop-blur-sm p-6 rounded-xl border border-gray-200/50 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Information</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <p className="text-sm text-gray-500">Username</p>
+                      <p className="text-lg font-medium text-gray-800">{user.name}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Password</p>
+                      <p className="text-lg font-medium text-gray-800">••••••••</p>
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setIsEditingDetails(true)}
+                  className="w-full py-3 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
+                >
+                  Edit Details
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className="bg-white/90 backdrop-blur-sm p-6 rounded-xl border border-gray-200/50 shadow-sm">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Edit Information</h3>
+                  
+                  <div className="space-y-4">
+                    {/* Username Section */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">Username</label>
+                      {isEditingUsername ? (
+                        <div className="space-y-3">
+                          <input
+                            type="text"
+                            value={newName}
+                            onChange={(e) => setNewName(e.target.value)}
+                            className="w-full p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                          />
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => saveDetails("username")}
+                              disabled={loading}
+                              className="flex-1 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-md"
+                            >
+                              {loading ? 'Saving...' : 'Save'}
+                            </button>
+                            <button
+                              onClick={() => setIsEditingUsername(false)}
+                              className="flex-1 py-2 bg-gray-200/90 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <p className="text-lg font-medium text-gray-800">{user.name}</p>
+                          <button
+                            onClick={() => setIsEditingUsername(true)}
+                            className="py-1 px-3 bg-blue-100/90 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors shadow-sm"
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Password Section */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-600 mb-1">Password</label>
+                      {isEditingPassword ? (
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-sm text-gray-500 mb-1">New Password</label>
+                            <input
+                              type="password"
+                              value={newPassword}
+                              onChange={(e) => setNewPassword(e.target.value)}
+                              className="w-full p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm text-gray-500 mb-1">Confirm Password</label>
+                            <input
+                              type="password"
+                              value={retypeNewPassword}
+                              onChange={(e) => setRetypeNewPassword(e.target.value)}
+                              className="w-full p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                            />
+                          </div>
+                          <div className="flex space-x-3">
+                            <button
+                              onClick={() => saveDetails("password")}
+                              disabled={loading}
+                              className="flex-1 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-md"
+                            >
+                              {loading ? 'Saving...' : 'Save'}
+                            </button>
+                            <button
+                              onClick={() => setIsEditingPassword(false)}
+                              className="flex-1 py-2 bg-gray-200/90 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex items-center justify-between">
+                          <p className="text-lg font-medium text-gray-800">••••••••</p>
+                          <button
+                            onClick={() => setIsEditingPassword(true)}
+                            className="py-1 px-3 bg-blue-100/90 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors shadow-sm"
+                          >
+                            Edit
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setIsEditingDetails(false);
+                    setIsEditingUsername(false);
+                    setIsEditingPassword(false);
+                  }}
+                  className="w-full py-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 text-gray-700 font-semibold rounded-xl hover:bg-gray-100/90 transition-all shadow-sm hover:shadow-md"
+                >
+                  Back to Profile
+                </button>
+              </div>
+            )}
           </div>
-        ) : (
-          // After clicking Edit Details - show edit sections separately
-          <div className="space-y-4 mt-6">
-            {/* Username Section */}
-            <div className="flex flex-col">
-              <label className="font-semibold text-gray-700">Username</label>
-              {isEditingUsername ? (
-                <>
-                  <input
-                    type="text"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    className="p-3 border border-gray-300 rounded-md bg-gray-100"
-                  />
-                  <button
-                    onClick={() => setIsEditingUsername(false)}
-                    className="mt-2 py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700"
-                  >
-                    Save
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p className="p-3 border border-gray-300 rounded-md bg-gray-100">
-                    {user.name}
-                  </p>
-                  <button
-                    onClick={() => setIsEditingUsername(true)}
-                    className="mt-2 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    Edit
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* Email Section */}
-            <div className="flex flex-col">
-              <label className="font-semibold text-gray-700">Email</label>
-              {isEditingEmail ? (
-                <>
-                  <input
-                    type="email"
-                    value={newEmail}
-                    onChange={(e) => setNewEmail(e.target.value)}
-                    className="p-3 border border-gray-300 rounded-md bg-gray-100"
-                  />
-                  <button
-                    onClick={() => setIsEditingEmail(false)}
-                    className="mt-2 py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700"
-                  >
-                    Save
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p className="p-3 border border-gray-300 rounded-md bg-gray-100">
-                    {user.email}
-                  </p>
-                  <button
-                    onClick={() => setIsEditingEmail(true)}
-                    className="mt-2 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    Edit
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* Password Section */}
-            <div className="flex flex-col">
-              <label className="font-semibold text-gray-700">Password</label>
-              {isEditingPassword ? (
-                <>
-                  <div className="flex flex-col">
-                    <label className="font-semibold text-gray-700">
-                      Old Password
-                    </label>
-                    <input
-                      type="password"
-                      value={oldPassword}
-                      onChange={(e) => setOldPassword(e.target.value)}
-                      className="p-3 border border-gray-300 rounded-md bg-gray-100"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <label className="font-semibold text-gray-700">
-                      New Password
-                    </label>
-                    <input
-                      type="password"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      className="p-3 border border-gray-300 rounded-md bg-gray-100"
-                    />
-                  </div>
-                  <div className="flex flex-col">
-                    <label className="font-semibold text-gray-700">
-                      Retype New Password
-                    </label>
-                    <input
-                      type="password"
-                      value={retypeNewPassword}
-                      onChange={(e) => setRetypeNewPassword(e.target.value)}
-                      className="p-3 border border-gray-300 rounded-md bg-gray-100"
-                    />
-                  </div>
-                  <button
-                    onClick={() => setIsEditingPassword(false)}
-                    className="mt-2 py-2 px-4 bg-green-600 text-white rounded-md hover:bg-green-700"
-                  >
-                    Save
-                  </button>
-                </>
-              ) : (
-                <>
-                  <p className="p-3 border border-gray-300 rounded-md bg-gray-100">
-                    ********
-                  </p>
-                  <button
-                    onClick={() => setIsEditingPassword(true)}
-                    className="mt-2 py-2 px-4 bg-blue-600 text-white rounded-md hover:bg-blue-700"
-                  >
-                    Edit
-                  </button>
-                </>
-              )}
-            </div>
-
-            {/* Cancel Button */}
-            <button
-              onClick={() => setIsEditingDetails(false)}
-              className="mt-4 py-2 px-4 bg-red-600 text-white rounded-md hover:bg-red-700 w-full"
-            >
-              Cancel
-            </button>
-          </div>
-        )}
+        </div>
       </div>
     </div>
   );

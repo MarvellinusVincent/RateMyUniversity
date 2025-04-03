@@ -1,82 +1,73 @@
-# Getting Started with Create React App
+# Rate My University Life  
+Rate My University Life is a web application designed to help students share their experiences at university. Users can rate various aspects of university life, such as campus facilities, classes, and social activities, and see how others have rated them. The app aims to provide insight into the overall student experience at different universities.  
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## Features  
+- Rate different aspects of university life  
+- View overall ratings for various universities  
+- Filter ratings by category (e.g., classes, campus, social life)  
+- User authentication and personalized experience  
 
-## Available Scripts
+## Prerequisites  
+Before running Rate My University Life on your local machine, ensure you have the following installed:  
+- [Node.js](https://nodejs.org/) (Latest LTS version recommended)  
+- [Git](https://git-scm.com/)  
+- [React](https://reactjs.org/)  
 
-In the project directory, you can run:
+## Installation  
+1. Clone the repository:  
+   `git clone https://github.com/yourusername/rate-my-university-life.git && cd rate-my-university-life`  
+2. Install dependencies:  
+   `npm install`  
+3. Set up environment variables (if applicable):  
+   - Create a `.env` file in the root directory  
+   - Add the necessary environment variables (e.g., for API keys or backend URLs)  
+4. Run the development server:  
+   `npm start`  
+5. Open your browser and go to:  
+   `http://localhost:3000`  
 
-### `npm start`
+## Usage  
+1. Sign up or log in to your account.  
+2. Rate different aspects of your university life.  
+3. View and compare ratings with others.  
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## Deployment  
+To deploy the app, use a hosting service like Vercel, Netlify, or Firebase:  
+`npm run build`  
+Then, follow the deployment instructions for your chosen platform.  
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## Contributing  
+Contributions are welcome! Feel free to fork the repository and submit pull requests.  
 
-### `npm test`
+## License  
+This project is licensed under the MIT License.  
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+## Contact  
+For any issues or suggestions, reach out via GitHub Issues or email at [your_email@example.com].  
 
 
 Todo:
-1. The frontend UI's need to be completely revamped
-2. The navbar when the users log in needs to be fixed both backend and frontend
-    - backend needs api calls for ratings that they have made
-    - frontend needs to be fixed
-    - make sure that when the user changes password, email, or username, it first chekcs if its possible by calling a backend functionn to check
-        if its unique since the email and username ahs to be unique. if its possible, then when the user clicks save, it calls the backend function
-        to change the details so its saved in the database
+1. The navbar when the users log in needs to be fixed both backend and frontend
     - make sure that everything calls the user id to get the details not the user name as it will fcuk it up when the name or email is changed
-3. add links to rate my courses and rate my professor
+2. add links to rate my courses and rate my professor
+3. change the sql database for reviews in render
+4. add te options to sort by most liked, oldest, and newest date
+
+
+
+
+academic
+reputation
+location
+food
+clubs
+opportunities
+social
+facilities
+happiness
+safety
+internet
+transportation
+professors
+athletics
+housing

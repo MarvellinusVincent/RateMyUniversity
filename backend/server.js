@@ -18,10 +18,10 @@ const searchUniversityRoutes = require('./routes/search_university');
 app.use(bodyParser.json());
 
 // Setup routes
-app.use('/api/users', userRoutes);
-app.use('/api/reviews', reviewRoutes);
-app.use('/api/specificUni', specificUniversityRoutes);
-app.use('/api/searchUniversity', searchUniversityRoutes);
+app.use('/users', userRoutes);
+app.use('/reviews', reviewRoutes);
+app.use('/specificUni', specificUniversityRoutes);
+app.use('/searchUniversity', searchUniversityRoutes);
 
 // Test DB connection and start the server
 const { pool } = require('./config/db');

@@ -1,6 +1,5 @@
 const { pool } = require('../config/db');
 
-// Database connection test
 pool.query('SELECT NOW()', (err, res) => {
   if (err) {
     console.error('Database connection error:', err);
@@ -11,37 +10,29 @@ pool.query('SELECT NOW()', (err, res) => {
 
 // Submit a Review
 const submitReview = async (req, res) => {
-  // Destructure all possible fields from request body
   const {
     university_id,
-    user_id = null, // Default to null if not provided
-    // Overall ratings
+    user_id = null,
     overall_rating,
     happiness_rating,
-    // Academic ratings
     academic_rating,
     professors_rating,
     difficulty_rating,
     opportunities_rating,
-    // Campus life ratings
     social_life_rating,
     clubs_rating,
     athletics_rating,
     safety_rating,
-    // Facilities ratings
     facilities_rating,
     internet_rating,
-    // Living conditions ratings
     location_rating,
     housing_rating,
     food_rating,
     transportation_rating,
-    // Review content
     review_text,
-    comments = null // Default to null if not provided
+    comments = null
   } = req.body;
 
-  // Validate required fields
   if (!university_id || !overall_rating || !review_text) {
     return res.status(400).json({ 
       error: 'Missing required fields',
@@ -56,7 +47,6 @@ const submitReview = async (req, res) => {
     });
   }
 
-  // Validate rating ranges (1-5)
   const validateRating = (rating, fieldName) => {
     if (rating !== undefined && (rating < 1 || rating > 5)) {
       throw new Error(`${fieldName} must be between 1 and 5`);
@@ -65,7 +55,6 @@ const submitReview = async (req, res) => {
   };
 
   try {
-    // Validate all ratings
     const validatedRatings = {
       overall_rating: validateRating(overall_rating, 'Overall rating'),
       happiness_rating: validateRating(happiness_rating, 'Happiness rating'),
@@ -128,7 +117,7 @@ const submitReview = async (req, res) => {
       ]
     );
 
-    res.status(201).json({
+    res.status(200).json({
       success: true,
       message: 'Review submitted successfully',
       review_id: result.rows[0].id
@@ -150,4 +139,33 @@ const submitReview = async (req, res) => {
   }
 };
 
-module.exports = { submitReview };
+const submitLike = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ 
+        error: 'Authentication required',
+        message: 'You must be logged in to like reviews'
+      });
+    }
+    const { id } = req.params;
+    const userId = req.user.id;
+    console.log(`User ${userId} attempting to like review ${id}`);
+    const result = await pool.query(
+      'SELECT like_review($1, $2) as new_likes',
+      [userId, id]
+    );
+    console.log('Like successful, new like count:', result.rows[0].new_likes);
+    res.status(200).json({ 
+      success: true,
+      likes: result.rows[0].new_likes
+    });
+  } catch (error) {
+    console.error('Error liking review:', error);
+    res.status(500).json({ 
+      error: 'Failed to like review',
+      message: error.message || 'Internal server error' 
+    });
+  }
+}
+
+module.exports = { submitReview, submitLike };

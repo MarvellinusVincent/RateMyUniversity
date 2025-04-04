@@ -9,13 +9,22 @@ const signUp = async (req, res) => {
         if (!username || !email || !password) {
             return res.status(400).json({ error: "All fields are required" });
         }
+        const emailCheck = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+        if (emailCheck.rows.length > 0) {
+            return res.status(409).json({ error: "Email already in use" });
+        }
         const hashedPassword = await bcrypt.hash(password, 10);
         const result = await pool.query(
-            `INSERT INTO users (username, email, password_hash) VALUES ($1, $2, $3) RETURNING *`,
+            `INSERT INTO users (username, email, password_hash) 
+             VALUES ($1, $2, $3) 
+             RETURNING id, username, email`,
             [username, email, hashedPassword]
         );
         const newUser = result.rows[0];
-        res.status(201).json({ message: "User created successfully", user: newUser });
+        res.status(201).json({ 
+            message: "User created successfully", 
+            user: newUser 
+        });
     } catch (err) {
         console.error("Error during sign up:", err);
         res.status(500).json({ error: "Internal server error" });
@@ -28,28 +37,148 @@ const login = async (req, res) => {
     try {
         const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
         if (result.rows.length === 0) {
-            return res.status(400).json({ error: "Invalid email" });
+            return res.status(401).json({ error: "Invalid email" });
         }
         const user = result.rows[0];
         const isMatch = await bcrypt.compare(password, user.password_hash);
         if (!isMatch) {
-            return res.status(400).json({ error: "Invalid password" });
+            return res.status(401).json({ error: "Invalid password" });
         }
-        
-        // Create the JWT tokens
-        const token = jwt.sign({ id: user.id, username: user.username, email: user.email, password: user.password }, process.env.JWT_SECRET, { expiresIn: '30d' });
-        const refreshToken = jwt.sign({ id: user.id, username: user.username, email: user.email, password: user.password }, process.env.JWT_REFRESH_SECRET, { expiresIn: '7d' });
-
-        // Log the tokens before sending
-        console.log("Generated Token:", token);
-        console.log("Generated Refresh Token:", refreshToken);
-
-        res.json({ message: "Login successful", token, refreshToken });
+        const token = jwt.sign(
+            { id: user.id, username: user.username, email: user.email },
+            process.env.JWT_SECRET,
+            { expiresIn: '1d' }
+        );
+        const refreshToken = jwt.sign(
+            { id: user.id },
+            process.env.JWT_REFRESH_SECRET,
+            { expiresIn: '7d' }
+        );
+        await pool.query(
+            'INSERT INTO refresh_tokens (user_id, token) VALUES ($1, $2)',
+            [user.id, refreshToken]
+        );
+        res.json({ 
+          user: {
+            id: user.id,
+            username: user.username,
+            email: user.email
+          },
+          token, 
+          refreshToken 
+        });
     } catch (error) {
         console.error("Error during login:", error);
         res.status(500).json({ error: "Internal server error" });
     }
 };
+
+// Logout
+const logout = async (req, res) => {
+    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const { refreshToken } = req.body;
+
+    try {
+        if (refreshToken) {
+        await pool.query('DELETE FROM refresh_tokens WHERE token = $1', [refreshToken]);
+        }
+
+        if (token) {
+        }
+
+        res.json({ message: 'Logout successful' });
+    } catch (error) {
+        console.error('Logout error:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+ };
+
+// Refresh Token
+const refreshToken = async (req, res) => {
+    const { refreshToken } = req.body;
+    try {
+      if (!refreshToken) {
+        return res.status(400).json({ error: 'Refresh token required' });
+      }
+      const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+      const validToken = await pool.query(
+        'SELECT * FROM refresh_tokens WHERE token = $1 AND user_id = $2',
+        [refreshToken, decoded.id]
+      );
+      if (!validToken.rows.length) {
+        return res.status(401).json({ error: 'Invalid refresh token' });
+      }
+      const user = await pool.query(
+        'SELECT id, username, email FROM users WHERE id = $1', 
+        [decoded.id]
+      );
+      if (!user.rows.length) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      const newToken = jwt.sign(
+        { id: user.rows[0].id, username: user.rows[0].username, email: user.rows[0].email },
+        process.env.JWT_SECRET,
+        { expiresIn: '1d' }
+      );
+      const newRefreshToken = jwt.sign(
+        { id: user.rows[0].id },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: '7d' }
+      );
+      await pool.query('BEGIN');
+      await pool.query('DELETE FROM refresh_tokens WHERE token = $1', [refreshToken]);
+      await pool.query(
+        'INSERT INTO refresh_tokens (user_id, token) VALUES ($1, $2)',
+        [user.rows[0].id, newRefreshToken]
+      );
+      await pool.query('COMMIT');
+      res.json({ 
+        token: newToken, 
+        refreshToken: newRefreshToken 
+      });
+    } catch (error) {
+      await pool.query('ROLLBACK');
+      console.error('Refresh error:', error);
+      
+      if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: 'Refresh token expired' });
+      }
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
+// Verify User
+const verifyUser = async (req, res) => {
+    try {
+      const token = req.header('Authorization')?.replace('Bearer ', '');
+      if (!token) {
+        return res.status(401).json({ error: 'Authentication required' });
+      }
+      
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const user = await pool.query(
+        'SELECT id, username, email FROM users WHERE id = $1', 
+        [decoded.id]
+      );
+      
+      if (!user.rows.length) {
+        return res.status(401).json({ error: 'User not found' });
+      }
+      
+      res.json({ 
+        user: {
+          id: user.rows[0].id,
+          username: user.rows[0].username,
+          email: user.rows[0].email
+        } 
+      });
+    } catch (err) {
+      if (err.name === 'TokenExpiredError') {
+        return res.status(401).json({ error: 'Token expired' });
+      }
+      res.status(401).json({ error: 'Invalid token' });
+    }
+  };
 
 
 // Get User
@@ -101,8 +230,6 @@ const updateUsername = async (req, res) => {
 };
 
 
-
-
 const updatePassword = async (req, res) => {
     try {
         const { oldPassword, newPassword, userId } = req.body;
@@ -124,23 +251,18 @@ const updatePassword = async (req, res) => {
 };
 
 const getReviews = async (req, res) => {
-    const { userId } = req.query;
-    console.log("Received userId:", userId);  // Debug log
-
-    try {
-        if (!userId) {
-            return res.status(400).json({ error: "User ID is required" });
-        }
-        const result = await pool.query('SELECT * FROM reviews WHERE user_id = $1', [userId]);
-        if (result.rows.length === 0) {
-            return res.status(404).json({ error: "No reviews found for this user" });
-        }
-        res.status(200).json({ reviews: result.rows });
-    } catch (err) {
-        console.error("Error fetching reviews:", err);
-        res.status(500).json({ error: "Internal server error" });
-    }
+  const { userId } = req.query;
+  try {
+      if (!userId) {
+          return res.status(400).json({ error: "User ID is required" });
+      }
+      const result = await pool.query('SELECT * FROM reviews WHERE user_id = $1', [userId]);
+      res.status(200).json({ reviews: result.rows });
+  } catch (err) {
+      console.log("Error fetching reviews:", err);
+      res.status(500).json({ error: "Internal server error" });
+  }
 };
 
 
-module.exports = { signUp, login, getUser, updateUsername, updatePassword, getReviews };
+module.exports = { signUp, login, logout, refreshToken, verifyUser, getUser, updateUsername, updatePassword, getReviews };

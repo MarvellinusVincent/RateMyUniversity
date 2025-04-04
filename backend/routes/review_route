@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { submitReview } = require('../controllers/review_controller');
+const { submitReview, submitLike } = require('../controllers/review_controller');
+const { authenticate } = require('../middleware/auth'); 
 
-// Route to submit a review
 router.post('/submit', submitReview);
+
+router.post('/:id/like', authenticate, submitLike);
 
 module.exports = router;

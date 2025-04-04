@@ -2,7 +2,6 @@ const express = require('express');
 const { pool } = require('../config/db');
 const router = express.Router();
 
-// Route for searching universities
 router.get('/', async (req, res) => {
   const { query } = req.query;
   if (!query) {

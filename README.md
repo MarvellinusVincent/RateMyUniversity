@@ -1,5 +1,5 @@
-# Rate My University Life  
-Rate My University Life is a web application designed to help students share their experiences at university. Users can rate various aspects of university life, such as campus facilities, classes, and social activities, and see how others have rated them. The app aims to provide insight into the overall student experience at different universities.  
+# Rate My University  
+Rate My University is a web application designed to help students share their experiences at university. Users can rate various aspects of university life, such as campus facilities, classes, and social activities, and see how others have rated them. The app aims to provide insight into the overall student experience at different universities.  
 
 ## Features  
 - Rate different aspects of university life  
@@ -8,7 +8,7 @@ Rate My University Life is a web application designed to help students share the
 - User authentication and personalized experience  
 
 ## Prerequisites  
-Before running Rate My University Life on your local machine, ensure you have the following installed:  
+Before running Rate My University on your local machine, ensure you have the following installed:  
 - [Node.js](https://nodejs.org/) (Latest LTS version recommended)  
 - [Git](https://git-scm.com/)  
 - [React](https://reactjs.org/)  
@@ -47,27 +47,6 @@ For any issues or suggestions, reach out via GitHub Issues or email at [your_ema
 
 
 Todo:
-1. The navbar when the users log in needs to be fixed both backend and frontend
-    - make sure that everything calls the user id to get the details not the user name as it will fcuk it up when the name or email is changed
-2. add links to rate my courses and rate my professor
-3. change the sql database for reviews in render
-4. add te options to sort by most liked, oldest, and newest date
-
-
-
-
-academic
-reputation
-location
-food
-clubs
-opportunities
-social
-facilities
-happiness
-safety
-internet
-transportation
-professors
-athletics
-housing
+5. when logging in, we need to log in twice to redirect to the home scren
+6. when editing profile, some error occurs
+7. overall rating star isnt accurate

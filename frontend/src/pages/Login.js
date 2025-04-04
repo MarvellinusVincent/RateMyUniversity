@@ -1,46 +1,20 @@
-import { useState } from "react";
-import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import { useUser } from "../contexts/UserContexts";
-import { jwtDecode } from 'jwt-decode';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const navigate = useNavigate();
-  const { login } = useUser();
+  const { login } = useAuth();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post(
-        "http://localhost:1234/users/login",
-        { email, password }
-      );
-      
-      console.log("Full response data:", response.data);
-  
-      const { token, refreshToken } = response.data;
-  
-      if (typeof token !== "string") {
-        console.error("Token is not a valid string:", token);
-        return;
-      }
-  
-      console.log("Token from response:", token);
-      console.log("Refresh Token from response:", refreshToken);
-  
-      const decoded = jwtDecode(token);
-      console.log("Decoded token:", decoded);
-      console.log("Decoded username:", decoded.username);
-  
-      login(decoded.username, email, password, token, refreshToken);
-      navigate("/");
+      await login({ email, password });
+      navigate('/');
     } catch (error) {
-      console.error("Error during handleSubmit:", error);
-      setError(error.response?.data?.error || "Invalid email or password.");
     }
   };
 
@@ -63,12 +37,6 @@ const Login = () => {
               </h2>
               <p className="text-center text-blue-600/80 mt-2">Sign in to continue your journey</p>
             </div>
-
-            {error && (
-              <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">
-                <p>{error}</p>
-              </div>
-            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="space-y-2">
@@ -110,7 +78,6 @@ const Login = () => {
                   </div>
                 </div>
               </div>
-
               <button 
                 type="submit" 
                 className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:from-blue-700 hover:to-cyan-600 transform hover:-translate-y-1 flex items-center justify-center"

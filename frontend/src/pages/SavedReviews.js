@@ -1,41 +1,59 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
-import { useUser } from "../contexts/UserContexts";
+import { useAuth } from "../contexts/AuthContext";
+import { authAxios } from "../stores/authStore";
 import { Link, useNavigate } from "react-router-dom";
 
 const SavedReviews = () => {
-    const { user } = useUser();
+    const { user, isAuthenticated } = useAuth();
     const [reviews, setReviews] = useState([]);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const navigate = useNavigate();
 
     useEffect(() => {
-
-        if (!user) {
-            setIsLoading(false);
-            return;
-        }
-        
         const fetchReviews = async () => {
+            if (!isAuthenticated() || !user?.id) {
+                setIsLoading(false);
+                return;
+            }
+            
             try {
                 setIsLoading(true);
-                const response = await axios.get('http://localhost:1234/users/getReviews', {
+                setError(null);
+                const response = await authAxios.get('http://localhost:1234/users/getReviews', {
                     params: { userId: user.id }
                 });
-                setReviews(response.data.reviews || []);
+                const reviewsData = response.data.reviews || response.data || [];
+                setReviews(Array.isArray(reviewsData) ? reviewsData : []);
             } catch (err) {
-                setError("Failed to fetch reviews");
                 console.error(err);
+                if (err.response && err.response.status !== 404) {
+                    setError("Failed to fetch reviews");
+                }
             } finally {
                 setIsLoading(false);
             }
         };
-    
-        fetchReviews();
-    }, [user?.id]);
+        fetchReviews()
+    }, [user?.id, isAuthenticated]);
 
-    // Enhanced Star Rating Component with null checks
+    if (!isAuthenticated()) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+                <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl p-8 max-w-md text-center">
+                    <h2 className="text-2xl font-bold text-gray-800 mb-4">Authentication Required</h2>
+                    <p className="text-gray-600 mb-6">Please log in to view your saved reviews</p>
+                    <a 
+                        href="/login" 
+                        className="inline-block px-6 py-3 bg-gradient-to-r from-blue-500 to-teal-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all"
+                    >
+                        Go to Login
+                    </a>
+                </div>
+            </div>
+        );
+    }
+
     const StarRating = ({ rating = 0, size = "md" }) => {
         const sizes = {
             sm: "w-4 h-4",
@@ -43,7 +61,7 @@ const SavedReviews = () => {
             lg: "w-6 h-6"
         };
         
-        const safeRating = rating || 0; // Default to 0 if undefined/null
+        const safeRating = rating || 0;
         
         return (
             <div className="flex items-center">
@@ -66,7 +84,6 @@ const SavedReviews = () => {
         );
     };
 
-    // Rating Category Component with null checks
     const RatingCategory = ({ label, value = 0 }) => (
         <div className="bg-white/90 backdrop-blur-sm p-3 rounded-lg border border-gray-200/30 shadow-xs hover:shadow-sm transition-all">
             <div className="text-sm font-medium text-gray-600 mb-1">{label}</div>
@@ -132,8 +149,8 @@ const SavedReviews = () => {
                                         <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-6">
                                             <div>
                                                 <h3 className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
-                                                    <Link to={`/university?name=${review.university_name || review.university_id}`}>
-                                                        {review.university_name || `University ID: ${review.university_id}`}
+                                                    <Link to={`/university?name=${review.university_name}`}>
+                                                        {review.university_name}
                                                     </Link>
                                                 </h3>
                                                 <p className="text-sm text-gray-500 mt-1">

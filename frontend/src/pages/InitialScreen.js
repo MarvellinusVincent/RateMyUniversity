@@ -6,7 +6,6 @@ const InitialScreen = () => {
   const [filteredUniversities, setFilteredUniversities] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Fetch universities from the backend
   useEffect(() => {
     const loadUniversities = async () => {
       if (!searchQuery.trim()) {
@@ -51,7 +50,7 @@ const InitialScreen = () => {
               <div className="absolute -top-8 -left-8 w-16 h-16 rounded-full bg-blue-400/20 blur-xl"></div>
               <div className="absolute -bottom-8 -right-8 w-16 h-16 rounded-full bg-teal-400/20 blur-xl"></div>
               <h1 className="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 relative z-10">
-                Rate My University Life
+                Rate My University
               </h1>
               <p className="text-center text-gray-600 mt-4 max-w-prose mx-auto leading-relaxed">
                 Discover and share your university experiences. Whether you're a prospective student or an alum, 

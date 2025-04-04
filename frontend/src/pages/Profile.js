@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { useUser } from "../contexts/UserContexts";
-import axios from "axios";
+import { useAuth } from "../contexts/AuthContext";
+import { authAxios } from "../stores/authStore";
 
 const Profile = () => {
-  const { user } = useUser();
+  const { user, isAuthenticated } = useAuth();
   const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
@@ -20,15 +20,16 @@ const Profile = () => {
     try {
       let response;
       if (type === "username") {
-        response = await axios.put("http://localhost:1234/users/updateUsername", { 
+        response = await authAxios.put("http://localhost:1234/users/updateUsername", { 
           username: newName, 
           userId: user.id 
         });
+        useAuth.getState().set({ user: { ...user, name: newName } });
       } else if (type === "password") {
         if (newPassword !== retypeNewPassword) {
           throw new Error("Passwords do not match");
         }
-        response = await axios.put("http://localhost:1234/users/updatePassword", { 
+        response = await authAxios.put("http://localhost:1234/users/updatePassword", { 
           newPassword, 
           userId: user.id 
         });
@@ -46,10 +47,19 @@ const Profile = () => {
     }
   };
 
-  if (!user) {
+  if (!isAuthenticated()) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl p-8 max-w-md text-center">
+          <h2 className="text-2xl font-bold text-gray-800 mb-4">Authentication Required</h2>
+          <p className="text-gray-600 mb-6">Please log in to view your profile</p>
+          <a 
+            href="/login" 
+            className="inline-block px-6 py-3 bg-gradient-to-r from-blue-500 to-teal-500 text-white font-semibold rounded-lg hover:shadow-lg transition-all"
+          >
+            Go to Login
+          </a>
+        </div>
       </div>
     );
   }
@@ -87,7 +97,11 @@ const Profile = () => {
                   <div className="space-y-4">
                     <div>
                       <p className="text-sm text-gray-500">Username</p>
-                      <p className="text-lg font-medium text-gray-800">{user.name}</p>
+                      <p className="text-lg font-medium text-gray-800">{user.username}</p>
+                    </div>
+                    <div>
+                      <p className="text-sm text-gray-500">Email</p>
+                      <p className="text-lg font-medium text-gray-800">{user.email}</p>
                     </div>
                     <div>
                       <p className="text-sm text-gray-500">Password</p>
@@ -138,7 +152,7 @@ const Profile = () => {
                         </div>
                       ) : (
                         <div className="flex items-center justify-between">
-                          <p className="text-lg font-medium text-gray-800">{user.name}</p>
+                          <p className="text-lg font-medium text-gray-800">{user.username}</p>
                           <button
                             onClick={() => setIsEditingUsername(true)}
                             className="py-1 px-3 bg-blue-100/90 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors shadow-sm"

@@ -1,19 +1,24 @@
-import React, { useState, forwardRef, useEffect } from 'react';
+import React, { useState, forwardRef, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useUser } from '../contexts/UserContexts';
+import { useAuth } from '../contexts/AuthContext';
 import logo from './../assets/logo.png';
+import UseClickOutside from '../contexts/UseClickOutside';
 
 const Navbar = forwardRef((props, ref) => {
-    const { user, logout } = useUser();
+    const { isAuthenticated, logout } = useAuth();
     const navigate = useNavigate();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const navRef = React.useRef(null);
+    const dropdownRef = useRef(null);
     const [dimensions, setDimensions] = useState({
       height: 0,
       width: 0
     });
 
-    // Update dimensions on resize
+    UseClickOutside(dropdownRef, () => {
+      setIsDropdownOpen(false);
+    });
+
     useEffect(() => {
       const updateDimensions = () => {
         if (navRef.current) {
@@ -34,7 +39,6 @@ const Navbar = forwardRef((props, ref) => {
       return () => resizeObserver.disconnect();
     }, []);
 
-    // Expose height getter to parent
     React.useImperativeHandle(ref, () => ({
       getHeight: () => dimensions.height
     }));
@@ -61,7 +65,6 @@ const Navbar = forwardRef((props, ref) => {
                 <div className="flex justify-between items-center h-16">
                     {/* Logo */}
                     <div className="flex items-center flex-shrink-0">
-                        {/* Portfolio Link */}
                         <a 
                             href="http://marvellinus-vincent-portfolio.onrender.com" 
                             target="_blank" 
@@ -69,24 +72,23 @@ const Navbar = forwardRef((props, ref) => {
                             className="flex items-center"
                         >
                             <img 
-                            src={logo} 
-                            alt="Logo" 
-                            className="h-8 w-8 sm:h-10 sm:w-10 mr-2" 
+                              src={logo} 
+                              alt="Logo" 
+                              className="h-8 w-8 sm:h-10 sm:w-10 mr-2" 
                             />
                         </a>
-
                         <Link 
                             to="/" 
                             className="text-lg sm:text-xl font-medium text-gray-900 whitespace-nowrap hover:text-gray-700"
                         >
-                            Rate My University Life
+                            Rate My University
                         </Link>
-                        </div>
+                    </div>
 
-                    {/* Responsive Account Menu */}
+                    {/* Conditional rendering based on authentication */}
                     <div className="relative ml-4">
-                        {user ? (
-                            <div className="relative">
+                        {isAuthenticated() ? (
+                            <div className="relative" ref={dropdownRef}>
                                 <button 
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)} 
                                     className="flex items-center space-x-1 text-gray-700 hover:text-gray-900 focus:outline-none px-3 py-2 rounded-md text-sm sm:text-base font-medium"

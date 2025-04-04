@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { useRef, useState, useEffect } from "react";
 import InitialScreen from "./pages/InitialScreen";
 import Login from "./pages/Login";
@@ -8,9 +8,9 @@ import LeaveReview from "./pages/LeaveReview";
 import Navbar from "./pages/NavBar";
 import Profile from "./pages/Profile";
 import SavedReviews from "./pages/SavedReviews";
-import { UserProvider } from "./contexts/UserContexts";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
-function App() {
+function NavbarWrapper() {
   const navbarRef = useRef(null);
   const [navbarHeight, setNavbarHeight] = useState(0);
 
@@ -22,7 +22,6 @@ function App() {
     };
 
     updateHeight();
-
     const handleResize = () => {
       updateHeight();
       setTimeout(updateHeight, 300);
@@ -33,31 +32,50 @@ function App() {
   }, []);
 
   return (
-    <UserProvider>
+    <>
+      <Navbar ref={navbarRef} />
+      <div style={{ paddingTop: `${navbarHeight}px` }}>
+        <Routes>
+          <Route path="/" element={<InitialScreen />} />
+          <Route path="/profile" element={<Profile />} />
+          <Route path="/university" element={<University />} />
+          <Route path="/leaveReview" element={<LeaveReview />} />
+          <Route path="/savedReviews" element={<SavedReviews />} />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </div>
+    </>
+  );
+}
+
+function AuthRoutes() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      navigate('/login');
+    }
+  }, [isAuthenticated, isLoading, navigate]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return isAuthenticated ? <NavbarWrapper /> : null;
+}
+
+function App() {
+  return (
+    <AuthProvider>
       <Router>
-        <Navbar ref={navbarRef} />
-        <div 
-          className="w-full bg-gray-50" // Added bg-gray-50 for subtle background
-          style={{
-            paddingTop: `calc(${navbarHeight}px + 1.5rem)`, // Added 1.5rem (24px) extra space
-            minHeight: `calc(100vh - ${navbarHeight}px + env(safe-area-inset-top))`,
-            boxSizing: 'border-box'
-          }}
-        >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6"> {/* Container for content */}
-            <Routes>
-              <Route path="/" element={<InitialScreen />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signUp" element={<SignUp />} />
-              <Route path="/profile" element={<Profile />} />
-              <Route path="/university" element={<University />} />
-              <Route path="/leaveReview" element={<LeaveReview />} />
-              <Route path="/savedReviews" element={<SavedReviews />} />
-            </Routes>
-          </div>
-        </div>
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signUp" element={<SignUp />} />
+          <Route path="*" element={<AuthRoutes />} />
+        </Routes>
       </Router>
-    </UserProvider>
+    </AuthProvider>
   );
 }
 

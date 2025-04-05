@@ -2,6 +2,7 @@ const express = require('express');
 const { pool } = require('../config/db');
 const router = express.Router();
 
+// Returns top 10 most similar universities that the user types
 router.get('/', async (req, res) => {
   const { query } = req.query;
   if (!query) {

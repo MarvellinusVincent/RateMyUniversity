@@ -18,25 +18,32 @@ const SignUp = () => {
       setError("All fields are required.");
       return;
     }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!validateEmail(email)) {
       setError("Please enter a valid email address.");
       return;
     }
     const { strength } = checkPasswordStrength(password);
-    if (strength < 3) { // Require at least 3/5 conditions
+    if (strength < 3) {
       setError("Password must meet at least 3 complexity requirements");
       return;
     }
     try {
       const response = await axios.post(
-        "http://localhost:1234/users/signup",
+        "/users/signup",
         { username, email, password }
       );
+      setError("");
       setSuccessMessage(response.data.message);
-      setTimeout(() => navigate("/login"), 2000);
+      setTimeout(() => navigate("/login"), 500);
     } catch (error) {
       setError(error.response?.data?.error || "An error occurred. Please try again.");
+      setSuccessMessage("");
     } 
+  };
+
+  const validateEmail = (email) => {
+    const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(String(email).toLowerCase());
   };
 
   const checkPasswordStrength = (password) => {
@@ -97,7 +104,6 @@ const SignUp = () => {
               <p className="text-center text-blue-600/80 mt-2">Join our academic community</p>
             </div>
 
-            {/* Messages */}
             {error && (
               <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">
                 <p>{error}</p>

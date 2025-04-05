@@ -44,3 +44,13 @@ This project is licensed under the MIT License.
 
 ## Contact  
 For any issues or suggestions, reach out via GitHub Issues or email at vmarvellinus@gmail.com.  
+
+fixed:
+Show message to the user if the login failed
+
+todo:
+6. Change all the backend to the render one and see if it works
+7. Check navbar UI for mobile later
+
+Possible functionalities:
+1. verify email before allowing the user to sign up

@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Link } from 'react-router-dom';
 
 const Login = () => {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate();
-  const { login, isAuthenticated, isLoading, isInitialized } = useAuth();
+  const { login, isAuthenticated, isLoading, isInitialized, error } = useAuth();
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
+  const [localError, setLocalError] = useState(null);
 
   useEffect(() => {
     if (isInitialized) {
@@ -21,18 +22,32 @@ const Login = () => {
     }
   }, [navigate, isAuthenticated, isInitialized]);
 
+  useEffect(() => {
+    if (email || password) {
+      setLocalError(null);
+    }
+  }, [email, password]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLocalError(null);
     try {
-      await login({ email, password });
+      const success = await login({ email, password });
+      if (!success) {
+        setPassword("");
+        setLocalError("Login failed. Please check your credentials.");
+      }
     } catch (error) {
+      setPassword("");
+      setLocalError("An unexpected error occurred. Please try again.");
     }
   };
+
+  const displayError = error || localError;
 
   if (isLoading || !isInitialized || isCheckingAuth) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        {/* Loading spinner or skeleton can go here */}
       </div>
     );
   }
@@ -68,6 +83,28 @@ const Login = () => {
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-6">
+
+              {displayError && (
+                <div className="mx-auto max-w-full p-3 text-sm sm:text-base text-red-700 bg-red-50 border border-red-200 rounded-lg break-words">
+                  <div className="flex items-start">
+                    <svg 
+                      className="flex-shrink-0 w-5 h-5 mr-2 mt-0.5" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth="2" 
+                        d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" 
+                      />
+                    </svg>
+                    <span>{displayError}</span>
+                  </div>
+                </div>
+              )}
+              
               <div className="space-y-2">
                 <label htmlFor="email" className="block text-sm font-medium text-blue-800/90">Email</label>
                 <div className="relative">
@@ -115,6 +152,7 @@ const Login = () => {
                   </button>
                 </div>
               </div>
+
               <button 
                 type="submit" 
                 className="w-full py-3 sm:py-4 px-6 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:from-blue-700 hover:to-cyan-600 transform hover:-translate-y-1 flex items-center justify-center"

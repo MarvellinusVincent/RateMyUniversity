@@ -112,7 +112,6 @@ const submitReview = async (req, res) => {
         comments ? comments.trim() : null
       ]
     );
-
     res.status(200).json({
       success: true,
       message: 'Review submitted successfully',
@@ -120,14 +119,12 @@ const submitReview = async (req, res) => {
     });
   } catch (err) {
     console.error('Error submitting review:', err);
-    
     if (err.message.includes('must be between 1 and 5')) {
       return res.status(400).json({ 
         error: 'Validation error',
         message: err.message 
       });
     }
-
     res.status(500).json({ 
       error: 'Failed to submit review',
       message: err.message || 'Internal server error' 
@@ -135,6 +132,7 @@ const submitReview = async (req, res) => {
   }
 };
 
+// User likes a review
 const submitLike = async (req, res) => {
   try {
     if (!req.user || !req.user.id) {
@@ -143,9 +141,10 @@ const submitLike = async (req, res) => {
         message: 'You must be logged in to like reviews'
       });
     }
+    
     const { id } = req.params;
     const userId = req.user.id;
-    (`User ${userId} attempting to like review ${id}`);
+
     const result = await pool.query(
       'SELECT like_review($1, $2) as new_likes',
       [userId, id]
@@ -168,7 +167,7 @@ const submitLike = async (req, res) => {
   }
 }
 
-// Add this to your review controller
+// Check if the user has liked the review before
 const checkIfLiked = async (req, res) => {
   try {
     if (!req.user || !req.user.id) {
@@ -185,7 +184,6 @@ const checkIfLiked = async (req, res) => {
       'SELECT EXISTS(SELECT 1 FROM review_likes WHERE user_id = $1 AND review_id = $2) as has_liked',
       [userId, id]
     );
-    
     res.status(200).json({ 
       hasLiked: result.rows[0].has_liked
     });
@@ -197,7 +195,5 @@ const checkIfLiked = async (req, res) => {
     });
   }
 }
-
-// Add this to your routes
 
 module.exports = { submitReview, submitLike, checkIfLiked };

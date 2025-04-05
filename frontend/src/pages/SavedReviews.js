@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { authAxios } from "../stores/authStore";
-import { Link } from "react-router-dom";
 
 const SavedReviews = () => {
     const { user, isAuthenticated } = useAuth();
@@ -19,7 +19,7 @@ const SavedReviews = () => {
             try {
                 setIsLoading(true);
                 setError(null);
-                const response = await authAxios.get('http://localhost:1234/users/getReviews', {
+                const response = await authAxios.get('/users/getReviews', {
                     params: { userId: user.id }
                 });
                 const reviewsData = response.data.reviews || response.data || [];
@@ -110,7 +110,7 @@ const SavedReviews = () => {
                     <span className="font-medium text-gray-700">Browse Universities</span>
                     </Link>
                 </div>
-                {/* Main Card */}
+                {/* All Saved Reviews Card */}
                 <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative">
                     <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-pink-50/30 opacity-30"></div>
                     

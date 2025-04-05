@@ -14,7 +14,7 @@ const InitialScreen = () => {
       }
       setIsLoading(true);
       try {
-        const response = await fetch(`http://localhost:1234/searchUniversity?query=${searchQuery}`);
+        const response = await fetch(`/searchUniversity?query=${searchQuery}`);
         if (!response.ok) {
           throw new Error('Failed to fetch universities');
         }
@@ -75,7 +75,6 @@ const InitialScreen = () => {
                 </div>
               </div>
 
-              {/* Loading indicator */}
               {isLoading && (
                 <div className="absolute top-full left-0 w-full mt-3 flex justify-center">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>

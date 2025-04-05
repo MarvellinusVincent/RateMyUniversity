@@ -2,7 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require('body-parser');
 require("dotenv").config();
-const { authenticate } = require('./middleware/auth');
 
 const app = express();
 app.use(express.json());

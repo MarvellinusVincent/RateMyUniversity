@@ -14,10 +14,8 @@ export const useAuthStore = create(
 
       initialize: async () => {
         if (get().isInitialized) return;
-        
         set({ isLoading: true });
         const token = get().token;
-
         if (!token) {
           return set({ 
             isLoading: false, 
@@ -25,12 +23,10 @@ export const useAuthStore = create(
             user: null
           });
         }
-
         try {
-          const response = await axios.get('http://localhost:1234/users/verify', {
+          const response = await axios.get('/users/verify', {
             headers: { Authorization: `Bearer ${token}` }
           });
-          
           set({ 
             user: response.data.user, 
             isLoading: false,
@@ -42,7 +38,7 @@ export const useAuthStore = create(
             try {
               const newToken = await get().refresh();
               if (newToken) {
-                const verifyResponse = await axios.get('http://localhost:1234/users/verify', {
+                const verifyResponse = await axios.get('/users/verify', {
                   headers: { Authorization: `Bearer ${newToken}` }
                 });
                 set({
@@ -58,7 +54,6 @@ export const useAuthStore = create(
               console.error('Refresh failed:', refreshError);
             }
           }
-          
           set({ 
             user: null,
             token: null,
@@ -69,40 +64,34 @@ export const useAuthStore = create(
         }
       },
 
-      // Login action
       login: async (credentials) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axios.post('http://localhost:1234/users/login', credentials);
+          const response = await axios.post('/users/login', credentials);
           const { user, token, refreshToken } = response.data;
-          
-          // Update all state at once
           set({ 
             user, 
             token, 
             refreshToken, 
             isLoading: false,
             error: null,
-            isInitialized: true // Mark as initialized
+            isInitialized: true
           });
-          
-          return true; // Return success status
+          return true;
         } catch (error) {
           console.error('Login error:', error);
           const errorMessage = error.response?.data?.error || 'Login failed';
           set({ error: errorMessage, isLoading: false });
-          return false; // Return failure status
+          return false;
         }
       },
 
       silentRefresh: async () => {
         const { refreshToken } = get();
         if (!refreshToken) return null;
-
         try {
-          const response = await axios.post('http://localhost:1234/users/refresh', { refreshToken });
+          const response = await axios.post('/users/refresh', { refreshToken });
           const { token, refreshToken: newRefreshToken } = response.data;
-          
           set({ token, refreshToken: newRefreshToken });
           return token;
         } catch (error) {
@@ -111,17 +100,14 @@ export const useAuthStore = create(
         }
       },
 
-      // Manual refresh token action
       refresh: async () => {
         const refreshToken = get().refreshToken;
         if (!refreshToken) {
           throw new Error('No refresh token available');
         }
-
         try {
-          const response = await axios.post('http://localhost:1234/users/refresh', { refreshToken });
+          const response = await axios.post('/users/refresh', { refreshToken });
           const { token, refreshToken: newRefreshToken } = response.data;
-          
           set({ token, refreshToken: newRefreshToken });
           return token;
         } catch (error) {
@@ -130,7 +116,6 @@ export const useAuthStore = create(
         }
       },
 
-      // Logout action
       clear: () => {
         set({ 
           user: null, 
@@ -141,14 +126,12 @@ export const useAuthStore = create(
         });
       },
 
-      // Check authentication status
       isAuthenticated: () => {
         return !!get().user;
       },
 
       setUser: (userData) => set({ user: { ...get().user, ...userData } }),
 
-      // Get current auth state
       getAuthState: () => {
         const { user, token, isLoading, isInitialized } = get();
         return {
@@ -160,6 +143,7 @@ export const useAuthStore = create(
         };
       }
     }),
+
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
@@ -203,14 +187,11 @@ authAxios.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    
     if (error.response?.status !== 401 || originalRequest._retry) {
       return Promise.reject(error);
     }
-
     originalRequest._retry = true;
     const authStore = useAuthStore.getState();
-    
     try {
       const newToken = await authStore.silentRefresh();
       if (newToken) {
@@ -220,7 +201,6 @@ authAxios.interceptors.response.use(
     } catch (refreshError) {
       console.error('Refresh token failed:', refreshError);
     }
-    
     authStore.clear();
     return Promise.reject(error);
   }

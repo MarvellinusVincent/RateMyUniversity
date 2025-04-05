@@ -1,8 +1,8 @@
 import React, { useState, useRef } from "react";
+import { Link } from 'react-router-dom';
 import { useAuth } from "../contexts/AuthContext";
 import { authAxios } from "../stores/authStore";
 import useClickOutside from "../contexts/UseClickOutside";
-import { Link } from 'react-router-dom';
 
 const Profile = () => {
   const { user, isAuthenticated, setUser } = useAuth();
@@ -20,17 +20,42 @@ const Profile = () => {
     setErrorMessage("");
   });
 
+  const checkPasswordStrength = (password) => {
+    const hasMinLength = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  
+    const strengthPoints = [
+      hasMinLength,
+      hasUpperCase,
+      hasLowerCase,
+      hasNumber,
+      hasSpecialChar
+    ].filter(Boolean).length;
+  
+    return {
+      strength: strengthPoints,
+      requirements: {
+        length: hasMinLength,
+        upperCase: hasUpperCase,
+        lowerCase: hasLowerCase,
+        number: hasNumber,
+        specialChar: hasSpecialChar
+      }
+    };
+  };
+
   const saveDetails = async (type) => {
     setLoading(true);
     setErrorMessage("");
-  
     try {
       let response;
       if (type === "username" && !newName.trim()) {
         setErrorMessage("Username cannot be empty");
         return;
       } else if (type === "password") {
-        // Password validation
         if (!newPassword || !retypeNewPassword) {
           setErrorMessage("Both password fields are required");
           return;
@@ -39,14 +64,20 @@ const Profile = () => {
           setErrorMessage("Passwords do not match");
           return;
         }
-        
-        response = await authAxios.put("http://localhost:1234/users/updatePassword", { 
+
+        const { strength } = checkPasswordStrength(newPassword);
+        if (strength < 3) {
+          setErrorMessage("Password must meet at least 3 complexity requirements");
+          return;
+        }
+
+        response = await authAxios.put("/users/updatePassword", { 
           newPassword,
           retypeNewPassword, 
           userId: user.id 
         });
       } else if (type === "username") {
-        response = await authAxios.put("http://localhost:1234/users/updateUsername", { 
+        response = await authAxios.put("/users/updateUsername", { 
           username: newName, 
           userId: user.id 
         });
@@ -57,7 +88,7 @@ const Profile = () => {
         setIsEditingUsername(false);
         setIsEditingPassword(false);
         setIsEditingDetails(false);
-        setNewPassword(""); // Clear password fields
+        setNewPassword("");
         setRetypeNewPassword("");
       }
     } catch (error) {

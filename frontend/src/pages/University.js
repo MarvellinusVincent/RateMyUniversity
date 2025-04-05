@@ -1,11 +1,11 @@
 import { useLocation } from 'react-router-dom';
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import { Link } from 'react-router-dom';
 import useClickOutside from '../contexts/UseClickOutside';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthStore } from '../stores/authStore';
-import { jwtDecode } from 'jwt-decode';
-import { Link } from 'react-router-dom';
 
 const University = () => {
   const location = useLocation();
@@ -42,14 +42,14 @@ const University = () => {
       setIsLoading(true);
       setShowNotFound(false);
       try {
-        const response = await fetch(`http://localhost:1234/specificUni?name=${universityName}`);
+        const response = await fetch(`/specificUni?name=${universityName}`);
         const universityData = await response.json();
         setUniversity(universityData);
 
         if (universityData.id) {
           const fetchReviews = async () => {
             try {
-              const response = await fetch(`http://localhost:1234/specificUni/${universityData.id}/reviews`);
+              const response = await fetch(`/specificUni/${universityData.id}/reviews`);
               const reviewsData = await response.json();
               
               // Check if user is authenticated
@@ -57,11 +57,10 @@ const University = () => {
               let processedReviews;
               
               if (token) {
-                // For each review, check if the current user has liked it
                 processedReviews = await Promise.all(
                   (reviewsData.reviews || []).map(async (review) => {
                     try {
-                      const likeResponse = await fetch(`http://localhost:1234/reviews/${review.id}/hasLiked`, {
+                      const likeResponse = await fetch(`/reviews/${review.id}/hasLiked`, {
                         headers: {
                           "Authorization": `Bearer ${token}`,
                         }
@@ -77,13 +76,12 @@ const University = () => {
               } else {
                 processedReviews = (reviewsData.reviews || []).map(review => ({ ...review, isLiked: false }));
               }
-              
               setReviews(processedReviews);
-              return reviewsData; // Return the original reviews data for username fetching
+              return reviewsData;
             } catch (error) {
               console.error('Error fetching reviews:', error);
               setReviews([]);
-              return { reviews: [] }; // Return empty array if there's an error
+              return { reviews: [] };
             }
           };
         
@@ -95,7 +93,7 @@ const University = () => {
             for (let review of reviewsData.reviews) {
               if (review.user_id) {
                 try {
-                  const userResponse = await fetch(`http://localhost:1234/users/getUser?userID=${review.user_id}`);
+                  const userResponse = await fetch(`/users/getUser?userID=${review.user_id}`);
                   const userData = await userResponse.json();
                   users[review.user_id] = userData.username;
                 } catch (error) {
@@ -165,17 +163,11 @@ const University = () => {
         setIsLoading(false);
       }
     };
-    const notFoundTimer = setTimeout(() => {
-      if (!university && !isLoading) {
-        setShowNotFound(true);
-      }
-    }, 1000); // 1 second delay
 
     if (universityName) {
       fetchUniversityDetails();
     }
 
-    return () => clearTimeout(notFoundTimer);
   }, [universityName]);
 
   const handleRateClick = () => {
@@ -184,7 +176,6 @@ const University = () => {
 
   const handleLikeReview = async (reviewId) => {
     const { token, refresh } = useAuthStore.getState();
-    
     if (!token) {
       return { needsLogin: true };
     }
@@ -192,12 +183,12 @@ const University = () => {
     try {
       const decoded = jwtDecode(token);
       let currentToken = token;
-      
+
       if (decoded.exp * 1000 < Date.now()) {
         currentToken = await refresh();
       }
   
-      const response = await fetch(`http://localhost:1234/reviews/${reviewId}/like`, {
+      const response = await fetch(`/reviews/${reviewId}/like`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${currentToken}`,
@@ -211,8 +202,7 @@ const University = () => {
   
       const data = await response.json();
       
-      // Check if the user has liked this review
-      const hasLikedResponse = await fetch(`http://localhost:1234/reviews/${reviewId}/hasLiked`, {
+      const hasLikedResponse = await fetch(`/reviews/${reviewId}/hasLiked`, {
         headers: {
           "Authorization": `Bearer ${currentToken}`,
         }
@@ -229,7 +219,6 @@ const University = () => {
             }
           : review
       ));
-      
       return { success: true, hasLiked: hasLikedData.hasLiked };
     } catch (error) {
       console.error("Error liking review:", error);
@@ -418,7 +407,6 @@ const University = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 md:w-64 md:h-64 bg-gradient-to-tr from-yellow-100 to-transparent opacity-10 rounded-full blur-2xl"></div>
       </div>
 
-      {/* Header */}
       <header className="relative py-12 md:py-16 px-4 sm:px-8 lg:px-12 text-center">
         <div className="absolute top-4 left-4 z-50">
           <Link 
@@ -549,7 +537,6 @@ const University = () => {
             colorFrom="from-blue-400"
             colorTo="to-indigo-500"
           />
-          
           <CategoryCard 
             title="Academics"
             icon="📚"
@@ -563,7 +550,6 @@ const University = () => {
             colorFrom="from-teal-400"
             colorTo="to-emerald-500"
           />
-          
           <CategoryCard 
             title="Living"
             icon="🏠"
@@ -624,7 +610,6 @@ const University = () => {
                   year: 'numeric' 
                 }) : "No date";
                 
-                // All possible rating categories
                 const ratingCategories = [
                   { label: "Academics", value: review.academic_rating, color: "green" },
                   { label: "Professors", value: review.professors_rating, color: "green" },
@@ -733,7 +718,6 @@ const University = () => {
   );  
 };
 
-// Category Card Component
 const CategoryCard = ({ title, icon, ratings, colorFrom, colorTo }) => (
   <div className="bg-white/80 backdrop-blur-lg rounded-2xl shadow-xl overflow-hidden border border-white/30 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2">
     <div className="p-6">
@@ -763,7 +747,6 @@ const CategoryCard = ({ title, icon, ratings, colorFrom, colorTo }) => (
   </div>
 );
 
-// Rating Pill Component
 const RatingPill = ({ label, value, color = "gray" }) => {
   const colorClasses = {
     gray: "bg-gray-50 text-gray-700 border-gray-200",
@@ -784,7 +767,6 @@ const RatingPill = ({ label, value, color = "gray" }) => {
   );
 };
 
-// Star Icon Component with partial filling
 const StarIcon = ({ filled, percent = 0, className = "w-5 h-5" }) => {
   if (typeof filled === 'boolean') {
     return (

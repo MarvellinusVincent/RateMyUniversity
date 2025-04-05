@@ -1,14 +1,14 @@
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useRef, useState, useEffect } from "react";
-import InitialScreen from "./pages/InitialScreen";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
+import Profile from "./pages/Profile";
+import Navbar from "./pages/NavBar";
+import InitialScreen from "./pages/InitialScreen";
 import University from "./pages/University";
 import LeaveReview from "./pages/LeaveReview";
-import Navbar from "./pages/NavBar";
-import Profile from "./pages/Profile";
 import SavedReviews from "./pages/SavedReviews";
-import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 function NavbarWrapper() {
   const navbarRef = useRef(null);
@@ -24,7 +24,7 @@ function NavbarWrapper() {
     updateHeight();
     const handleResize = () => {
       updateHeight();
-      setTimeout(updateHeight, 300); // Double check after resize
+      setTimeout(updateHeight, 300);
     };
 
     window.addEventListener('resize', handleResize);

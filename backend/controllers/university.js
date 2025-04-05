@@ -1,6 +1,5 @@
 const { pool } = require('../config/db');
 
-
 // Get all details of the university from the university table in the database
 const getSpecificUniversity = async (req, res) => {
   const { name } = req.query;
@@ -23,7 +22,7 @@ const getSpecificUniversity = async (req, res) => {
   }
 };
 
-// Get all reviews of that university
+// Get all reviews of the university
 const getReviewFromUniversity = async (req, res) => {
   const { university_id } = req.params;
   try {
@@ -37,6 +36,5 @@ const getReviewFromUniversity = async (req, res) => {
     res.status(500).json({ error: 'Failed to fetch reviews' });
   }
 };
-
 
 module.exports = { getSpecificUniversity, getReviewFromUniversity };

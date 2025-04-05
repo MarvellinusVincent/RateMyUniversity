@@ -69,13 +69,13 @@ const Profile = () => {
       }
 
       if (type === "password") {
-        response = await authAxios.put("/users/updatePassword", { 
+        response = await authAxios.put(`${process.env.REACT_APP_API_URL}/users/updatePassword`, { 
           newPassword,
           retypeNewPassword, 
           userId: user.id 
         });
       } else if (type === "username") {
-        response = await authAxios.put("/users/updateUsername", { 
+        response = await authAxios.put(`${process.env.REACT_APP_API_URL}/users/updateUsername`, { 
           username: newName, 
           userId: user.id 
         });

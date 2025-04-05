@@ -29,7 +29,7 @@ const SignUp = () => {
     }
     try {
       const response = await axios.post(
-        "/users/signup",
+        `${process.env.REACT_APP_API_URL}/users/signup`,
         { username, email, password }
       );
       setError("");

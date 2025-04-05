@@ -24,7 +24,7 @@ export const useAuthStore = create(
           });
         }
         try {
-          const response = await axios.get('/users/verify', {
+          const response = await axios.get(`${process.env.REACT_APP_API_URL}/users/verify`, {
             headers: { Authorization: `Bearer ${token}` }
           });
           set({ 
@@ -38,7 +38,7 @@ export const useAuthStore = create(
             try {
               const newToken = await get().refresh();
               if (newToken) {
-                const verifyResponse = await axios.get('/users/verify', {
+                const verifyResponse = await axios.get(`${process.env.REACT_APP_API_URL}/users/verify`, {
                   headers: { Authorization: `Bearer ${newToken}` }
                 });
                 set({
@@ -67,7 +67,7 @@ export const useAuthStore = create(
       login: async (credentials) => {
         set({ isLoading: true, error: null });
         try {
-          const response = await axios.post('/users/login', credentials);
+          const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/login`, credentials);
           const { user, token, refreshToken } = response.data;
           set({ 
             user, 
@@ -90,7 +90,7 @@ export const useAuthStore = create(
         const { refreshToken } = get();
         if (!refreshToken) return null;
         try {
-          const response = await axios.post('/users/refresh', { refreshToken });
+          const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/refresh`, { refreshToken });
           const { token, refreshToken: newRefreshToken } = response.data;
           set({ token, refreshToken: newRefreshToken });
           return token;
@@ -106,7 +106,7 @@ export const useAuthStore = create(
           throw new Error('No refresh token available');
         }
         try {
-          const response = await axios.post('/users/refresh', { refreshToken });
+          const response = await axios.post(`${process.env.REACT_APP_API_URL}/users/refresh`, { refreshToken });
           const { token, refreshToken: newRefreshToken } = response.data;
           set({ token, refreshToken: newRefreshToken });
           return token;

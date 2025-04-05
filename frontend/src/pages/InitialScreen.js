@@ -14,7 +14,7 @@ const InitialScreen = () => {
       }
       setIsLoading(true);
       try {
-        const response = await fetch(`/searchUniversity?query=${searchQuery}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/searchUniversity?query=${searchQuery}`);
         if (!response.ok) {
           throw new Error('Failed to fetch universities');
         }

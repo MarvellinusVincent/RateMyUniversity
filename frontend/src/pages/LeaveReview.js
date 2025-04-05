@@ -84,7 +84,7 @@ const LeaveReview = () => {
         is_anonymous: !isAuthenticated()
       };
 
-      const response = await authAxios.post(`/reviews/submit`, reviewData);
+      const response = await authAxios.post(`${process.env.REACT_APP_API_URL}/reviews/submit`, reviewData);
 
       if (response.status === 200) {
         navigate(`/university?name=${universityName}`);

@@ -19,7 +19,7 @@ const SavedReviews = () => {
             try {
                 setIsLoading(true);
                 setError(null);
-                const response = await authAxios.get('/users/getReviews', {
+                const response = await authAxios.get(`${process.env.REACT_APP_API_URL}/users/getReviews`, {
                     params: { userId: user.id }
                 });
                 const reviewsData = response.data.reviews || response.data || [];

@@ -42,14 +42,14 @@ const University = () => {
       setIsLoading(true);
       setShowNotFound(false);
       try {
-        const response = await fetch(`/specificUni?name=${universityName}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/specificUni?name=${universityName}`);
         const universityData = await response.json();
         setUniversity(universityData);
 
         if (universityData.id) {
           const fetchReviews = async () => {
             try {
-              const response = await fetch(`/specificUni/${universityData.id}/reviews`);
+              const response = await fetch(`${process.env.REACT_APP_API_URL}/specificUni/${universityData.id}/reviews`);
               const reviewsData = await response.json();
               
               // Check if user is authenticated
@@ -60,7 +60,7 @@ const University = () => {
                 processedReviews = await Promise.all(
                   (reviewsData.reviews || []).map(async (review) => {
                     try {
-                      const likeResponse = await fetch(`/reviews/${review.id}/hasLiked`, {
+                      const likeResponse = await fetch(`${process.env.REACT_APP_API_URL}/reviews/${review.id}/hasLiked`, {
                         headers: {
                           "Authorization": `Bearer ${token}`,
                         }
@@ -93,7 +93,7 @@ const University = () => {
             for (let review of reviewsData.reviews) {
               if (review.user_id) {
                 try {
-                  const userResponse = await fetch(`/users/getUser?userID=${review.user_id}`);
+                  const userResponse = await fetch(`${process.env.REACT_APP_API_URL}/users/getUser?userID=${review.user_id}`);
                   const userData = await userResponse.json();
                   users[review.user_id] = userData.username;
                 } catch (error) {
@@ -188,7 +188,7 @@ const University = () => {
         currentToken = await refresh();
       }
   
-      const response = await fetch(`/reviews/${reviewId}/like`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/reviews/${reviewId}/like`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${currentToken}`,
@@ -202,7 +202,7 @@ const University = () => {
   
       const data = await response.json();
       
-      const hasLikedResponse = await fetch(`/reviews/${reviewId}/hasLiked`, {
+      const hasLikedResponse = await fetch(`${process.env.REACT_APP_API_URL}/reviews/${reviewId}/hasLiked`, {
         headers: {
           "Authorization": `Bearer ${currentToken}`,
         }

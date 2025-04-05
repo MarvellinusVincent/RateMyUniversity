@@ -112,7 +112,7 @@ const LeaveReview = () => {
             onClick={() => handleStarClick(field, rating)}
             onMouseEnter={() => setHoverRatings((prev) => ({ ...prev, [field]: rating }))}
             onMouseLeave={() => setHoverRatings((prev) => ({ ...prev, [field]: 0 }))}
-            className={`cursor-pointer text-2xl ${
+            className={`cursor-pointer text-2xl p-1 ${
               rating <= (hoverRating || currentRating) ? 'text-yellow-400' : 'text-gray-300'
             } transition transform duration-200 hover:scale-110`}
           >
@@ -199,7 +199,7 @@ const LeaveReview = () => {
               </div>
 
               {/* Rating Categories */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {/* Academics Column */}
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">Academics</h3>
@@ -263,10 +263,10 @@ const LeaveReview = () => {
 
               {/* Submit Button */}
               <div className="flex justify-center pt-4">
-                <button
+                <button 
                   type="submit"
                   disabled={isSubmitting}
-                  className={`px-8 py-3 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 ${
+                  className={`w-full md:w-auto px-8 py-3 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 ${
                     isSubmitting ? 'opacity-70 cursor-not-allowed' : ''
                   }`}
                 >

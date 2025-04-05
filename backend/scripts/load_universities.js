@@ -12,7 +12,7 @@ async function loadUniversities() {
   try {
     await client.connect();
     const data = JSON.parse(await fs.promises.readFile('./world_universities_and_domains.json', 'utf8'));
-    console.log(data);
+    (data);
     for (const university of data) {
       const { name, country, web_pages, domains, alpha_two_code } = university;
       const formattedWebPages = `{ ${web_pages.map(page => `'${page}'`).join(', ')} }`;
@@ -25,7 +25,6 @@ async function loadUniversities() {
       await client.query(query);
     }
 
-    console.log('Universities loaded successfully.');
   } catch (error) {
     console.error('Error loading universities:', error);
   } finally {

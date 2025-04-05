@@ -4,27 +4,17 @@ const { pool } = require('../config/db');
 const authenticate = async (req, res, next) => {
     try {
         const token = req.header('Authorization')?.replace('Bearer ', '');
-        console.log('Authentication middleware triggered');
-        console.log('Received token:', token);
         
         if (!token) {
-            console.log('No token provided');
             return res.status(401).json({ error: 'Authentication required' });
         }
 
-        console.log('Verifying token with secret:', process.env.JWT_SECRET);
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        console.log('Decoded token:', decoded);
-
-        console.log('Looking for user with id:', decoded.id);
         const user = await pool.query('SELECT id, username, email FROM users WHERE id = $1', [decoded.id]);
         
         if (!user.rows.length) {
-            console.log('User not found in database');
             return res.status(401).json({ error: 'User not found' });
         }
-
-        console.log('Authentication successful for user:', user.rows[0]);
         req.user = user.rows[0];
         req.token = token;
         next();

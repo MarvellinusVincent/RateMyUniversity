@@ -43,10 +43,4 @@ Contributions are welcome! Feel free to fork the repository and submit pull requ
 This project is licensed under the MIT License.  
 
 ## Contact  
-For any issues or suggestions, reach out via GitHub Issues or email at [your_email@example.com].  
-
-
-Todo:
-5. when logging in, we need to log in twice to redirect to the home scren
-6. when editing profile, some error occurs
-7. overall rating star isnt accurate
+For any issues or suggestions, reach out via GitHub Issues or email at vmarvellinus@gmail.com.  

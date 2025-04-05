@@ -71,34 +71,27 @@ export const useAuthStore = create(
 
       // Login action
       login: async (credentials) => {
-        console.log('Login attempt with credentials:', credentials);
         set({ isLoading: true, error: null });
         try {
           const response = await axios.post('http://localhost:1234/users/login', credentials);
-          console.log('Login response:', response.data);
           const { user, token, refreshToken } = response.data;
           
+          // Update all state at once
           set({ 
             user, 
             token, 
             refreshToken, 
             isLoading: false,
             error: null,
-            isInitialized: true
+            isInitialized: true // Mark as initialized
           });
           
-          console.log('Login successful, new state:', get());
-          return user;
+          return true; // Return success status
         } catch (error) {
           console.error('Login error:', error);
-          const errorMessage = error.response?.data?.message || 
-                            error.message || 
-                            'Login failed';
-          set({ 
-            error: errorMessage,
-            isLoading: false 
-          });
-          throw error;
+          const errorMessage = error.response?.data?.error || 'Login failed';
+          set({ error: errorMessage, isLoading: false });
+          return false; // Return failure status
         }
       },
 
@@ -152,6 +145,8 @@ export const useAuthStore = create(
       isAuthenticated: () => {
         return !!get().user;
       },
+
+      setUser: (userData) => set({ user: { ...get().user, ...userData } }),
 
       // Get current auth state
       getAuthState: () => {

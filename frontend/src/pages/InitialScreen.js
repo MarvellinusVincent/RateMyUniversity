@@ -85,7 +85,7 @@ const InitialScreen = () => {
               {/* Results dropdown */}
               {filteredUniversities.length > 0 && (
                 <div className="absolute z-10 w-full mt-2">
-                  <ul className="bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-xl shadow-lg overflow-y-auto max-h-60">
+                  <ul className="bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-xl shadow-lg overflow-y-auto max-h-[50vh]">
                     {filteredUniversities.map((uni) => (
                       <li key={uni}>
                         <Link

@@ -10,7 +10,7 @@ const Navbar = forwardRef((props, ref) => {
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
     const navRef = React.useRef(null);
     const dropdownRef = useRef(null);
-    const [dimensions, setDimensions] = useState({
+    const [dimensions] = useState({
       height: 0,
       width: 0
     });
@@ -20,24 +20,15 @@ const Navbar = forwardRef((props, ref) => {
     });
 
     useEffect(() => {
-      const updateDimensions = () => {
-        if (navRef.current) {
-          setDimensions({
-            height: navRef.current.offsetHeight,
-            width: navRef.current.offsetWidth
-          });
+        if (ref && typeof ref === 'object' && ref.current) {
+          ref.current.updateHeight = () => {
+            if (navRef.current) {
+              return navRef.current.offsetHeight;
+            }
+            return 0;
+          };
         }
-      };
-
-      updateDimensions();
-
-      const resizeObserver = new ResizeObserver(updateDimensions);
-      if (navRef.current) {
-        resizeObserver.observe(navRef.current);
-      }
-
-      return () => resizeObserver.disconnect();
-    }, []);
+      }, [dimensions.height, ref]);
 
     React.useImperativeHandle(ref, () => ({
       getHeight: () => dimensions.height
@@ -72,9 +63,9 @@ const Navbar = forwardRef((props, ref) => {
                             className="flex items-center"
                         >
                             <img 
-                              src={logo} 
-                              alt="Logo" 
-                              className="h-8 w-8 sm:h-10 sm:w-10 mr-2" 
+                                src={logo} 
+                                alt="Logo" 
+                                className="h-[2rem] w-[2rem] sm:h-[2.5rem] sm:w-[2.5rem] mr-2" 
                             />
                         </a>
                         <Link 
@@ -91,10 +82,10 @@ const Navbar = forwardRef((props, ref) => {
                             <div className="relative" ref={dropdownRef}>
                                 <button 
                                     onClick={() => setIsDropdownOpen(!isDropdownOpen)} 
-                                    className="flex items-center space-x-1 text-gray-700 hover:text-gray-900 focus:outline-none px-3 py-2 rounded-md text-sm sm:text-base font-medium"
+                                    className="flex items-center space-x-1 text-gray-700 hover:text-gray-900 focus:outline-none px-4 py-2.5 sm:px-3 sm:py-2 rounded-md text-sm sm:text-base font-medium"
                                     aria-expanded={isDropdownOpen}
                                     aria-haspopup="true"
-                                >
+                                    >
                                     <span className="hidden sm:inline">Account</span>
                                     <svg 
                                         className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 ${isDropdownOpen ? 'transform rotate-180' : ''}`} 
@@ -107,7 +98,7 @@ const Navbar = forwardRef((props, ref) => {
 
                                 {isDropdownOpen && (
                                     <div 
-                                        className="absolute right-0 mt-2 w-48 sm:w-56 bg-white rounded-md shadow-lg py-1 border border-gray-200 z-50"
+                                        className="absolute right-0 mt-2 w-48 sm:w-56 md:w-64 bg-white rounded-md shadow-lg py-1 border border-gray-200 z-50"
                                         role="menu"
                                     >
                                         <Link 

@@ -4,7 +4,6 @@ pool.query('SELECT NOW()', (err, res) => {
   if (err) {
     console.error('Database connection error:', err);
   } else {
-    console.log('Database connected:', res.rows[0]);
   }
 });
 
@@ -12,6 +11,7 @@ pool.query('SELECT NOW()', (err, res) => {
 const submitReview = async (req, res) => {
   const {
     university_id,
+    university_name,
     user_id = null,
     overall_rating,
     happiness_rating,
@@ -33,13 +33,14 @@ const submitReview = async (req, res) => {
     comments = null
   } = req.body;
 
-  if (!university_id || !overall_rating || !review_text) {
+  if (!university_id || !university_name || !overall_rating || !review_text) {
     return res.status(400).json({ 
       error: 'Missing required fields',
       details: {
-        required: ['university_id', 'overall_rating', 'review_text'],
+        required: ['university_id', 'university_name', 'overall_rating', 'review_text'],
         received: {
           university_id: !!university_id,
+          university_name: !!university_name,
           overall_rating: !!overall_rating,
           review_text: !!review_text
         }
@@ -76,26 +77,21 @@ const submitReview = async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO reviews (
-        user_id, university_id,
-        -- Overall ratings
+        user_id, university_id, university_name,
         overall_rating, happiness_rating,
-        -- Academic ratings
         academic_rating, professors_rating, difficulty_rating, opportunities_rating,
-        -- Campus life ratings
         social_life_rating, clubs_rating, athletics_rating, safety_rating,
-        -- Facilities ratings
         facilities_rating, internet_rating,
-        -- Living conditions ratings
         location_rating, housing_rating, food_rating, transportation_rating,
-        -- Review content
         review_text, comments
       ) VALUES (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-        $11, $12, $13, $14, $15, $16, $17, $18, $19, $20
+        $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21
       ) RETURNING id`,
       [
         user_id,
         university_id,
+        university_name,
         validatedRatings.overall_rating,
         validatedRatings.happiness_rating,
         validatedRatings.academic_rating,
@@ -149,15 +145,19 @@ const submitLike = async (req, res) => {
     }
     const { id } = req.params;
     const userId = req.user.id;
-    console.log(`User ${userId} attempting to like review ${id}`);
+    (`User ${userId} attempting to like review ${id}`);
     const result = await pool.query(
       'SELECT like_review($1, $2) as new_likes',
       [userId, id]
     );
-    console.log('Like successful, new like count:', result.rows[0].new_likes);
+    const likeStatus = await pool.query(
+      'SELECT EXISTS(SELECT 1 FROM review_likes WHERE user_id = $1 AND review_id = $2) as has_liked',
+      [userId, id]
+    );
     res.status(200).json({ 
       success: true,
-      likes: result.rows[0].new_likes
+      likes: result.rows[0].new_likes,
+      hasLiked: likeStatus.rows[0].has_liked
     });
   } catch (error) {
     console.error('Error liking review:', error);
@@ -168,4 +168,36 @@ const submitLike = async (req, res) => {
   }
 }
 
-module.exports = { submitReview, submitLike };
+// Add this to your review controller
+const checkIfLiked = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ 
+        error: 'Authentication required',
+        message: 'You must be logged in to check likes'
+      });
+    }
+    
+    const { id } = req.params;
+    const userId = req.user.id;
+    
+    const result = await pool.query(
+      'SELECT EXISTS(SELECT 1 FROM review_likes WHERE user_id = $1 AND review_id = $2) as has_liked',
+      [userId, id]
+    );
+    
+    res.status(200).json({ 
+      hasLiked: result.rows[0].has_liked
+    });
+  } catch (error) {
+    console.error('Error checking like status:', error);
+    res.status(500).json({ 
+      error: 'Failed to check like status',
+      message: error.message || 'Internal server error' 
+    });
+  }
+}
+
+// Add this to your routes
+
+module.exports = { submitReview, submitLike, checkIfLiked };

@@ -10,11 +10,21 @@ const SignUp = () => {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!username || !email || !password) {
       setError("All fields are required.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+    const { strength } = checkPasswordStrength(password);
+    if (strength < 3) { // Require at least 3/5 conditions
+      setError("Password must meet at least 3 complexity requirements");
       return;
     }
     try {
@@ -26,7 +36,34 @@ const SignUp = () => {
       setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       setError(error.response?.data?.error || "An error occurred. Please try again.");
-    }
+    } 
+  };
+
+  const checkPasswordStrength = (password) => {
+    const hasMinLength = password.length >= 8;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /[0-9]/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  
+    const strengthPoints = [
+      hasMinLength,
+      hasUpperCase,
+      hasLowerCase,
+      hasNumber,
+      hasSpecialChar
+    ].filter(Boolean).length;
+  
+    return {
+      strength: strengthPoints,
+      requirements: {
+        length: hasMinLength,
+        upperCase: hasUpperCase,
+        lowerCase: hasLowerCase,
+        number: hasNumber,
+        specialChar: hasSpecialChar
+      }
+    };
   };
 
   return (
@@ -39,6 +76,17 @@ const SignUp = () => {
 
       <div className="relative flex items-center justify-center min-h-screen p-6">
         <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl overflow-hidden w-full max-w-md border border-white/30">
+          <div className="absolute top-4 right-4">
+            <Link 
+              to="/" 
+              className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 hover:bg-blue-100 transition-colors duration-200 text-blue-500"
+              title="Back to home"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </Link>
+          </div>
           <div className="p-8 sm:p-10">
             <div className="relative mb-8 text-center">
               <div className="absolute -top-8 -left-8 w-16 h-16 rounded-full bg-blue-400/20 blur-xl"></div>
@@ -107,19 +155,45 @@ const SignUp = () => {
                 <div className="relative">
                   <input
                     id="password"
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
                     className="w-full px-4 py-3 bg-white/80 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-blue-300/70"
                     placeholder="••••••••"
                   />
-                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  >
                     <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+                      {showPassword ? (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      ) : (
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                      )}
                     </svg>
-                  </div>
+                  </button>
                 </div>
+
+                {/* Password Strength Indicator */}
+                {password.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full rounded-full ${
+                          checkPasswordStrength(password).strength >= 4 ? 'bg-green-500' : 
+                          checkPasswordStrength(password).strength >= 2 ? 'bg-yellow-500' : 'bg-red-500'
+                        }`}
+                        style={{ 
+                          width: `${(checkPasswordStrength(password).strength / 5) * 100}%`,
+                          transition: 'width 0.3s ease'
+                        }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <button 

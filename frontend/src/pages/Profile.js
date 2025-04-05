@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { authAxios } from "../stores/authStore";
+import useClickOutside from "../contexts/UseClickOutside";
+import { Link } from 'react-router-dom';
 
 const Profile = () => {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, setUser } = useAuth();
   const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
@@ -12,36 +14,60 @@ const Profile = () => {
   const [retypeNewPassword, setRetypeNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const errorRef = useRef(null);
+
+  useClickOutside(errorRef, () => {
+    setErrorMessage("");
+  });
 
   const saveDetails = async (type) => {
     setLoading(true);
     setErrorMessage("");
-
+  
     try {
       let response;
-      if (type === "username") {
+      if (type === "username" && !newName.trim()) {
+        setErrorMessage("Username cannot be empty");
+        return;
+      } else if (type === "password") {
+        // Password validation
+        if (!newPassword || !retypeNewPassword) {
+          setErrorMessage("Both password fields are required");
+          return;
+        }
+        if (newPassword !== retypeNewPassword) {
+          setErrorMessage("Passwords do not match");
+          return;
+        }
+        
+        response = await authAxios.put("http://localhost:1234/users/updatePassword", { 
+          newPassword,
+          retypeNewPassword, 
+          userId: user.id 
+        });
+      } else if (type === "username") {
         response = await authAxios.put("http://localhost:1234/users/updateUsername", { 
           username: newName, 
           userId: user.id 
         });
-        useAuth.getState().set({ user: { ...user, name: newName } });
-      } else if (type === "password") {
-        if (newPassword !== retypeNewPassword) {
-          throw new Error("Passwords do not match");
-        }
-        response = await authAxios.put("http://localhost:1234/users/updatePassword", { 
-          newPassword, 
-          userId: user.id 
-        });
+        setUser({ username: newName });
       }
-
+  
       if (response.status === 200) {
         setIsEditingUsername(false);
         setIsEditingPassword(false);
         setIsEditingDetails(false);
+        setNewPassword(""); // Clear password fields
+        setRetypeNewPassword("");
       }
     } catch (error) {
-      setErrorMessage(error.response?.data?.message || error.message);
+      if (error.response) {
+        setErrorMessage(error.response.data?.error || error.response.data?.message || "An error occurred");
+      } else if (error.request) {
+        setErrorMessage("No response from server. Please try again.");
+      } else {
+        setErrorMessage(error.message || "An unexpected error occurred");
+      }
     } finally {
       setLoading(false);
     }
@@ -67,12 +93,23 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
-        <div className="absolute bottom-1/3 -right-20 w-80 h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-tr from-yellow-100 to-transparent opacity-10 rounded-full blur-2xl"></div>
+        <div className="absolute top-1/4 -left-20 w-64 h-64 md:w-96 md:h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
+        <div className="absolute bottom-1/3 -right-20 w-56 h-56 md:w-80 md:h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 md:w-64 md:h-64 bg-gradient-to-tr from-yellow-100 to-transparent opacity-10 rounded-full blur-2xl"></div>
       </div>
 
-      <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+      < div className="mb-6">
+          <Link 
+            to="/" 
+            className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm hover:bg-white px-4 py-2 rounded-xl shadow-sm hover:shadow-md border border-gray-200/70 hover:border-blue-300 transition-all duration-200"
+          >
+            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span className="font-medium text-gray-700">Back to Home</span>
+          </Link>
+        </div>
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-pink-50/30 opacity-30"></div>
           
@@ -85,7 +122,7 @@ const Profile = () => {
             </p>
 
             {errorMessage && (
-              <div className="bg-red-50/90 backdrop-blur-sm border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg">
+              <div ref={errorRef} className="bg-red-50/90 backdrop-blur-sm border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg">
                 {errorMessage}
               </div>
             )}
@@ -112,8 +149,7 @@ const Profile = () => {
 
                 <button
                   onClick={() => setIsEditingDetails(true)}
-                  className="w-full py-3 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5"
-                >
+                  className="w-full py-2 md:py-3 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
                   Edit Details
                 </button>
               </div>
@@ -132,7 +168,7 @@ const Profile = () => {
                             type="text"
                             value={newName}
                             onChange={(e) => setNewName(e.target.value)}
-                            className="w-full p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                            className="w-full p-2 md:p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
                           />
                           <div className="flex space-x-3">
                             <button
@@ -174,7 +210,7 @@ const Profile = () => {
                               type="password"
                               value={newPassword}
                               onChange={(e) => setNewPassword(e.target.value)}
-                              className="w-full p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                              className="w-full p-2 md:p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
                             />
                           </div>
                           <div>
@@ -183,7 +219,7 @@ const Profile = () => {
                               type="password"
                               value={retypeNewPassword}
                               onChange={(e) => setRetypeNewPassword(e.target.value)}
-                              className="w-full p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                              className="w-full p-2 md:p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
                             />
                           </div>
                           <div className="flex space-x-3">

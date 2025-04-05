@@ -16,15 +16,15 @@ function NavbarWrapper() {
 
   useEffect(() => {
     const updateHeight = () => {
-      if (navbarRef.current && navbarRef.current.getHeight) {
-        setNavbarHeight(navbarRef.current.getHeight());
+      if (navbarRef.current?.updateHeight) {
+        setNavbarHeight(navbarRef.current.updateHeight());
       }
     };
 
     updateHeight();
     const handleResize = () => {
       updateHeight();
-      setTimeout(updateHeight, 300);
+      setTimeout(updateHeight, 300); // Double check after resize
     };
 
     window.addEventListener('resize', handleResize);

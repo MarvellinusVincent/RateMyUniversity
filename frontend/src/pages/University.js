@@ -5,6 +5,7 @@ import useClickOutside from '../contexts/UseClickOutside';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthStore } from '../stores/authStore';
 import { jwtDecode } from 'jwt-decode';
+import { Link } from 'react-router-dom';
 
 const University = () => {
   const location = useLocation();
@@ -13,6 +14,8 @@ const University = () => {
   const [reviews, setReviews] = useState([]);
   const [usernames, setUsernames] = useState({});
   const [sortOption, setSortOption] = useState('recent');
+  const [isLoading, setIsLoading] = useState(true);
+  const [showNotFound, setShowNotFound] = useState(false);
   const [averageRatings, setAverageRatings] = useState({
     overall: 0,
     safety: 0,
@@ -36,15 +39,55 @@ const University = () => {
 
   useEffect(() => {
     const fetchUniversityDetails = async () => {
+      setIsLoading(true);
+      setShowNotFound(false);
       try {
         const response = await fetch(`http://localhost:1234/specificUni?name=${universityName}`);
         const universityData = await response.json();
         setUniversity(universityData);
 
         if (universityData.id) {
-          const reviewsResponse = await fetch(`http://localhost:1234/specificUni/${universityData.id}/reviews`);
-          const reviewsData = await reviewsResponse.json();
-          setReviews(reviewsData.reviews || []);
+          const fetchReviews = async () => {
+            try {
+              const response = await fetch(`http://localhost:1234/specificUni/${universityData.id}/reviews`);
+              const reviewsData = await response.json();
+              
+              // Check if user is authenticated
+              const { token } = useAuthStore.getState();
+              let processedReviews;
+              
+              if (token) {
+                // For each review, check if the current user has liked it
+                processedReviews = await Promise.all(
+                  (reviewsData.reviews || []).map(async (review) => {
+                    try {
+                      const likeResponse = await fetch(`http://localhost:1234/reviews/${review.id}/hasLiked`, {
+                        headers: {
+                          "Authorization": `Bearer ${token}`,
+                        }
+                      });
+                      const likeData = await likeResponse.json();
+                      return { ...review, isLiked: likeData.hasLiked };
+                    } catch (error) {
+                      console.error('Error checking like status:', error);
+                      return { ...review, isLiked: false };
+                    }
+                  })
+                );
+              } else {
+                processedReviews = (reviewsData.reviews || []).map(review => ({ ...review, isLiked: false }));
+              }
+              
+              setReviews(processedReviews);
+              return reviewsData; // Return the original reviews data for username fetching
+            } catch (error) {
+              console.error('Error fetching reviews:', error);
+              setReviews([]);
+              return { reviews: [] }; // Return empty array if there's an error
+            }
+          };
+        
+          const reviewsData = await fetchReviews();
 
           // Fetch usernames
           const users = {};
@@ -118,12 +161,21 @@ const University = () => {
         }
       } catch (error) {
         console.error('Error loading university details:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
+    const notFoundTimer = setTimeout(() => {
+      if (!university && !isLoading) {
+        setShowNotFound(true);
+      }
+    }, 1000); // 1 second delay
 
     if (universityName) {
       fetchUniversityDetails();
     }
+
+    return () => clearTimeout(notFoundTimer);
   }, [universityName]);
 
   const handleRateClick = () => {
@@ -134,7 +186,6 @@ const University = () => {
     const { token, refresh } = useAuthStore.getState();
     
     if (!token) {
-      console.log("No token - user needs to log in");
       return { needsLogin: true };
     }
   
@@ -159,12 +210,27 @@ const University = () => {
       }
   
       const data = await response.json();
+      
+      // Check if the user has liked this review
+      const hasLikedResponse = await fetch(`http://localhost:1234/reviews/${reviewId}/hasLiked`, {
+        headers: {
+          "Authorization": `Bearer ${currentToken}`,
+        }
+      });
+      
+      const hasLikedData = await hasLikedResponse.json();
+  
       setReviews(reviews.map(review =>
         review.id === reviewId
-          ? { ...review, likes: data.likes }
+          ? { 
+              ...review, 
+              likes: data.likes,
+              isLiked: hasLikedData.hasLiked
+            }
           : review
       ));
-      return { success: true };
+      
+      return { success: true, hasLiked: hasLikedData.hasLiked };
     } catch (error) {
       console.error("Error liking review:", error);
       setReviews(reviews.map(review =>
@@ -233,6 +299,7 @@ const University = () => {
     const { isAuthenticated } = useAuth();
     const [showLoginPrompt, setShowLoginPrompt] = useState(false);
     const [isLiking, setIsLiking] = useState(false);
+    const [isLiked, setIsLiked] = useState(review.isLiked || false);
     const promptRef = useRef(null);
     
     useClickOutside(promptRef, () => {
@@ -250,6 +317,8 @@ const University = () => {
         const result = await onLike(review.id);
         if (result?.needsLogin) {
           setShowLoginPrompt(true);
+        } else if (result?.hasLiked !== undefined) {
+          setIsLiked(result.hasLiked);
         }
       } finally {
         setIsLiking(false);
@@ -262,21 +331,21 @@ const University = () => {
           onClick={handleClick}
           disabled={isLiking}
           className={`flex items-center transition-colors ${
-            review.isLiked 
+            isLiked 
               ? 'text-red-500' 
               : 'text-gray-400 hover:text-red-500'
           } ${isLiking ? 'opacity-50' : ''}`}
         >
           <svg
             className="w-5 h-5 mr-1"
-            fill={review.isLiked ? "currentColor" : "none"}
+            fill={isLiked ? "currentColor" : "none"}
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
-              strokeWidth={review.isLiked ? "2" : "1.5"}
+              strokeWidth={isLiked ? "2" : "1.5"}
               d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
             />
           </svg>
@@ -316,7 +385,7 @@ const University = () => {
     );
   };
 
-  if (!university) {
+  if (showNotFound) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-blue-900 flex items-center justify-center">
         <div className="text-center">
@@ -330,19 +399,46 @@ const University = () => {
     );
   }
 
+  if (isLoading || !university) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+        </div>
+      </div>
+    );
+  }
+
   const topCategories = getTopRatedCategories();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
-        <div className="absolute bottom-1/3 -right-20 w-80 h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-tr from-yellow-100 to-transparent opacity-10 rounded-full blur-2xl"></div>
+        <div className="absolute top-1/4 -left-20 w-64 h-64 md:w-96 md:h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
+        <div className="absolute bottom-1/3 -right-20 w-56 h-56 md:w-80 md:h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 md:w-64 md:h-64 bg-gradient-to-tr from-yellow-100 to-transparent opacity-10 rounded-full blur-2xl"></div>
       </div>
 
       {/* Header */}
-      <header className="relative py-16 px-6 sm:px-12 lg:px-24 text-center">
-        <h1 className="text-5xl md:text-6xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">
+      <header className="relative py-12 md:py-16 px-4 sm:px-8 lg:px-12 text-center">
+        <div className="absolute top-4 left-4 z-50">
+          <Link 
+            to="/" 
+            className="group flex items-center gap-2 bg-white/90 backdrop-blur-sm hover:bg-white px-4 py-3 rounded-xl shadow-sm hover:shadow-md border border-gray-200/70 hover:border-blue-300 transition-all duration-200"
+          >
+            <svg 
+              className="w-5 h-5 text-blue-600 group-hover:text-blue-700 transition-colors" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            <span className="font-medium text-gray-700 group-hover:text-gray-900">
+              Home
+            </span>
+          </Link>
+        </div>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">
           {university.name}
         </h1>
         <div className="inline-flex items-center backdrop-blur-sm px-6 py-3">
@@ -401,9 +497,7 @@ const University = () => {
                 <div className="mt-8 text-center">
                   <h2 className="text-2xl font-bold text-gray-800 mb-2">Overall Rating</h2>
                   <div className="flex justify-center space-x-1">
-                    {[...Array(5)].map((_, i) => (
-                      <StarIcon key={i} filled={i < Math.round(averageRatings.overall)} />
-                    ))}
+                    <RatingStars rating={averageRatings.overall} className="w-4 h-4 xs:w-5 xs:h-5" />
                   </div>
                 </div>
               </div>
@@ -441,7 +535,7 @@ const University = () => {
         </div>
 
         {/* Rating Categories */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-16">
+        <div className="grid grid-cols-1 xs:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
           <CategoryCard 
             title="Campus Life"
             icon="🏛️"
@@ -552,21 +646,13 @@ const University = () => {
                 return (
                   <div key={index} className="bg-white p-6 rounded-xl border border-gray-100 shadow-xs hover:shadow-sm transition-shadow duration-200">
                     {/* Header with rating and date */}
-                    <div className="flex justify-between items-start mb-4">
+                    <div className="flex flex-col xs:flex-row justify-between items-start gap-2 mb-4">
                       <div>
                         <div className="flex items-center mb-1">
                           <span className="text-2xl font-bold text-gray-900 mr-3">
                             {review.overall_rating?.toFixed(1) || "N/A"}
                           </span>
-                          <div className="flex">
-                            {[...Array(5)].map((_, i) => (
-                              <StarIcon 
-                                key={i} 
-                                filled={i < Math.round(review.overall_rating || 0)} 
-                                className="w-5 h-5 text-yellow-400"
-                              />
-                            ))}
-                          </div>
+                          <RatingStars rating={review.overall_rating || 0} className="w-4 h-4 xs:w-5 xs:h-5" />
                         </div>
                         <span className="text-sm text-gray-500">by {username}</span>
                       </div>
@@ -583,7 +669,7 @@ const University = () => {
                     )}
 
                     {/* All Rating Categories */}
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+                    <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
                       {ratingCategories.map((category, idx) => (
                         <RatingPill 
                           key={idx} 
@@ -614,9 +700,9 @@ const University = () => {
             </div>
           )}
         </div>
-        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white/80 to-transparent pt-10 pb-6 px-6 z-50">
+        <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-white/80 to-transparent pt-6 pb-4 px-4 z-50">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col sm:flex-row gap-4 bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/30 p-4 sm:p-5">
+            <div className="flex flex-col sm:flex-row gap-3 bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl border border-white/30 p-3 sm:p-4">
               <button
                 onClick={handleRateClick}
                 className="flex-1 bg-gradient-to-r from-blue-600 to-teal-500 hover:from-blue-700 hover:to-teal-600 text-white py-4 px-6 rounded-xl font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-3"
@@ -692,29 +778,73 @@ const RatingPill = ({ label, value, color = "gray" }) => {
       <span className="text-xs font-medium truncate">{label}</span>
       <div className="flex items-center justify-between mt-1">
         <span className="text-sm font-bold">{value.toFixed(1)}</span>
-        <div className="flex">
-          {[...Array(5)].map((_, i) => (
-            <StarIcon 
-              key={i} 
-              filled={i < Math.round(value)} 
-              className="w-3 h-3"
-            />
-          ))}
-        </div>
+        <RatingStars rating={value} className="w-3 h-3" />
       </div>
     </div>
   );
 };
 
-// Star Icon Component
-const StarIcon = ({ filled, small = false }) => (
-  <svg 
-    className={`${small ? 'w-4 h-4' : 'w-5 h-5'} ${filled ? 'text-yellow-400' : 'text-gray-300'}`} 
-    fill="currentColor" 
-    viewBox="0 0 20 20"
-  >
-    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-  </svg>
-);
+// Star Icon Component with partial filling
+const StarIcon = ({ filled, percent = 0, className = "w-5 h-5" }) => {
+  if (typeof filled === 'boolean') {
+    return (
+      <svg 
+        className={`${className} ${filled ? 'text-yellow-400' : 'text-gray-300'}`} 
+        fill="currentColor" 
+        viewBox="0 0 20 20"
+      >
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+      </svg>
+    );
+  }
+
+  const clipPathWidth = Math.round(percent * 100);
+
+  return (
+    <div className="relative inline-block">
+      <svg 
+        className={`${className} text-gray-300`} 
+        fill="currentColor" 
+        viewBox="0 0 20 20"
+      >
+        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+      </svg>
+      <div 
+        className={`absolute top-0 left-0 overflow-hidden`} 
+        style={{ width: `${clipPathWidth}%` }}
+      >
+        <svg 
+          className={`${className} text-yellow-400`} 
+          fill="currentColor" 
+          viewBox="0 0 20 20"
+        >
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+        </svg>
+      </div>
+    </div>
+  );
+};
+
+const RatingStars = ({ rating, className = "w-5 h-5" }) => {
+  const fullStars = Math.floor(rating);
+  const partialStar = rating - fullStars;
+  const emptyStars = 5 - Math.ceil(rating);
+
+  return (
+    <div className="flex items-center">
+      {[...Array(fullStars)].map((_, i) => (
+        <StarIcon key={`full-${i}`} filled className={className} />
+      ))}
+      
+      {partialStar > 0 && (
+        <StarIcon key="partial" percent={partialStar} className={className} />
+      )}
+      
+      {[...Array(emptyStars)].map((_, i) => (
+        <StarIcon key={`empty-${i}`} filled={false} className={className} />
+      ))}
+    </div>
+  );
+};
 
 export default University;

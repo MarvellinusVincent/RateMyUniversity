@@ -408,7 +408,7 @@ const University = () => {
       </div>
 
       <header className="relative py-12 md:py-16 px-4 sm:px-8 lg:px-12 text-center">
-        <div className="absolute top-4 left-4 z-50">
+        <div className="absolute top-4 left-4">
           <Link 
             to="/" 
             className="group flex items-center gap-2 bg-white/90 backdrop-blur-sm hover:bg-white px-4 py-3 rounded-xl shadow-sm hover:shadow-md border border-gray-200/70 hover:border-blue-300 transition-all duration-200"

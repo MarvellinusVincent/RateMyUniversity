@@ -5,7 +5,17 @@ require("dotenv").config();
 
 const app = express();
 app.use(express.json());
-app.use(cors());
+const corsOptions = {
+    origin: [
+      "https://ratemyuniversity.vercel.app",
+      "https://ratemyuniversity.io",
+      "http://localhost:3000",
+    ],
+    methods: "GET,POST,PUT,DELETE",
+    credentials: true,
+};
+  
+app.use(cors(corsOptions));
 
 const userRoutes = require('./routes/user_routes');
 const reviewRoutes = require('./routes/review_route');

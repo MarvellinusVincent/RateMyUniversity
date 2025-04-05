@@ -1,8 +1,7 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { Link } from 'react-router-dom';
 import { useAuth } from "../contexts/AuthContext";
 import { authAxios } from "../stores/authStore";
-import useClickOutside from "../contexts/UseClickOutside";
 
 const Profile = () => {
   const { user, isAuthenticated, setUser } = useAuth();
@@ -14,11 +13,8 @@ const Profile = () => {
   const [retypeNewPassword, setRetypeNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const errorRef = useRef(null);
-
-  useClickOutside(errorRef, () => {
-    setErrorMessage("");
-  });
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showRetypePassword, setShowRetypePassword] = useState(false);
 
   const checkPasswordStrength = (password) => {
     const hasMinLength = password.length >= 8;
@@ -67,10 +63,12 @@ const Profile = () => {
 
         const { strength } = checkPasswordStrength(newPassword);
         if (strength < 3) {
-          setErrorMessage("Password must meet at least 3 complexity requirements");
+          setErrorMessage(`Password must meet at least 3 complexity requirements: At least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character`);
           return;
         }
+      }
 
+      if (type === "password") {
         response = await authAxios.put("/users/updatePassword", { 
           newPassword,
           retypeNewPassword, 
@@ -85,6 +83,7 @@ const Profile = () => {
       }
   
       if (response.status === 200) {
+        setErrorMessage("");
         setIsEditingUsername(false);
         setIsEditingPassword(false);
         setIsEditingDetails(false);
@@ -153,8 +152,26 @@ const Profile = () => {
             </p>
 
             {errorMessage && (
-              <div ref={errorRef} className="bg-red-50/90 backdrop-blur-sm border-l-4 border-red-500 text-red-700 p-4 mb-6 rounded-lg">
-                {errorMessage}
+              <div className="relative bg-red-50/90 backdrop-blur-sm border border-red-200 rounded-xl p-3 sm:p-4 mb-6 shadow-sm">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="text-sm text-red-700 flex-1 min-w-0 break-words">
+                    {errorMessage}
+                  </div>
+                  <button
+                    onClick={() => setErrorMessage("")}
+                    className="flex-shrink-0 text-red-400 hover:text-red-600 transition-colors ml-2"
+                    aria-label="Close error message"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             )}
 
@@ -210,7 +227,10 @@ const Profile = () => {
                               {loading ? 'Saving...' : 'Save'}
                             </button>
                             <button
-                              onClick={() => setIsEditingUsername(false)}
+                              onClick={() => {
+                                setIsEditingUsername(false);
+                                setErrorMessage("");
+                              }}
                               className="flex-1 py-2 bg-gray-200/90 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
                             >
                               Cancel
@@ -237,21 +257,55 @@ const Profile = () => {
                         <div className="space-y-4">
                           <div>
                             <label className="block text-sm text-gray-500 mb-1">New Password</label>
-                            <input
-                              type="password"
-                              value={newPassword}
-                              onChange={(e) => setNewPassword(e.target.value)}
-                              className="w-full p-2 md:p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
-                            />
+                            <div className="relative">
+                              <input
+                                type={showNewPassword ? "text" : "password"}
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                className="w-full p-2 md:p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                                placeholder="Enter new password"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowNewPassword(!showNewPassword)}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                aria-label={showNewPassword ? "Hide password" : "Show password"}
+                              >
+                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  {showNewPassword ? (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  ) : (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                  )}
+                                </svg>
+                              </button>
+                            </div>
                           </div>
                           <div>
                             <label className="block text-sm text-gray-500 mb-1">Confirm Password</label>
-                            <input
-                              type="password"
-                              value={retypeNewPassword}
-                              onChange={(e) => setRetypeNewPassword(e.target.value)}
-                              className="w-full p-2 md:p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
-                            />
+                            <div className="relative">
+                              <input
+                                type={showRetypePassword ? "text" : "password"}
+                                value={retypeNewPassword}
+                                onChange={(e) => setRetypeNewPassword(e.target.value)}
+                                className="w-full p-2 md:p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                                placeholder="Confirm new password"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => setShowRetypePassword(!showRetypePassword)}
+                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                aria-label={showRetypePassword ? "Hide password" : "Show password"}
+                              >
+                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  {showRetypePassword ? (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                  ) : (
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                  )}
+                                </svg>
+                              </button>
+                            </div>
                           </div>
                           <div className="flex space-x-3">
                             <button
@@ -262,7 +316,10 @@ const Profile = () => {
                               {loading ? 'Saving...' : 'Save'}
                             </button>
                             <button
-                              onClick={() => setIsEditingPassword(false)}
+                              onClick={() => {
+                                setIsEditingPassword(false);
+                                setErrorMessage("");
+                              }}
                               className="flex-1 py-2 bg-gray-200/90 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
                             >
                               Cancel
@@ -289,6 +346,7 @@ const Profile = () => {
                     setIsEditingDetails(false);
                     setIsEditingUsername(false);
                     setIsEditingPassword(false);
+                    setErrorMessage("");
                   }}
                   className="w-full py-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 text-gray-700 font-semibold rounded-xl hover:bg-gray-100/90 transition-all shadow-sm hover:shadow-md"
                 >

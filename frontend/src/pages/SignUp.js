@@ -24,7 +24,7 @@ const SignUp = () => {
     }
     const { strength } = checkPasswordStrength(password);
     if (strength < 3) {
-      setError("Password must meet at least 3 complexity requirements");
+      setError(`Password must meet at least 3 complexity requirements: At least 8 characters, 1 uppercase letter, 1 lowercase letter, 1 number, 1 special character`);
       return;
     }
     try {
@@ -105,10 +105,29 @@ const SignUp = () => {
             </div>
 
             {error && (
-              <div className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded-lg">
-                <p>{error}</p>
+              <div className="relative bg-red-50/90 backdrop-blur-sm border border-red-200 rounded-xl p-3 sm:p-4 mb-6 shadow-sm">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="text-sm text-red-700 flex-1 min-w-0 break-words">
+                    {error}
+                  </div>
+                  <button
+                    onClick={() => setError("")}
+                    className="flex-shrink-0 text-red-400 hover:text-red-600 transition-colors ml-2"
+                    aria-label="Close error message"
+                  >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
               </div>
             )}
+
             {successMessage && (
               <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg">
                 <p>{successMessage}</p>

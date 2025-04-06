@@ -1,4 +1,4 @@
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
@@ -8,7 +8,6 @@ import { useAuth } from '../contexts/AuthContext';
 import { useAuthStore } from '../stores/authStore';
 
 const University = () => {
-  const location = useLocation();
   const navigate = useNavigate();
   const [university, setUniversity] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -35,14 +34,14 @@ const University = () => {
     happiness: 0,
   });
 
-  const universityName = new URLSearchParams(location.search).get('name');
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchUniversityDetails = async () => {
       setIsLoading(true);
       setShowNotFound(false);
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/specificUni?name=${universityName}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/specificUni/${id}`);
         const universityData = await response.json();
         setUniversity(universityData);
 
@@ -164,11 +163,11 @@ const University = () => {
       }
     };
 
-    if (universityName) {
+    if (id) {
       fetchUniversityDetails();
     }
 
-  }, [universityName]);
+  }, [id]);
 
   const handleRateClick = () => {
     navigate(`/leaveReview?id=${university.id}&name=${university.name}`);

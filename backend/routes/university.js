@@ -3,7 +3,7 @@ const router = express.Router();
 const { getSpecificUniversity, getReviewFromUniversity } = require('../controllers/university');
 
 // Route to get the details of the university
-router.get('/', getSpecificUniversity);
+router.get('/:id', getSpecificUniversity);
 
 // Route to get the reviews of the specific university
 router.get('/:university_id/reviews', getReviewFromUniversity);

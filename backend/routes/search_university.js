@@ -10,11 +10,10 @@ router.get('/', async (req, res) => {
   }
   try {
     const result = await pool.query(
-      'SELECT name FROM universities WHERE name ILIKE $1 LIMIT 10', 
+      'SELECT id, name, country FROM universities WHERE name ILIKE $1 LIMIT 10', 
       [`%${query}%`]
     );
-    const universities = result.rows.map((row) => row.name);
-    res.json(universities);
+    res.json(result.rows);
   } catch (err) {
     console.error('Error searching universities:', err);
     res.status(500).json({ error: 'Internal server error' });

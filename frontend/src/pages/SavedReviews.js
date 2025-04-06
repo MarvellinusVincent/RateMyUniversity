@@ -153,7 +153,7 @@ const SavedReviews = () => {
                                         <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:justify-between sm:items-start">
                                             <div>
                                                 <h3 className="text-xl font-bold text-gray-800 hover:text-blue-600 transition-colors">
-                                                    <Link to={`/university?name=${review.university_name}`}>
+                                                    <Link to={`/university/${review.university_id}`}>
                                                         {review.university_name}
                                                     </Link>
                                                 </h3>
@@ -171,7 +171,7 @@ const SavedReviews = () => {
                                         {review.review_text && (
                                             <div className="mb-6">
                                                 <p className="text-gray-700 text-lg leading-relaxed">
-                                                    "{review.review_text}"
+                                                    {review.review_text}
                                                 </p>
                                             </div>
                                         )}

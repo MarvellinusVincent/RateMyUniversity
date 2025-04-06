@@ -87,7 +87,7 @@ const LeaveReview = () => {
       const response = await authAxios.post(`${process.env.REACT_APP_API_URL}/reviews/submit`, reviewData);
 
       if (response.status === 200) {
-        navigate(`/university?name=${universityName}`);
+        navigate(`/university/${universityId}`);
       } else {
         const errorData = response.data;
         alert(`Error: ${errorData.message}`);
@@ -151,7 +151,7 @@ const LeaveReview = () => {
           <div className="relative p-8 md:p-10">
             <div className="flex justify-start mb-6">
               <button
-                onClick={() => navigate(`/university?name=${universityName}`)}
+                onClick={() => navigate(`/university/${universityId}`)}
                 className="flex items-center text-blue-600 hover:text-blue-800 transition-colors"
               >
                 <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

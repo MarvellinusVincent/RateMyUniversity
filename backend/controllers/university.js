@@ -2,9 +2,9 @@ const { pool } = require('../config/db');
 
 // Get all details of the university from the university table in the database
 const getSpecificUniversity = async (req, res) => {
-  const { name } = req.query;
+  const { id } = req.params;
   try {
-    const result = await pool.query('SELECT * FROM universities WHERE name = $1', [name]);
+    const result = await pool.query('SELECT * FROM universities WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'University not found' });
     }

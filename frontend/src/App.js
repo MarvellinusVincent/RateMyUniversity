@@ -6,9 +6,11 @@ import SignUp from "./pages/SignUp";
 import Profile from "./pages/Profile";
 import Navbar from "./pages/NavBar";
 import InitialScreen from "./pages/InitialScreen";
+import SearchResults from "./pages/SearchResults";
 import University from "./pages/University";
 import LeaveReview from "./pages/LeaveReview";
 import SavedReviews from "./pages/SavedReviews";
+import AddSchool from "./pages/AddSchool";
 
 function NavbarWrapper() {
   const navbarRef = useRef(null);
@@ -38,9 +40,11 @@ function NavbarWrapper() {
         <Routes>
           <Route path="/" element={<InitialScreen />} />
           <Route path="/profile" element={<Profile />} />
-          <Route path="/university" element={<University />} />
+          <Route path="/university/:id" element={<University />} />
+          <Route path="/search/university" element={<SearchResults />} />
           <Route path="/leaveReview" element={<LeaveReview />} />
           <Route path="/savedReviews" element={<SavedReviews />} />
+          <Route path="/addSchool" element={<AddSchool />} />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

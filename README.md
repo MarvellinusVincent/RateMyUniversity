@@ -45,15 +45,12 @@ This project is licensed under the MIT License.
 ## Contact  
 For any issues or suggestions, reach out via GitHub Issues or email at vmarvellinus@gmail.com. 
 
-
-
 todo:
-1. Add a page for when the user initially enters when searching a uni, it shows a page of all the relevant ones to the one they typed
-2. UI for saved reviews in mobile looks bad
+- Add delete review option for signed-in users
+- Revamp mobile UI for better responsiveness
 
 
 Additional functionalities not implemented:
-1. The error message should disappear when the user leaves the login page after a failed login attempt. When the user returns to the login page the error message should no longer be displayed
-2. Require users to verify their email before allowing them to complete the sign up
-3. In mobile small screen like iphones, the rate this university and visit website button needs to be fixed as it looks to big
-
+- Clear login error when user leaves and re-enters the login page
+- Require email verification before completing sign-up
+- Fix oversized buttons on small mobile screens

@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 const InitialScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredUniversities, setFilteredUniversities] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadUniversities = async () => {
@@ -33,6 +34,11 @@ const InitialScreen = () => {
 
     return () => clearTimeout(timer);
   }, [searchQuery]);
+
+  const handleSearchClick = () => {
+    if (!searchQuery.trim()) return;
+    navigate(`/search/university?name=${searchQuery}`);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
@@ -67,12 +73,25 @@ const InitialScreen = () => {
                   placeholder="Search for a university..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      handleSearchClick();
+                    }
+                  }}
                 />
-                <div className="absolute right-4 top-1/2 transform -translate-y-1/2">
-                  <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button
+                  onClick={handleSearchClick}
+                  className="absolute right-4 top-1/2 transform -translate-y-1/2"
+                >
+                  <svg 
+                    className="w-6 h-6 text-blue-500 hover:text-blue-700 transition-colors" 
+                    fill="none" 
+                    stroke="currentColor" 
+                    viewBox="0 0 24 24"
+                  >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                   </svg>
-                </div>
+                </button>
               </div>
 
               {isLoading && (
@@ -86,20 +105,31 @@ const InitialScreen = () => {
                 <div className="absolute z-10 w-full mt-2">
                   <ul className="bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-xl shadow-lg overflow-y-auto max-h-[50vh]">
                     {filteredUniversities.map((uni) => (
-                      <li key={uni}>
-                        <Link
-                          to={`/university?name=${uni}`}
-                          className="block p-4 hover:bg-blue-50/50 transition duration-200 border-b border-gray-100/50 last:border-b-0 group"
-                        >
-                          <div className="flex items-center">
-                            <div className="flex-1 text-gray-800 group-hover:text-blue-600 transition-colors">
-                              {uni}
-                            </div>
-                            <svg className="w-5 h-5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <li key={uni.id}>
+                        <div className="flex items-center justify-between p-4 hover:bg-blue-50/50 transition duration-200 border-b border-gray-100/50 last:border-b-0 group">
+                          <Link
+                            to={`/university/${uni.id}`}
+                            className="flex-1 text-gray-800 group-hover:text-blue-600 transition-colors"
+                          >
+                            {uni.name}
+                          </Link>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              navigate(`/search/university?name=${uni.name}`);
+                            }}
+                            className="ml-2 p-1 rounded-full hover:bg-blue-100 transition-colors"
+                          >
+                            <svg 
+                              className="w-5 h-5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" 
+                              fill="none" 
+                              stroke="currentColor" 
+                              viewBox="0 0 24 24"
+                            >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                             </svg>
-                          </div>
-                        </Link>
+                          </button>
+                        </div>
                       </li>
                     ))}
                   </ul>

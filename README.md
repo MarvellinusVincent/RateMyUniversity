@@ -43,14 +43,17 @@ Contributions are welcome! Feel free to fork the repository and submit pull requ
 This project is licensed under the MIT License.  
 
 ## Contact  
-For any issues or suggestions, reach out via GitHub Issues or email at vmarvellinus@gmail.com.  
+For any issues or suggestions, reach out via GitHub Issues or email at vmarvellinus@gmail.com. 
 
-fixed:
-Show message to the user if the login failed
+
 
 todo:
-6. Change all the backend to the render one and see if it works
-7. Check navbar UI for mobile later
+1. Add a page for when the user initially enters when searching a uni, it shows a page of all the relevant ones to the one they typed
+2. UI for saved reviews in mobile looks bad
 
-Possible functionalities:
-1. verify email before allowing the user to sign up
+
+Additional functionalities not implemented:
+1. The error message should disappear when the user leaves the login page after a failed login attempt. When the user returns to the login page the error message should no longer be displayed
+2. Require users to verify their email before allowing them to complete the sign up
+3. In mobile small screen like iphones, the rate this university and visit website button needs to be fixed as it looks to big
+

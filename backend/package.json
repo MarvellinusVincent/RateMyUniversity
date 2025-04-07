@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "node server.js",
-    "postinstall": "echo 'Dependencies installed'"
+    "postinstall": "echo 'Dependencies installed'",
+    "build": "echo 'Skipping build' && exit 0"
   },
   "keywords": [],
   "author": "",

@@ -1,6 +1,7 @@
 const express = require("express");
 const cors = require("cors");
 const bodyParser = require('body-parser');
+const path = require('path');
 require("dotenv").config();
 
 const app = express();
@@ -17,11 +18,14 @@ const corsOptions = {
   
 app.use(cors(corsOptions));
 
+app.use(express.static(path.join(__dirname, '../frontend/public')));
+
 const userRoutes = require('./routes/user_routes');
 const reviewRoutes = require('./routes/review_route');
 const specificUniversityRoutes = require('./routes/university');
 const searchUniversityRoutes = require('./routes/search_university');
 const emailRoutes = require('./routes/email_route');
+const sitemapRoutes = require('./routes/sitemap_route');
 
 app.use(bodyParser.json());
 
@@ -30,6 +34,7 @@ app.use('/reviews', reviewRoutes);
 app.use('/specificUni', specificUniversityRoutes);
 app.use('/searchUniversity', searchUniversityRoutes);
 app.use('/email', emailRoutes);
+app.use('/', sitemapRoutes);
 
 const { pool } = require('./config/db');
 pool.connect()

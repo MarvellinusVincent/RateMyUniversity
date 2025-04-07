@@ -2,10 +2,32 @@ const express = require("express");
 const cors = require("cors");
 const bodyParser = require('body-parser');
 const path = require('path');
+const compression = require('compression');
 require("dotenv").config();
 
 const app = express();
+app.set('etag', false);
 app.use(express.json());
+app.use('/sitemap', express.static(path.join(__dirname, '../frontend/public'), {
+    setHeaders: (res, path) => {
+      if (path.endsWith('.xml')) {
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+        res.removeHeader('ETag');
+      }
+    },
+    maxAge: '1d'
+  }));
+  
+  app.use((req, res, next) => {
+    if (req.path.match(/sitemap.*\.xml$/)) {
+      res.set({
+        'Cache-Control': 'public, max-age=86400',
+        'X-Robots-Tag': 'noindex'
+      });
+      res.removeHeader('ETag');
+    }
+    next();
+  });
 const corsOptions = {
     origin: [
       "https://ratemyuniversity.vercel.app",
@@ -18,7 +40,14 @@ const corsOptions = {
   
 app.use(cors(corsOptions));
 
-app.use(express.static(path.join(__dirname, '../frontend/public')));
+app.use(express.static(path.join(__dirname, '../frontend/public'), {
+    setHeaders: (res, path) => {
+      if (path.endsWith('.xml')) {
+        res.setHeader('Cache-Control', 'public, max-age=86400');
+      }
+    },
+    maxAge: '1d'
+  }));
 
 const userRoutes = require('./routes/user_routes');
 const reviewRoutes = require('./routes/review_route');

@@ -110,8 +110,10 @@ pool.connect()
     .catch((err) => console.error("Error connecting to the database", err));
 
 // Client-side routing fallback - MUST BE LAST
+const frontendPath = path.join(__dirname, '../frontend/public');
+app.use(express.static(frontendPath));
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/build', 'index.html'));
+  res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
 const PORT = process.env.PORT || 1234;

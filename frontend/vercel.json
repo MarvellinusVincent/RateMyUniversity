@@ -6,7 +6,7 @@
       "headers": {
         "Cache-Control": "public, max-age=86400, s-maxage=86400",
         "Content-Type": "application/xml",
-        "X-Robots-Tag": "none"
+        "X-Robots-Tag": "noindex"
       }
     },
     {
@@ -15,24 +15,14 @@
       "headers": {
         "Cache-Control": "public, max-age=86400, s-maxage=86400",
         "Content-Type": "application/xml",
-        "X-Robots-Tag": "none"
+        "X-Robots-Tag": "noindex"
       }
     },
     {
-      "src": "/static/(.*\\.css)",
+      "src": "/static/(.*)",
       "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable",
-        "Content-Type": "text/css"
-      },
-      "continue": true
-    },
-    {
-      "src": "/static/(.*\\.js)",
-      "headers": {
-        "Cache-Control": "public, max-age=31536000, immutable",
-        "Content-Type": "application/javascript"
-      },
-      "continue": true
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
     },
     {
       "src": "/(.*)",

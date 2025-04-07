@@ -19,7 +19,12 @@ router.get('/sitemap*.xml', (req, res) => {
   res.sendFile(filePath, {
     lastModified: false,
     etag: false,
-    cacheControl: false
+    cacheControl: false,
+    headers: {
+      // Override any auto-added headers
+      'X-Powered-By': undefined,
+      'X-Robots-Tag': undefined
+    }
   });
 });
 

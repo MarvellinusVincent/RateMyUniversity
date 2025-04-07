@@ -37,4 +37,14 @@ const getReviewFromUniversity = async (req, res) => {
   }
 };
 
-module.exports = { getSpecificUniversity, getReviewFromUniversity };
+const getAllUniversityIDs = async (req, res) =>  {
+  try {
+    const result = await pool.query('SELECT id FROM universities');
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+};
+
+module.exports = { getSpecificUniversity, getReviewFromUniversity, getAllUniversityIDs };

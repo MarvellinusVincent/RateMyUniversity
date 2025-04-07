@@ -34,12 +34,17 @@ const sendSitemap = (res, filename) => {
 
   res.set({
     'Content-Type': 'application/xml',
-    'Cache-Control': 'public, max-age=86400'
+    'Cache-Control': 'public, max-age=86400',
+    'X-Robots-Tag': null,
+    'X-Powered-By': null
   });
   res.sendFile(filePath, { lastModified: false });
 };
 
 router.get('/sitemap-index.xml', (req, res) => {
+  res.removeHeader('X-Robots-Tag');
+  res.removeHeader('X-Powered-By');
+  res.removeHeader('X-Render-Origin-Server');
   sendSitemap(res, 'sitemap-index.xml');
 });
 

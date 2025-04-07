@@ -5,5 +5,6 @@ Disallow: /profile
 Disallow: /savedReviews
 
 # Sitemaps
-Sitemap: https://ratemyuniversity.io/sitemap-index.xml
 Sitemap: https://ratemyuniversity.io/sitemap.xml
+Sitemap: https://ratemyuniversity.io/sitemap-universities.xml
+Sitemap: https://ratemyuniversity.io/sitemap-reviews.xml

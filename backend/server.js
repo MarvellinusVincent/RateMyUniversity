@@ -69,22 +69,22 @@ app.use((req, res, next) => {
 });
 
 // Static files with proper headers
-app.use(express.static(path.join(__dirname, '../frontend/build'), {
-  setHeaders: (res, path) => {
-    if (path.endsWith('.css')) {
-      res.setHeader('Content-Type', 'text/css');
-    } else if (path.endsWith('.js')) {
-      res.setHeader('Content-Type', 'application/javascript');
-    }
+// app.use(express.static(path.join(__dirname, '../frontend/build'), {
+//   setHeaders: (res, path) => {
+//     if (path.endsWith('.css')) {
+//       res.setHeader('Content-Type', 'text/css');
+//     } else if (path.endsWith('.js')) {
+//       res.setHeader('Content-Type', 'application/javascript');
+//     }
     
-    // Cache control
-    if (path.includes('/static/')) {
-      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-    } else {
-      res.setHeader('Cache-Control', 'no-cache');
-    }
-  }
-}));
+//     // Cache control
+//     if (path.includes('/static/')) {
+//       res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+//     } else {
+//       res.setHeader('Cache-Control', 'no-cache');
+//     }
+//   }
+// }));
 
 // API Routes
 const userRoutes = require('./routes/user_routes');
@@ -108,10 +108,14 @@ pool.connect()
     .catch((err) => console.error("Error connecting to the database", err));
 
 // Client-side routing fallback - MUST BE LAST
-const frontendPath = path.join(__dirname, '../frontend/public');
-app.use(express.static(frontendPath));
+// const frontendPath = path.join(__dirname, '../frontend/public');
+// app.use(express.static(frontendPath));
+// app.get('*', (req, res) => {
+//   res.sendFile(path.join(frontendPath, 'index.html'));
+// });
+
 app.get('*', (req, res) => {
-  res.sendFile(path.join(frontendPath, 'index.html'));
+  res.status(404).json({ error: "Backend static file serving disabled for testing" });
 });
 
 const PORT = process.env.PORT || 1234;

@@ -4,6 +4,21 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const compression = require('compression');
 require("dotenv").config();
+const cron = require('node-cron');
+const { generateSitemaps } = require('./controllers/sitemap_controller');
+
+// Weekly regeneration (Sunday 3 AM UTC)
+cron.schedule('0 3 * * 0', async () => {
+  if (process.env.NODE_ENV === 'production') {
+    console.log('[CRON] Auto-regenerating sitemaps...');
+    try {
+      await generateSitemaps();
+      console.log('[CRON] Sitemaps regenerated');
+    } catch (err) {
+      console.error('[CRON] Sitemap regeneration failed:', err);
+    }
+  }
+});
 
 const app = express();
 app.set('etag', false);

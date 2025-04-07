@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "postinstall": "echo 'Dependencies installed'",
-    "build": "echo 'Skipping build' && exit 0"
+    "build": "echo 'Skipping build' && exit 0",
+    "postdeploy": "node -e \"if (process.env.NODE_ENV === 'production') { require('./controllers/sitemap_controller').generateSitemaps(); }\""
   },
   "keywords": [],
   "author": "",

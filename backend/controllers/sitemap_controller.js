@@ -1,69 +1,73 @@
-require('dotenv').config();
-const fs = require('fs').promises;
-const fsSync = require('fs'); 
 const { pool } = require('../config/db');
-const path = require('path');
-const PUBLIC_DIR = path.join(__dirname, '../../frontend/public');
-const TEMP_DIR = path.join(__dirname, '../public');
-const BASE_URL = 'https://ratemyuniversity.io';
 
-const STATIC_PAGES = [
-  { url: '/', changefreq: 'daily', priority: 1.0 },
-];
+// Generate main sitemap index
+exports.generateSitemapIndex = (req, res) => {
+    const sitemapIndex = `<?xml version="1.0" encoding="UTF-8"?>
+    <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        <sitemap>
+            <loc>https://ratemyuniversity.io/sitemap.xml</loc>
+            <lastmod>${new Date().toISOString()}</lastmod>
+        </sitemap>
+        <sitemap>
+            <loc>https://ratemyuniversity.io/sitemap-universities.xml</loc>
+            <lastmod>${new Date().toISOString()}</lastmod>
+        </sitemap>
+    </sitemapindex>`;
 
-const generateSitemapChunk = (universities, chunkId) => {
-  const today = new Date().toISOString().split('T')[0];
-  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
-
-  if (chunkId === 1) {
-    STATIC_PAGES.forEach(page => {
-      xml += `  <url><loc>${BASE_URL}${page.url}</loc><lastmod>${today}</lastmod></url>\n`;
-    });
-  }
-
-  universities.forEach(univ => {
-    xml += `  <url><loc>${BASE_URL}/university/${univ.id}</loc><lastmod>${today}</lastmod></url>\n`;
-  });
-
-  xml += '</urlset>';
-  return xml;
+    res.header('Content-Type', 'application/xml');
+    res.send(sitemapIndex);
 };
 
-exports.generateSitemaps = async () => {
-  try {
-    await fs.mkdir(PUBLIC_DIR, { recursive: true });
-    await fs.mkdir(TEMP_DIR, { recursive: true });
+// Generate main pages sitemap
+exports.generateMainSitemap = (req, res) => {
+    const mainPages = [
+        { url: 'https://ratemyuniversity.io', lastmod: new Date().toISOString() }
+    ];
 
-    const { rows: universities } = await pool.query(
-      'SELECT id, updated_at FROM universities ORDER BY updated_at DESC'
-    );
+    let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
 
-    const chunkSize = 50000;
-    const totalChunks = Math.ceil(universities.length / chunkSize);
-    const today = new Date().toISOString().split('T')[0];
+    mainPages.forEach(page => {
+        sitemap += `
+        <url>
+            <loc>${page.url}</loc>
+            <lastmod>${page.lastmod}</lastmod>
+            <changefreq>weekly</changefreq>
+            <priority>1.0</priority>
+        </url>`;
+    });
 
-    let indexXml = '<?xml version="1.0" encoding="UTF-8"?>\n';
-    indexXml += '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+    sitemap += `\n</urlset>`;
 
-    for (let i = 0; i < totalChunks; i++) {
-      const chunk = universities.slice(i * chunkSize, (i + 1) * chunkSize);
-      const chunkXml = generateSitemapChunk(chunk, i + 1);
-      const filename = `sitemap-universities-${i + 1}.xml`;
-      
-      await fs.writeFile(path.join(PUBLIC_DIR, filename), chunkXml);
-      await fs.writeFile(path.join(TEMP_DIR, filename), chunkXml);
-      
-      indexXml += `  <sitemap><loc>${BASE_URL}/${filename}</loc><lastmod>${today}</lastmod></sitemap>\n`;
+    res.header('Content-Type', 'application/xml');
+    res.send(sitemap);
+};
+
+// Generate universities sitemap
+exports.generateUniversitiesSitemap = async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id FROM universities');
+        const universityIds = result.rows;
+
+        let sitemap = `<?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">`;
+
+        universityIds.forEach(university => {
+            sitemap += `
+            <url>
+                <loc>https://ratemyuniversity.io/university/${university.id}</loc>
+                <lastmod>${new Date().toISOString()}</lastmod>
+                <changefreq>weekly</changefreq>
+                <priority>0.8</priority>
+            </url>`;
+        });
+
+        sitemap += `\n</urlset>`;
+
+        res.header('Content-Type', 'application/xml');
+        res.send(sitemap);
+    } catch (error) {
+        console.error('Error generating universities sitemap:', error);
+        res.status(500).send('Error generating sitemap');
     }
-
-    indexXml += '</sitemapindex>';
-    await fs.writeFile(path.join(PUBLIC_DIR, 'sitemap-index.xml'), indexXml);
-    await fs.writeFile(path.join(TEMP_DIR, 'sitemap-index.xml'), indexXml);
-
-    console.log(`✅ Generated ${totalChunks} sitemap files`);
-  } catch (err) {
-    console.error('❌ Sitemap generation failed:', err);
-    throw err;
-  }
 };

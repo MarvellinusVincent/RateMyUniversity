@@ -2,18 +2,18 @@
   "routes": [
     {
       "src": "/sitemap-index.xml",
-      "dest": "/sitemap-index.xml",
+      "dest": "https://rate-my-student-life-backend.onrender.com/sitemap-index.xml",
       "headers": {
-        "Content-Type": "application/xml",
-        "Cache-Control": "public, max-age=86400"
+        "Cache-Control": "public, max-age=86400, s-maxage=86400",
+        "Content-Type": "application/xml"
       }
     },
     {
       "src": "/sitemap-universities-(.*).xml",
-      "dest": "/sitemap-universities-$1.xml",
+      "dest": "https://rate-my-student-life-backend.onrender.com/sitemap-universities-$1.xml",
       "headers": {
-        "Content-Type": "application/xml",
-        "Cache-Control": "public, max-age=86400"
+        "Cache-Control": "public, max-age=86400, s-maxage=86400", 
+        "Content-Type": "application/xml"
       }
     },
     {

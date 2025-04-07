@@ -6,9 +6,9 @@
       "headers": {
         "Cache-Control": "public, max-age=86400, s-maxage=86400",
         "Content-Type": "application/xml",
-        "X-Robots-Tag": "",
-        "X-Vercel-Id": "",
-        "X-Powered-By": ""
+        "x-robots-tag": "",
+        "x-vercel-id": "",
+        "x-powered-by": ""
       }
     },
     {
@@ -17,9 +17,9 @@
       "headers": {
         "Cache-Control": "public, max-age=86400, s-maxage=86400", 
         "Content-Type": "application/xml",
-        "X-Robots-Tag": "",
-        "X-Vercel-Id": "",
-        "X-Powered-By": ""
+        "x-robots-tag": "",
+        "x-vercel-id": "",
+        "x-powered-by": ""
       }
     },
     {

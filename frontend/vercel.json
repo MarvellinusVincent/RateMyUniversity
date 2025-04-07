@@ -5,10 +5,7 @@
       "dest": "https://rate-my-student-life-backend.onrender.com/sitemap-index.xml",
       "headers": {
         "Cache-Control": "public, max-age=86400, s-maxage=86400",
-        "Content-Type": "application/xml",
-        "X-Robots-Tag": null,
-        "X-Vercel-Id": null,
-        "X-Powered-By": null
+        "Content-Type": "application/xml"
       }
     },
     {
@@ -16,10 +13,7 @@
       "dest": "https://rate-my-student-life-backend.onrender.com/sitemap-universities-$1.xml",
       "headers": {
         "Cache-Control": "public, max-age=86400, s-maxage=86400", 
-        "Content-Type": "application/xml",
-        "X-Robots-Tag": null,
-        "X-Vercel-Id": null,
-        "X-Powered-By": null
+        "Content-Type": "application/xml"
       }
     },
     {

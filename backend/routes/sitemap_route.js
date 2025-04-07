@@ -35,8 +35,8 @@ const sendSitemap = (res, filename) => {
   res.set({
     'Content-Type': 'application/xml',
     'Cache-Control': 'public, max-age=86400',
-    'X-Robots-Tag': null,
-    'X-Powered-By': null
+    'X-Robots-Tag': '',
+    'X-Powered-By': ''
   });
   res.sendFile(filePath, { lastModified: false });
 };

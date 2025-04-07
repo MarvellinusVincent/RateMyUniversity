@@ -71,7 +71,6 @@ app.use((req, res, next) => {
 // Static files with proper headers
 app.use(express.static(path.join(__dirname, '../frontend/build'), {
   setHeaders: (res, path) => {
-    // Set proper MIME types
     if (path.endsWith('.css')) {
       res.setHeader('Content-Type', 'text/css');
     } else if (path.endsWith('.js')) {
@@ -84,8 +83,7 @@ app.use(express.static(path.join(__dirname, '../frontend/build'), {
     } else {
       res.setHeader('Cache-Control', 'no-cache');
     }
-  },
-  maxAge: '1d'
+  }
 }));
 
 // API Routes

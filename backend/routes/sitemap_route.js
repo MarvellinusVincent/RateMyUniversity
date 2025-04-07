@@ -11,6 +11,10 @@ router.get('/sitemap*.xml', (req, res) => {
     'Cache-Control': 'public, max-age=86400',
     'X-Robots-Tag': 'noindex'
   });
+  res.removeHeader('X-Powered-By');
+  res.removeHeader('X-Robots-Tag');
+  res.removeHeader('X-Render-Origin-Server');
+  
   
   res.sendFile(filePath, {
     lastModified: false,
@@ -31,20 +35,21 @@ const sendSitemap = (res, filename) => {
     });
     return res.sendFile(gzPath, { lastModified: false });
   }
+  res.removeHeader('X-Powered-By');
+  res.removeHeader('X-Robots-Tag');
+  res.removeHeader('X-Render-Origin-Server');
 
   res.set({
     'Content-Type': 'application/xml',
-    'Cache-Control': 'public, max-age=86400',
-    'X-robots-tag': '',
-    'X-powered-by': ''
+    'Cache-Control': 'public, max-age=86400'
   });
   res.sendFile(filePath, { lastModified: false });
 };
 
 router.get('/sitemap-index.xml', (req, res) => {
-  res.removeHeader('X-robots-tag');
-  res.removeHeader('X-powered-by');
-  res.removeHeader('X-render-origin-server');
+  res.removeHeader('X-Powered-By');
+  res.removeHeader('X-Robots-Tag');
+  res.removeHeader('X-Render-Origin-Server');
   sendSitemap(res, 'sitemap-index.xml');
 });
 

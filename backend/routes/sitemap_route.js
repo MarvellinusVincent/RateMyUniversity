@@ -35,16 +35,16 @@ const sendSitemap = (res, filename) => {
   res.set({
     'Content-Type': 'application/xml',
     'Cache-Control': 'public, max-age=86400',
-    'X-Robots-Tag': '',
-    'X-Powered-By': ''
+    'X-robots-tag': '',
+    'X-powered-by': ''
   });
   res.sendFile(filePath, { lastModified: false });
 };
 
 router.get('/sitemap-index.xml', (req, res) => {
-  res.removeHeader('X-Robots-Tag');
-  res.removeHeader('X-Powered-By');
-  res.removeHeader('X-Render-Origin-Server');
+  res.removeHeader('X-robots-tag');
+  res.removeHeader('X-powered-by');
+  res.removeHeader('X-render-origin-server');
   sendSitemap(res, 'sitemap-index.xml');
 });
 

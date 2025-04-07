@@ -6,30 +6,31 @@
       "headers": {
         "Cache-Control": "public, max-age=86400, s-maxage=86400",
         "Content-Type": "application/xml",
-        "X-Robots-Tag": "none",
-        "X-Powered-By": "none",
-        "X-Vercel-Id": "none" 
+        "X-Robots-Tag": "none"
       }
     },
     {
       "src": "/sitemap-universities-(.*).xml",
       "dest": "https://rate-my-student-life-backend.onrender.com/sitemap-universities-$1.xml",
       "headers": {
-        "Cache-Control": "public, max-age=86400, s-maxage=86400", 
+        "Cache-Control": "public, max-age=86400, s-maxage=86400",
         "Content-Type": "application/xml",
-        "X-Robots-Tag": "none",
-        "X-Powered-By": "none",
-        "X-Vercel-Id": "none" 
+        "X-Robots-Tag": "none"
       }
     },
     {
-      "src": "/static/(.*)",
+      "src": "/static/(.*\\.css)",
       "headers": {
         "Cache-Control": "public, max-age=31536000, immutable",
-        "Content-Type": {
-          ".css": "text/css",
-          ".js": "application/javascript"
-        }
+        "Content-Type": "text/css"
+      },
+      "continue": true
+    },
+    {
+      "src": "/static/(.*\\.js)",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable",
+        "Content-Type": "application/javascript"
       },
       "continue": true
     },

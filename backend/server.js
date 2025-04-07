@@ -22,7 +22,6 @@ const reviewRoutes = require('./routes/review_route');
 const specificUniversityRoutes = require('./routes/university');
 const searchUniversityRoutes = require('./routes/search_university');
 const emailRoutes = require('./routes/email_route');
-const sitemapRoutes = require('./routes/sitemap_route');
 
 app.use(bodyParser.json());
 
@@ -31,7 +30,6 @@ app.use('/reviews', reviewRoutes);
 app.use('/specificUni', specificUniversityRoutes);
 app.use('/searchUniversity', searchUniversityRoutes);
 app.use('/email', emailRoutes);
-app.use('/', sitemapRoutes);
 
 const { pool } = require('./config/db');
 pool.connect()

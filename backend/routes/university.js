@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { getSpecificUniversity, getReviewFromUniversity, getAllUniversityIDs } = require('../controllers/university');
+const { getSpecificUniversity, getReviewFromUniversity, getAllUniversityIDs, getUniversityName } = require('../controllers/university');
+
+router.get('/university_name/:id', getUniversityName);
 
 router.get('/all_university_ids', getAllUniversityIDs);
 

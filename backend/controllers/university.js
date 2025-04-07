@@ -47,4 +47,59 @@ const getAllUniversityIDs = async (req, res) =>  {
   }
 };
 
-module.exports = { getSpecificUniversity, getReviewFromUniversity, getAllUniversityIDs };
+// Get the university's name
+const getUniversityName = async (req, res) => {
+  const { id } = req.params;
+  
+  if (!id) {
+    return res.status(400).json({
+      success: false,
+      error: 'University ID is required',
+      details: {
+        parameter: 'id',
+        expected: 'Number or UUID string',
+        received: id
+      }
+    });
+  }
+
+  try {
+    const { rows } = await pool.query(
+      'SELECT name FROM universities WHERE id = $1', 
+      [id]
+    );
+
+    if (!rows.length) {
+      return res.status(404).json({
+        success: false,
+        error: `University with ID ${id} not found`
+      });
+    }
+
+    res.json({
+      success: true,
+      data: rows[0]
+    });
+
+  } catch (error) {
+    console.error('Database error:', error);
+    
+    if (error.code === '22P02') {
+      return res.status(400).json({
+        success: false,
+        error: 'Invalid university ID format',
+        details: {
+          expected: 'Number or valid UUID',
+          received: id
+        }
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: 'Database operation failed'
+    });
+  }
+};
+
+module.exports = { getSpecificUniversity, getReviewFromUniversity, getAllUniversityIDs, getUniversityName };

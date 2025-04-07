@@ -7,7 +7,6 @@ require("dotenv").config();
 const cron = require('node-cron');
 const { generateSitemaps } = require('./controllers/sitemap_controller');
 
-// Weekly regeneration (Sunday 3 AM UTC)
 cron.schedule('0 3 * * 0', async () => {
   if (process.env.NODE_ENV === 'production') {
     console.log('[CRON] Auto-regenerating sitemaps...');
@@ -55,14 +54,24 @@ const corsOptions = {
   
 app.use(cors(corsOptions));
 
-app.use(express.static(path.join(__dirname, '../frontend/public'), {
-    setHeaders: (res, path) => {
-      if (path.endsWith('.xml')) {
-        res.setHeader('Cache-Control', 'public, max-age=86400');
-      }
-    },
-    maxAge: '1d'
-  }));
+app.use(express.static(path.join(__dirname, '../frontend/build'), {
+  setHeaders: (res, path) => {
+    // Set proper MIME types
+    if (path.endsWith('.css')) {
+      res.setHeader('Content-Type', 'text/css');
+    } else if (path.endsWith('.js')) {
+      res.setHeader('Content-Type', 'application/javascript');
+    }
+    
+    // Cache control
+    if (path.includes('/static/')) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    } else {
+      res.setHeader('Cache-Control', 'no-cache');
+    }
+  },
+  maxAge: '1d'
+}));
 
 const userRoutes = require('./routes/user_routes');
 const reviewRoutes = require('./routes/review_route');

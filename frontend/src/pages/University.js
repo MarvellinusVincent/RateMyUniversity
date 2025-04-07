@@ -170,7 +170,7 @@ const University = () => {
   }, [id]);
 
   const handleRateClick = () => {
-    navigate(`/leaveReview?id=${university.id}&name=${university.name}`);
+    navigate(`/addReview/${university.id}`);
   };
 
   const handleLikeReview = async (reviewId) => {

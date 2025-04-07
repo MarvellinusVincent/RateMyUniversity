@@ -42,7 +42,7 @@ function NavbarWrapper() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/university/:id" element={<University />} />
           <Route path="/search/university" element={<SearchResults />} />
-          <Route path="/leaveReview" element={<LeaveReview />} />
+          <Route path="/addReview/:universityId" element={<LeaveReview />} />
           <Route path="/savedReviews" element={<SavedReviews />} />
           <Route path="/addSchool" element={<AddSchool />} />
           <Route path="*" element={<Navigate to="/" />} />

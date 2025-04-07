@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authAxios } from '../stores/authStore';
 
@@ -7,9 +7,36 @@ const LeaveReview = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated } = useAuth();
+  const [universityName, setUniversityName] = useState('');
+  const [isLoadingUniversity, setIsLoadingUniversity] = useState(true);
+  const { universityId } = useParams();
 
-  const universityId = new URLSearchParams(location.search).get('id');
-  const universityName = new URLSearchParams(location.search).get('name');
+  useEffect(() => {
+    const fetchUniversityName = async () => {
+      setIsLoadingUniversity(true);
+      try {
+        const response = await authAxios.get(
+          `${process.env.REACT_APP_API_URL}/specificUni/university_name/${universityId}`
+        );
+        if (response.data.success) {
+          setUniversityName(response.data.data.name);
+        } else {
+          console.error('Failed to fetch university name:', response.data.error);
+          setUniversityName("University");
+        }
+      } catch (error) {
+        console.error('Error fetching university name:', error);
+        setUniversityName("University");
+      } finally {
+        setIsLoadingUniversity(false);
+      }
+    };
+    if (universityId) {
+      fetchUniversityName();
+    } else {
+      setIsLoadingUniversity(false);
+    }
+  }, [universityId, location.search]);
 
   const [formData, setFormData] = useState({
     academic_rating: '',
@@ -160,9 +187,13 @@ const LeaveReview = () => {
                 Back to University
               </button>
             </div>
-            <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 mb-2">
-              {universityName}
-            </h1>
+            {isLoadingUniversity ? (
+              <div className="animate-pulse h-8 w-64 bg-gray-200 rounded mb-2"></div>
+            ) : (
+              <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 mb-2">
+                {universityName || 'University'}
+              </h1>
+            )}
             <p className="text-gray-600 mb-6">
               Share your experience to help others
             </p>

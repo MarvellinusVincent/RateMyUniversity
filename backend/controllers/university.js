@@ -39,7 +39,7 @@ const getReviewFromUniversity = async (req, res) => {
 
 const getAllUniversityIDs = async (req, res) =>  {
   try {
-    const result = await pool.query('SELECT id FROM universities');
+    const result = await pool.query('SELECT id, name FROM universities');
     res.json(result.rows);
   } catch (error) {
     console.error(error);

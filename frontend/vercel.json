@@ -1,11 +1,24 @@
 {
-  "headers": [
+  "routes": [
     {
-      "source": "/sitemap-(.*).xml",
-      "headers": [
-        { "key": "Content-Type", "value": "application/xml" },
-        { "key": "Cache-Control", "value": "public, max-age=86400" }
-      ]
+      "src": "/sitemap-index.xml",
+      "dest": "/sitemap-index.xml",
+      "headers": {
+        "Content-Type": "application/xml",
+        "Cache-Control": "public, max-age=86400"
+      }
+    },
+    {
+      "src": "/sitemap-universities-(.*).xml",
+      "dest": "/sitemap-universities-$1.xml",
+      "headers": {
+        "Content-Type": "application/xml",
+        "Cache-Control": "public, max-age=86400"
+      }
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
   ]
 }

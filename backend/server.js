@@ -49,6 +49,7 @@ app.use(bodyParser.json());
 app.use('/sitemap', express.static(path.join(__dirname, '../frontend/public'), {
   setHeaders: (res, path) => {
     if (path.endsWith('.xml')) {
+      res.setHeader('Content-Type', 'application/xml');
       res.setHeader('Cache-Control', 'public, max-age=86400');
       res.removeHeader('ETag');
     }

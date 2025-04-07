@@ -4,6 +4,7 @@ const fsSync = require('fs');
 const { pool } = require('../config/db');
 const path = require('path');
 const PUBLIC_DIR = path.join(__dirname, '../../frontend/public');
+const TEMP_DIR = path.join(__dirname, '../public');
 const BASE_URL = 'https://ratemyuniversity.io';
 
 const STATIC_PAGES = [
@@ -32,6 +33,7 @@ const generateSitemapChunk = (universities, chunkId) => {
 exports.generateSitemaps = async () => {
   try {
     await fs.mkdir(PUBLIC_DIR, { recursive: true });
+    await fs.mkdir(TEMP_DIR, { recursive: true });
 
     const { rows: universities } = await pool.query(
       'SELECT id, updated_at FROM universities ORDER BY updated_at DESC'
@@ -46,16 +48,18 @@ exports.generateSitemaps = async () => {
 
     for (let i = 0; i < totalChunks; i++) {
       const chunk = universities.slice(i * chunkSize, (i + 1) * chunkSize);
-      const chunkXml = generateSitemapChunk(chunk, i + 1);  // Sync function
+      const chunkXml = generateSitemapChunk(chunk, i + 1);
       const filename = `sitemap-universities-${i + 1}.xml`;
       
       await fs.writeFile(path.join(PUBLIC_DIR, filename), chunkXml);
+      await fs.writeFile(path.join(TEMP_DIR, filename), chunkXml);
       
       indexXml += `  <sitemap><loc>${BASE_URL}/${filename}</loc><lastmod>${today}</lastmod></sitemap>\n`;
     }
 
     indexXml += '</sitemapindex>';
     await fs.writeFile(path.join(PUBLIC_DIR, 'sitemap-index.xml'), indexXml);
+    await fs.writeFile(path.join(TEMP_DIR, 'sitemap-index.xml'), indexXml);
 
     console.log(`✅ Generated ${totalChunks} sitemap files`);
   } catch (err) {

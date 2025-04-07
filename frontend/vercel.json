@@ -1,0 +1,22 @@
+{
+    "routes": [
+      {
+        "src": "/sitemap-index.xml",
+        "headers": {
+          "Content-Type": "application/xml",
+          "Cache-Control": "public, max-age=86400"
+        }
+      },
+      {
+        "src": "/sitemap-universities-(.*).xml",
+        "headers": {
+          "Content-Type": "application/xml",
+          "Cache-Control": "public, max-age=86400"
+        }
+      },
+      {
+        "src": "/(.*)",
+        "dest": "/index.html"
+      }
+    ]
+  }

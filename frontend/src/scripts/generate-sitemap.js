@@ -2,53 +2,74 @@ const fs = require('fs');
 const axios = require('axios');
 require('dotenv').config();
 
+const CHUNK_SIZE = 2000;
+const BASE_URL = 'https://ratemyuniversity.io';
+
 (async () => {
   try {
-    const mainSitemap = `<?xml version="1.0" encoding="UTF-8"?>
-    <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-      <sitemap>
-        <loc>https://ratemyuniversity.io/sitemap-universities.xml</loc>
-        <lastmod>${new Date().toISOString()}</lastmod>
-      </sitemap>
-      <sitemap>
-        <loc>https://ratemyuniversity.io/sitemap-reviews.xml</loc>
-        <lastmod>${new Date().toISOString()}</lastmod>
-      </sitemap>
-    </sitemapindex>`;
-    fs.writeFileSync('public/sitemap.xml', mainSitemap);
-    console.log('Main Sitemap generated successfully!');
-
     const response = await axios.get(`${process.env.REACT_APP_API_URL}/specificUni/all_university_ids`);
     const universities = response.data;
     const lastModDate = new Date().toISOString();
 
-    const uniSitemap = `<?xml version="1.0" encoding="UTF-8"?>
-    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-      ${universities.map(university => `
-        <url>
-          <loc>https://ratemyuniversity.io/university/${university.id}</loc>
-          <lastmod>${lastModDate}</lastmod>
-          <changefreq>weekly</changefreq>
-          <priority>0.8</priority>
-        </url>
-      `).join('')}
-    </urlset>`;
-    fs.writeFileSync('public/sitemap-universities.xml', uniSitemap);
-    console.log('University Sitemap generated!');
+    const universityChunks = [];
+    for (let i = 0; i < universities.length; i += CHUNK_SIZE) {
+      universityChunks.push(universities.slice(i, i + CHUNK_SIZE));
+    }
 
-    const reviewSitemap = `<?xml version="1.0" encoding="UTF-8"?>
-    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-      ${universities.map(university => `
-        <url>
-          <loc>https://ratemyuniversity.io/addReview/${university.id}</loc>
+    // --- 1. Generate university sitemap chunks ---
+    const universitySitemapEntries = [];
+    universityChunks.forEach((chunk, index) => {
+      const chunkXml = `<?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+          ${chunk.map(u => `
+          <url>
+            <loc>${BASE_URL}/university/${u.id}</loc>
+            <lastmod>${lastModDate}</lastmod>
+            <changefreq>weekly</changefreq>
+            <priority>0.8</priority>
+          </url>`).join('')}
+        </urlset>`;
+
+      const filename = `sitemap-universities-${index}.xml`;
+      fs.writeFileSync(`public/${filename}`, chunkXml);
+      universitySitemapEntries.push(filename);
+    });
+
+    // --- 2. Generate review sitemap chunks ---
+    const reviewSitemapEntries = [];
+    universityChunks.forEach((chunk, index) => {
+      const chunkXml = `<?xml version="1.0" encoding="UTF-8"?>
+        <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+          ${chunk.map(u => `
+          <url>
+            <loc>${BASE_URL}/addReview/${u.id}</loc>
+            <lastmod>${lastModDate}</lastmod>
+            <changefreq>weekly</changefreq>
+            <priority>0.7</priority>
+          </url>`).join('')}
+        </urlset>`;
+
+      const filename = `sitemap-reviews-${index}.xml`;
+      fs.writeFileSync(`public/${filename}`, chunkXml);
+      reviewSitemapEntries.push(filename);
+    });
+
+    // --- 3. Generate main sitemap index ---
+    const mainSitemap = `<?xml version="1.0" encoding="UTF-8"?>
+      <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+        ${[...universitySitemapEntries, ...reviewSitemapEntries].map(filename => `
+        <sitemap>
+          <loc>${BASE_URL}/${filename}</loc>
           <lastmod>${lastModDate}</lastmod>
-          <changefreq>weekly</changefreq>
-          <priority>0.7</priority>
-        </url>
-      `).join('')}
-    </urlset>`;
-    fs.writeFileSync('public/sitemap-reviews.xml', reviewSitemap);
-    console.log('Review Sitemap generated!');
+        </sitemap>`).join('')}
+      </sitemapindex>`;
+
+    fs.writeFileSync('public/sitemap.xml', mainSitemap);
+    console.log(`Generated:
+      - 1 main sitemap.xml
+      - ${universitySitemapEntries.length} university sitemaps
+      - ${reviewSitemapEntries.length} review sitemaps`);
+
   } catch (error) {
     console.error('Failed to generate sitemap:', error.message);
     process.exit(1);

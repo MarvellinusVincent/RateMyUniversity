@@ -57,7 +57,7 @@ const Navbar = forwardRef((props, ref) => {
                     {/* Logo */}
                     <div className="flex items-center flex-shrink-0">
                         <a 
-                            href="http://marvellinus-vincent-portfolio.onrender.com" 
+                            href="https://marvellinusvincent.com" 
                             target="_blank" 
                             rel="noopener noreferrer"
                             className="flex items-center"

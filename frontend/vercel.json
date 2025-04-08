@@ -11,10 +11,10 @@
       ]
     },
     {
-      "source": "/sitemap-(.*).xml",
+      "source": "/sitemap-(.*)\\.xml",
       "headers": [
         {
-          "key": "Cache-Control", 
+          "key": "Cache-Control",
           "value": "public, max-age=86400, stale-while-revalidate=604800"
         }
       ]
@@ -23,17 +23,12 @@
   "routes": [
     {
       "src": "/sitemap.xml",
-      "dest": "/public/sitemap.xml",
-      "headers": {
-        "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800"
-      }
+      "dest": "/sitemap.xml"
     },
     {
-      "src": "/sitemap-(.*).xml",
-      "dest": "/public/sitemap-$1.xml",
-      "headers": {
-        "Cache-Control": "public, max-age=86400, stale-while-revalidate=604800"
-      }
+      "src": "/sitemap-(.*)\\.xml",
+      "dest": "/sitemap-$1.xml",
+      "continue": true
     }
   ]
 }

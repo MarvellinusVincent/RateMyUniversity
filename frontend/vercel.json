@@ -1,16 +1,41 @@
 {
-    "headers": [
-      {
-        "source": "/sitemap.xml",
-        "headers": [
-          { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }
-        ]
-      },
-      {
-        "source": "/sitemap-:name.xml",
-        "headers": [
-          { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }
-        ]
-      }
-    ]
-  }
+  "headers": [
+    {
+      "source": "/sitemap.xml",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml"
+        }
+      ]
+    },
+    {
+      "source": "/sitemap-(.*).xml",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "application/xml"
+        }
+      ]
+    },
+    {
+      "source": "/robots.txt",
+      "headers": [
+        {
+          "key": "Content-Type",
+          "value": "text/plain"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/sitemap.xml",
+      "destination": "/sitemap.xml"
+    },
+    {
+      "source": "/sitemap-:name.xml",
+      "destination": "/sitemap-:name.xml"
+    }
+  ]
+}

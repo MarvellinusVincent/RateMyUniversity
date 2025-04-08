@@ -57,7 +57,12 @@ const BASE_URL = 'https://ratemyuniversity.io';
     // --- 3. Generate main sitemap index ---
     const mainSitemap = `<?xml version="1.0" encoding="UTF-8"?>
       <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-        ${[...universitySitemapEntries, ...reviewSitemapEntries].map(filename => `
+        ${universitySitemapEntries.map(filename => `
+        <sitemap>
+          <loc>${BASE_URL}/${filename}</loc>
+          <lastmod>${lastModDate}</lastmod>
+        </sitemap>`).join('')}
+        ${reviewSitemapEntries.map(filename => `
         <sitemap>
           <loc>${BASE_URL}/${filename}</loc>
           <lastmod>${lastModDate}</lastmod>

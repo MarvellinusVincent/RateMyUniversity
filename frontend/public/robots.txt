@@ -1,4 +1,3 @@
-# https://www.robotstxt.org/robotstxt.html
 User-agent: *
 Allow: /
 Disallow: /profile
@@ -6,5 +5,3 @@ Disallow: /savedReviews
 
 # Sitemaps
 Sitemap: https://ratemyuniversity.io/sitemap.xml
-Sitemap: https://ratemyuniversity.io/sitemap-universities.xml
-Sitemap: https://ratemyuniversity.io/sitemap-reviews.xml

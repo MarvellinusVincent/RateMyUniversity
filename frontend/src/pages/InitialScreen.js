@@ -125,11 +125,11 @@ const InitialScreen = () => {
 
               {/* Results dropdown */}
               {filteredUniversities.length > 0 && (
-                <div className="absolute z-10 w-full mt-2">
-                  <ul className="bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-xl shadow-lg overflow-y-auto max-h-[50vh]">
+                <div className="absolute z-20 w-full mt-2">
+                  <ul className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-y-auto max-h-[50vh]">
                     {filteredUniversities.map((uni) => (
                       <li key={uni.id}>
-                        <div className="flex items-center justify-between p-4 hover:bg-blue-50/50 transition duration-200 border-b border-gray-100/50 last:border-b-0 group">
+                        <div className="flex items-center justify-between p-4 hover:bg-blue-50 transition duration-200 border-b border-gray-100 last:border-b-0 group">
                           <Link
                             to={`/university/${uni.id}`}
                             className="flex-1 text-gray-800 group-hover:text-blue-600 transition-colors"

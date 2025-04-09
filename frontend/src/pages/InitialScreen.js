@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import UseClickOutside from '../contexts/UseClickOutside';
 
 const InitialScreen = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -7,7 +8,14 @@ const InitialScreen = () => {
   const [featuredUniversities, setFeaturedUniversities] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
+  const [showDropdown, setShowDropdown] = useState(false);
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
   const navigate = useNavigate();
+
+  UseClickOutside(dropdownRef, () => {
+    setShowDropdown(false);
+  });
 
   // Featured universities
   useEffect(() => {
@@ -38,11 +46,34 @@ const InitialScreen = () => {
       }
       setIsLoading(true);
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/searchUniversity?query=${searchQuery}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/searchUniversity/limit?query=${searchQuery}`);
         if (!response.ok) {
           throw new Error('Failed to fetch universities');
         }
-        const data = await response.json();
+        let data = await response.json();
+        
+        const universitiesWithReviews = await Promise.all(
+          data.map(async (uni) => {
+            try {
+              const reviewsResponse = await fetch(`${process.env.REACT_APP_API_URL}/specificUni/${uni.id}/reviews`);
+              const reviewsData = await reviewsResponse.json();
+              const reviews = reviewsData.reviews || [];
+              return {
+                ...uni,
+                review_count: reviews.length
+              };
+            } catch (error) {
+              console.error(`Error fetching reviews for university ${uni.id}:`, error);
+              return {
+                ...uni,
+                review_count: 0
+              };
+            }
+          })
+        );
+        
+        data = universitiesWithReviews.sort((a, b) => b.review_count - a.review_count);
+        
         setFilteredUniversities(data);
       } catch (error) {
         console.error('Error loading universities:', error);
@@ -54,13 +85,19 @@ const InitialScreen = () => {
     const timer = setTimeout(() => {
       loadUniversities();
     }, 300);
-
+  
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
   const handleSearchClick = () => {
     if (!searchQuery.trim()) return;
     navigate(`/search/university?name=${searchQuery}`);
+  };
+
+  const handleInputFocus = () => {
+    if (filteredUniversities.length > 0) {
+      setShowDropdown(true);
+    }
   };
 
   return (
@@ -91,16 +128,26 @@ const InitialScreen = () => {
             <div className="relative w-full mb-8">
               <div className="relative">
                 <input
+                  ref={inputRef}
                   type="text"
                   className="w-full p-4 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-gray-400 text-gray-800 shadow-sm"
                   placeholder="Search for a university..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    if (e.target.value === '') {
+                      setFilteredUniversities([]);
+                      setShowDropdown(false);
+                    } else {
+                      setShowDropdown(true);
+                    }
+                  }}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       handleSearchClick();
                     }
                   }}
+                  onFocus={handleInputFocus}
                 />
                 <button
                   onClick={handleSearchClick}
@@ -123,36 +170,66 @@ const InitialScreen = () => {
                 </div>
               )}
 
-              {/* Results dropdown */}
-              {filteredUniversities.length > 0 && (
-                <div className="absolute z-20 w-full mt-2">
-                  <ul className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-y-auto max-h-[50vh]">
+              {showDropdown && filteredUniversities.length > 0 && (
+                <div className="absolute z-20 w-full mt-2" ref={dropdownRef}>
+                  <ul className="bg-white border border-gray-200 rounded-xl shadow-lg overflow-y-auto max-h-[40vh] divide-y divide-gray-100">
                     {filteredUniversities.map((uni) => (
                       <li key={uni.id}>
-                        <div className="flex items-center justify-between p-4 hover:bg-blue-50 transition duration-200 border-b border-gray-100 last:border-b-0 group">
-                          <Link
-                            to={`/university/${uni.id}`}
-                            className="flex-1 text-gray-800 group-hover:text-blue-600 transition-colors"
-                          >
-                            {uni.name}
-                          </Link>
-                          <button
-                            onClick={(e) => {
-                              e.preventDefault();
-                              navigate(`/search/university?name=${uni.name}`);
-                            }}
-                            className="ml-2 p-1 rounded-full hover:bg-blue-100 transition-colors"
-                          >
+                        <Link
+                          to={`/university/${uni.id}`}
+                          className="flex items-start p-4 hover:bg-blue-50 transition duration-200 group cursor-pointer"
+                          onClick={() => setShowDropdown(false)}
+                        >
+                          <div className="flex-shrink-0 mr-4">
+                            <div className="w-12 h-12 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600">
+                              <svg 
+                                className="w-6 h-6" 
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                              </svg>
+                            </div>
+                          </div>
+
+                          <div className="flex-1 min-w-0">
+                            <div className="flex justify-between items-baseline">
+                              <h3 className="text-lg font-semibold text-gray-800 group-hover:text-blue-600 transition-colors truncate">
+                                {uni.name}
+                              </h3>
+                            </div>
+
+                            <div className="flex items-center mt-1 space-x-4">
+                              <p className="text-sm text-gray-500 flex items-center">
+                                <svg 
+                                  className="w-4 h-4 mr-1" 
+                                  fill="none" 
+                                  stroke="currentColor" 
+                                  viewBox="0 0 24 24"
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                {uni.country || 'Unknown country'}
+                              </p>
+                              <span className="text-sm font-bold underline text-blue-600">
+                                Review University
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="ml-4 flex-shrink-0 text-gray-300 group-hover:text-blue-400 transition-colors">
                             <svg 
-                              className="w-5 h-5 text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity" 
+                              className="w-5 h-5" 
                               fill="none" 
                               stroke="currentColor" 
                               viewBox="0 0 24 24"
                             >
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7"></path>
                             </svg>
-                          </button>
-                        </div>
+                          </div>
+                        </Link>
                       </li>
                     ))}
                   </ul>

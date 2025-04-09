@@ -30,7 +30,7 @@ const SearchResults = () => {
 
         if (isMounted) setLoading(true);
 
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/searchUniversity?query=${query}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/searchUniversity/all?query=${query}`);
         const universities = await response.json();
 
         if (!isMounted) return;
@@ -70,9 +70,11 @@ const SearchResults = () => {
           })
         );
 
+        const sortedResults = universitiesWithRatings.sort((a, b) => b.review_count - a.review_count);
+
         await Promise.resolve();
         if (isMounted) {
-          setResults(universitiesWithRatings);
+          setResults(sortedResults);
           setLoading(false);
         }
       } catch (error) {

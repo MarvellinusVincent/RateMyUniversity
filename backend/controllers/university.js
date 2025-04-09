@@ -102,4 +102,22 @@ const getUniversityName = async (req, res) => {
   }
 };
 
-module.exports = { getSpecificUniversity, getReviewFromUniversity, getAllUniversityIDs, getUniversityName };
+// Get Top 3 Universities To Show On Home Screen
+const FeaturedUniversities = async(req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT u.id, u.name, COUNT(v.id) as review_count
+      FROM universities u
+      LEFT JOIN reviews v ON u.id = v.university_id
+      GROUP BY u.id
+      ORDER BY review_count DESC
+      LIMIT 3
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Server error');
+  }
+};
+
+module.exports = { getSpecificUniversity, getReviewFromUniversity, getAllUniversityIDs, getUniversityName, FeaturedUniversities };

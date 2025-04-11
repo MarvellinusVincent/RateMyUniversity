@@ -17,26 +17,33 @@ function NavbarWrapper() {
   const [navbarHeight, setNavbarHeight] = useState(0);
 
   useEffect(() => {
+    if (!navbarRef.current) return;
+
     const updateHeight = () => {
-      if (navbarRef.current?.updateHeight) {
-        setNavbarHeight(navbarRef.current.updateHeight());
-      }
+      const height = navbarRef.current.offsetHeight;
+      setNavbarHeight(height);
     };
 
     updateHeight();
-    const handleResize = () => {
-      updateHeight();
-      setTimeout(updateHeight, 300);
-    };
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        setNavbarHeight(entry.contentRect.height);
+      }
+    });
+
+    resizeObserver.observe(navbarRef.current);
+
+    return () => resizeObserver.disconnect();
   }, []);
 
   return (
     <>
       <Navbar ref={navbarRef} />
-      <div style={{ paddingTop: `${navbarHeight}px` }}>
+      <div style={{ 
+        paddingTop: `${navbarHeight}px`,
+        minHeight: `calc(100vh - ${navbarHeight}px)`
+      }}>
         <Routes>
           <Route path="/" element={<InitialScreen />} />
           <Route path="/profile" element={<Profile />} />

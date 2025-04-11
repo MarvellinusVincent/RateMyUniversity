@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useEffect, useRef } from 'react';
+import React, { useState, forwardRef, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import logo from './../assets/logo.png';
@@ -8,31 +8,11 @@ const Navbar = forwardRef((props, ref) => {
     const { isAuthenticated, logout } = useAuth();
     const navigate = useNavigate();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-    const navRef = React.useRef(null);
     const dropdownRef = useRef(null);
-    const [dimensions] = useState({
-      height: 0,
-      width: 0
-    });
 
     UseClickOutside(dropdownRef, () => {
       setIsDropdownOpen(false);
     });
-
-    useEffect(() => {
-        if (ref && typeof ref === 'object' && ref.current) {
-          ref.current.updateHeight = () => {
-            if (navRef.current) {
-              return navRef.current.offsetHeight;
-            }
-            return 0;
-          };
-        }
-      }, [dimensions.height, ref]);
-
-    React.useImperativeHandle(ref, () => ({
-      getHeight: () => dimensions.height
-    }));
 
     const onLogout = () => {
         const confirmLogout = window.confirm("Are you sure you want to log out?");
@@ -44,7 +24,7 @@ const Navbar = forwardRef((props, ref) => {
 
     return (
         <nav 
-            ref={navRef}
+            ref={ref}
             className="bg-white shadow-sm fixed top-0 left-0 w-full z-50"
             style={{
               paddingTop: 'env(safe-area-inset-top)',
@@ -54,7 +34,6 @@ const Navbar = forwardRef((props, ref) => {
         >
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
-                    {/* Logo */}
                     <div className="flex items-center flex-shrink-0">
                         <a 
                             href="https://marvellinusvincent.com" 
@@ -76,7 +55,6 @@ const Navbar = forwardRef((props, ref) => {
                         </Link>
                     </div>
 
-                    {/* Conditional rendering based on authentication */}
                     <div className="relative ml-4">
                         {isAuthenticated() ? (
                             <div className="relative" ref={dropdownRef}>
@@ -85,7 +63,7 @@ const Navbar = forwardRef((props, ref) => {
                                     className="flex items-center space-x-1 text-gray-700 hover:text-gray-900 focus:outline-none px-4 py-2.5 sm:px-3 sm:py-2 rounded-md text-sm sm:text-base font-medium"
                                     aria-expanded={isDropdownOpen}
                                     aria-haspopup="true"
-                                    >
+                                >
                                     <span className="hidden sm:inline">Account</span>
                                     <svg 
                                         className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 ${isDropdownOpen ? 'transform rotate-180' : ''}`} 

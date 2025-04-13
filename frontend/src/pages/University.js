@@ -3,6 +3,7 @@ import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { Link } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import useClickOutside from '../contexts/UseClickOutside';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthStore } from '../stores/authStore';
@@ -400,6 +401,14 @@ const University = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
+      <Helmet>
+        <title>{university.name} - RateMyUniversity</title>
+        <link 
+          rel="canonical" 
+          href={`https://ratemyuniversity.io/university/${id}`} 
+        />
+        <meta name="description" content={`Read student reviews and ratings for ${university.name}. Learn about academics, campus life, and more.`} />
+      </Helmet>
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-64 h-64 md:w-96 md:h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
         <div className="absolute bottom-1/3 -right-20 w-56 h-56 md:w-80 md:h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 import UseClickOutside from '../contexts/UseClickOutside';
 
 const InitialScreen = () => {
@@ -102,6 +103,11 @@ const InitialScreen = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
+      <Helmet>
+        <title>Rate My University - Discover & Share University Reviews</title>
+        <link rel="canonical" href="https://ratemyuniversity.io/" />
+        <meta name="description" content="Discover and rate universities. Read authentic reviews from students about academics, campus life, and more." />
+      </Helmet>
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-96 h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
         <div className="absolute bottom-1/3 -right-20 w-80 h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>

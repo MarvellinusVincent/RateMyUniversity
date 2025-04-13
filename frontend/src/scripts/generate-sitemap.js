@@ -25,7 +25,7 @@ const BASE_URL = 'https://ratemyuniversity.io';
           <url>
             <loc>${BASE_URL}/university/${u.id}</loc>
             <lastmod>${lastModDate}</lastmod>
-            <changefreq>weekly</changefreq>
+            <changefreq>monthly</changefreq>
             <priority>0.8</priority>
           </url>`).join('')}
         </urlset>`;
@@ -44,7 +44,7 @@ const BASE_URL = 'https://ratemyuniversity.io';
           <url>
             <loc>${BASE_URL}/addReview/${u.id}</loc>
             <lastmod>${lastModDate}</lastmod>
-            <changefreq>weekly</changefreq>
+            <changefreq>monthly</changefreq>
             <priority>0.7</priority>
           </url>`).join('')}
         </urlset>`;

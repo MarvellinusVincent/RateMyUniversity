@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authAxios } from '../stores/authStore';
+import { Helmet } from 'react-helmet-async';
 
 const LeaveReview = () => {
   const location = useLocation();
@@ -165,6 +166,14 @@ const LeaveReview = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
+      <Helmet>
+        <title>Review {universityName || 'University'} - RateMyUniversity</title>
+        <link 
+          rel="canonical" 
+          href={`https://ratemyuniversity.io/addReview/${universityId}`} 
+        />
+        <meta name="description" content={`Share your experience about ${universityName || 'this university'}. Help future students make informed decisions.`} />
+      </Helmet>
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-96 h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
         <div className="absolute bottom-1/3 -right-20 w-80 h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>

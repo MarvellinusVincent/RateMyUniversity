@@ -11,6 +11,7 @@ import University from "./pages/University";
 import LeaveReview from "./pages/LeaveReview";
 import SavedReviews from "./pages/SavedReviews";
 import AddSchool from "./pages/AddSchool";
+import { HelmetProvider } from "react-helmet-async";
 
 function NavbarWrapper() {
   const navbarRef = useRef(null);
@@ -78,15 +79,17 @@ function AuthRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/signUp" element={<SignUp />} />
-          <Route path="*" element={<AuthRoutes />} />
-        </Routes>
-      </Router>
-    </AuthProvider>
+    <HelmetProvider>
+      <AuthProvider>
+        <Router>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signUp" element={<SignUp />} />
+            <Route path="*" element={<AuthRoutes />} />
+          </Routes>
+        </Router>
+      </AuthProvider>
+    </HelmetProvider>
   );
 }
 

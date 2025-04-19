@@ -9,6 +9,7 @@ const InitialScreen = () => {
   const [featuredUniversities, setFeaturedUniversities] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
+  const [showNoResultsPrompt, setShowNoResultsPrompt] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
@@ -16,6 +17,7 @@ const InitialScreen = () => {
 
   UseClickOutside(dropdownRef, () => {
     setShowDropdown(false);
+    setShowNoResultsPrompt(false);
   });
 
   // Featured universities
@@ -40,12 +42,17 @@ const InitialScreen = () => {
 
   // Search functionality
   useEffect(() => {
+    let noResultsTimer;
+
     const loadUniversities = async () => {
       if (!searchQuery.trim()) {
         setFilteredUniversities([]);
+        setShowNoResultsPrompt(false);
         return;
       }
       setIsLoading(true);
+      setShowNoResultsPrompt(false);
+      clearTimeout(noResultsTimer);
       try {
         const response = await fetch(`${process.env.REACT_APP_API_URL}/searchUniversity/limit?query=${searchQuery}`);
         if (!response.ok) {
@@ -76,8 +83,16 @@ const InitialScreen = () => {
         data = universitiesWithReviews.sort((a, b) => b.review_count - a.review_count);
         
         setFilteredUniversities(data);
+        if (data.length === 0) {
+          noResultsTimer = setTimeout(() => {
+            setShowNoResultsPrompt(true);
+          }, 100);
+        }
       } catch (error) {
         console.error('Error loading universities:', error);
+        noResultsTimer = setTimeout(() => {
+          setShowNoResultsPrompt(true);
+        }, 100);
       } finally {
         setIsLoading(false);
       }
@@ -87,7 +102,10 @@ const InitialScreen = () => {
       loadUniversities();
     }, 300);
   
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(noResultsTimer);
+    }
   }, [searchQuery]);
 
   const handleSearchClick = () => {
@@ -239,6 +257,32 @@ const InitialScreen = () => {
                       </li>
                     ))}
                   </ul>
+                </div>
+              )}
+
+              {/* No University */}
+              {showDropdown && searchQuery && filteredUniversities.length === 0 && !isLoading && showNoResultsPrompt && (
+                <div className="absolute z-20 w-full mt-2" ref={dropdownRef}>
+                  <div className="bg-white border border-gray-200 rounded-xl shadow-lg p-6 text-center">
+                    <svg className="mx-auto h-10 w-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <h3 className="text-lg font-medium text-gray-900 mb-1">No matches found</h3>
+                    <p className="text-gray-500 mb-4">We couldn't find "{searchQuery}" in our database</p>
+                    <Link
+                      to="/addSchool"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                      onClick={() => {
+                        setShowDropdown(false);
+                        setShowNoResultsPrompt(false);
+                      }}
+                    >
+                      <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      Add Your School
+                    </Link>
+                  </div>
                 </div>
               )}
             </div>

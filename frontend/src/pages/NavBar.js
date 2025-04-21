@@ -35,18 +35,11 @@ const Navbar = forwardRef((props, ref) => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between items-center h-16">
                     <div className="flex items-center flex-shrink-0">
-                        <a 
-                            href="https://marvellinusvincent.com" 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center"
-                        >
-                            <img 
-                                src={logo} 
-                                alt="Logo" 
-                                className="h-[2rem] w-[2rem] sm:h-[2.5rem] sm:w-[2.5rem] mr-2" 
-                            />
-                        </a>
+                        <img 
+                            src={logo} 
+                            alt="Logo" 
+                            className="h-[2rem] w-[2rem] sm:h-[2.5rem] sm:w-[2.5rem] mr-2" 
+                        />
                         <Link 
                             to="/" 
                             className="text-lg sm:text-xl font-medium text-gray-900 whitespace-nowrap hover:text-gray-700"

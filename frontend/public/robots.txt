@@ -1,7 +1,10 @@
 User-agent: *
 Allow: /
+
+# Private pages
 Disallow: /profile
 Disallow: /savedReviews
 
 # Sitemaps
 Sitemap: https://ratemyuniversity.io/sitemap.xml
+Sitemap: https://ratemyuniversity.io/sitemap-static.xml

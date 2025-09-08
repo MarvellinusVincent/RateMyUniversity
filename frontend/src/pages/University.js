@@ -2,7 +2,6 @@ import { useParams } from 'react-router-dom';
 import { useRef, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import useClickOutside from '../contexts/UseClickOutside';
 import { useAuth } from '../contexts/AuthContext';
@@ -416,24 +415,6 @@ const University = () => {
       </div>
 
       <header className="relative py-12 md:py-16 px-4 sm:px-8 lg:px-12 text-center">
-        <div className="absolute top-4 left-4 hidden md:block">
-          <Link 
-            to="/" 
-            className="group flex items-center gap-2 bg-white/90 backdrop-blur-sm hover:bg-white px-4 py-3 rounded-xl shadow-sm hover:shadow-md border border-gray-200/70 hover:border-blue-300 transition-all duration-200"
-          >
-            <svg 
-              className="w-5 h-5 text-blue-600 group-hover:text-blue-700 transition-colors" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
-            </svg>
-            <span className="font-medium text-gray-700 group-hover:text-gray-900">
-              Home
-            </span>
-          </Link>
-        </div>
         <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500">
           {university.name}
         </h1>

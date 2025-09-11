@@ -8,6 +8,9 @@ const SavedReviews = () => {
     const [reviews, setReviews] = useState([]);
     const [error, setError] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [deletingReviewId, setDeletingReviewId] = useState(null);
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [reviewToDelete, setReviewToDelete] = useState(null);
 
     useEffect(() => {
         const fetchReviews = async () => {
@@ -19,9 +22,7 @@ const SavedReviews = () => {
             try {
                 setIsLoading(true);
                 setError(null);
-                const response = await authAxios.get(`${process.env.REACT_APP_API_URL}/users/getReviews`, {
-                    params: { userId: user.id }
-                });
+                const response = await authAxios.get(`${process.env.REACT_APP_API_URL}/users/getReviews`);
                 const reviewsData = response.data.reviews || response.data || [];
                 setReviews(Array.isArray(reviewsData) ? reviewsData : []);
             } catch (err) {
@@ -35,6 +36,34 @@ const SavedReviews = () => {
         };
         fetchReviews()
     }, [user?.id, isAuthenticated]);
+
+    const handleDeleteReview = async (reviewId) => {
+        const review = reviews.find(r => r.id === reviewId);
+        setReviewToDelete(review);
+        setShowDeleteModal(true);
+    };
+
+    const handleDeleteConfirm = async () => {
+        if (!reviewToDelete) return;
+        
+        try {
+            setDeletingReviewId(reviewToDelete.id);
+            await authAxios.delete(`${process.env.REACT_APP_API_URL}/reviews/delete/${reviewToDelete.id}`);
+            setReviews(reviews.filter(review => review.id !== reviewToDelete.id));
+            setShowDeleteModal(false);
+            setReviewToDelete(null);
+        } catch (err) {
+            console.error("Failed to delete review:", err);
+            setError("Failed to delete review. Please try again.");
+        } finally {
+            setDeletingReviewId(null);
+        }
+    };
+
+    const handleDeleteCancel = () => {
+        setShowDeleteModal(false);
+        setReviewToDelete(null);
+    };
 
     if (!isAuthenticated()) {
         return (
@@ -165,7 +194,23 @@ const SavedReviews = () => {
                                                     }) : 'No date available'}
                                                 </p>
                                             </div>
-                                            <StarRating rating={review.overall_rating} />
+                                            <div className="flex items-center gap-3">
+                                                <StarRating rating={review.overall_rating} />
+                                                <button
+                                                    onClick={() => handleDeleteReview(review.id)}
+                                                    disabled={deletingReviewId === review.id}
+                                                    className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                    title="Delete review"
+                                                >
+                                                    {deletingReviewId === review.id ? (
+                                                        <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-red-500"></div>
+                                                    ) : (
+                                                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    )}
+                                                </button>
+                                            </div>
                                         </div>
 
                                         {review.review_text && (
@@ -203,6 +248,54 @@ const SavedReviews = () => {
                     </div>
                 </div>
             </div>
+
+            {showDeleteModal && (
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 border border-white/20">
+                        <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+                            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                            </svg>
+                        </div>
+                        
+                        <h3 className="text-lg font-bold text-gray-900 text-center mb-2">
+                            Delete Review
+                        </h3>
+                        
+                        <p className="text-gray-600 text-center mb-6">
+                            Are you sure you want to delete your review for{" "}
+                            <span className="font-semibold text-gray-900">
+                                {reviewToDelete?.university_name}
+                            </span>
+                            ? This action cannot be undone.
+                        </p>
+                        
+                        <div className="flex gap-3 justify-end">
+                            <button
+                                onClick={handleDeleteCancel}
+                                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-all duration-200"
+                                disabled={deletingReviewId === reviewToDelete?.id}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleDeleteConfirm}
+                                disabled={deletingReviewId === reviewToDelete?.id}
+                                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                            >
+                                {deletingReviewId === reviewToDelete?.id ? (
+                                    <>
+                                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                                        Deleting...
+                                    </>
+                                ) : (
+                                    "Delete"
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

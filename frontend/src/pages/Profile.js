@@ -1,20 +1,23 @@
-import React, { useState } from "react";
-import { Link } from 'react-router-dom';
+import { useState } from "react";
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from "../contexts/AuthContext";
 import { authAxios } from "../stores/authStore";
 
 const Profile = () => {
-  const { user, isAuthenticated, setUser } = useAuth();
+  const { user, isAuthenticated, setUser, logout } = useAuth();
+  const navigate = useNavigate();
   const [isEditingDetails, setIsEditingDetails] = useState(false);
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [isEditingPassword, setIsEditingPassword] = useState(false);
-  const [newName, setNewName] = useState(user?.name || "");
+  const [newName, setNewName] = useState(user?.username || "");
   const [newPassword, setNewPassword] = useState("");
   const [retypeNewPassword, setRetypeNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showRetypePassword, setShowRetypePassword] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const checkPasswordStrength = (password) => {
     const hasMinLength = password.length >= 8;
@@ -41,6 +44,50 @@ const Profile = () => {
         specialChar: hasSpecialChar
       }
     };
+  };
+
+  const handleDeleteAccount = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      setIsDeleting(true);
+      setErrorMessage("");
+      
+      const response = await authAxios.delete(
+        `${process.env.REACT_APP_API_URL}/users/delete`
+      );
+      
+      if (response.data.success) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
+        logout();
+        navigate('/', { replace: true });
+      }
+    } catch (error) {
+      console.error("Failed to delete account:", error);
+      let errorMsg = "Failed to delete account. Please try again.";
+      if (error.response?.data?.message) {
+        errorMsg = error.response.data.message;
+      } else if (error.response?.status === 401) {
+        errorMsg = "You must be logged in to delete your account.";
+        navigate('/login');
+        return;
+      } else if (error.response?.status === 404) {
+        errorMsg = "Account not found.";
+      } else if (!error.response) {
+        errorMsg = "Network error. Please check your connection and try again.";
+      }
+      setErrorMessage(errorMsg);
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteModal(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
   };
 
   const saveDetails = async (type) => {
@@ -71,15 +118,13 @@ const Profile = () => {
       if (type === "password") {
         response = await authAxios.put(`${process.env.REACT_APP_API_URL}/users/updatePassword`, { 
           newPassword,
-          retypeNewPassword, 
-          userId: user.id 
+          retypeNewPassword
         });
       } else if (type === "username") {
         response = await authAxios.put(`${process.env.REACT_APP_API_URL}/users/updateUsername`, { 
-          username: newName, 
-          userId: user.id 
+          username: newName
         });
-        setUser({ username: newName });
+        setUser({ ...user, username: newName });
       }
   
       if (response.status === 200) {
@@ -129,7 +174,7 @@ const Profile = () => {
       </div>
 
       <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-      < div className="mb-6">
+        <div className="mb-6">
           <Link 
             to="/" 
             className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm hover:bg-white px-4 py-2 rounded-xl shadow-sm hover:shadow-md border border-gray-200/70 hover:border-blue-300 transition-all duration-200"
@@ -140,16 +185,35 @@ const Profile = () => {
             <span className="font-medium text-gray-700">Back to Home</span>
           </Link>
         </div>
+        
         <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-pink-50/30 opacity-30"></div>
           
           <div className="relative p-8 md:p-10">
-            <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 mb-2">
-              Your Profile
-            </h1>
-            <p className="text-gray-600 mb-6">
-              Manage your account details
-            </p>
+            <div className="flex justify-between items-start mb-6">
+              <div>
+                <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 mb-2">
+                  Your Profile
+                </h1>
+                <p className="text-gray-600">
+                  Manage your account details
+                </p>
+              </div>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={isDeleting}
+                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Delete account"
+              >
+                {isDeleting ? (
+                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-red-500"></div>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                )}
+              </button>
+            </div>
 
             {errorMessage && (
               <div className="relative bg-red-50/90 backdrop-blur-sm border border-red-200 rounded-xl p-3 sm:p-4 mb-6 shadow-sm">
@@ -230,6 +294,7 @@ const Profile = () => {
                               onClick={() => {
                                 setIsEditingUsername(false);
                                 setErrorMessage("");
+                                setNewName(user.username);
                               }}
                               className="flex-1 py-2 bg-gray-200/90 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
                             >
@@ -318,6 +383,8 @@ const Profile = () => {
                             <button
                               onClick={() => {
                                 setIsEditingPassword(false);
+                                setNewPassword("");
+                                setRetypeNewPassword("");
                                 setErrorMessage("");
                               }}
                               className="flex-1 py-2 bg-gray-200/90 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
@@ -346,6 +413,8 @@ const Profile = () => {
                     setIsEditingDetails(false);
                     setIsEditingUsername(false);
                     setIsEditingPassword(false);
+                    setNewPassword("");
+                    setRetypeNewPassword("");
                     setErrorMessage("");
                   }}
                   className="w-full py-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 text-gray-700 font-semibold rounded-xl hover:bg-gray-100/90 transition-all shadow-sm hover:shadow-md"
@@ -356,6 +425,50 @@ const Profile = () => {
             )}
           </div>
         </div>
+
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 border border-white/20">
+              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
+                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+              </div>
+              
+              <h3 className="text-lg font-bold text-gray-900 text-center mb-2">
+                Delete Account
+              </h3>
+              
+              <p className="text-gray-600 text-center mb-6">
+                Are you sure you want to permanently delete your account? This will remove all your data, including reviews and profile information. This action cannot be undone.
+              </p>
+              
+              <div className="flex gap-3 justify-between">
+                <button
+                  onClick={handleDeleteCancel}
+                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-all duration-200"
+                  disabled={isDeleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleDeleteConfirm}
+                  disabled={isDeleting}
+                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isDeleting ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
+                      Deleting...
+                    </>
+                  ) : (
+                    "Delete Account"
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

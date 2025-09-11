@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const { signUp, login, logout, refreshToken, verifyUser, getUser, updateUsername, updatePassword, getReviews } = require('../controllers/user_controller');
+const { authenticate } = require('../middleware/auth');
+const { signUp, login, logout, refreshToken, verifyUser, getUser, updateUsername, updatePassword, getReviews, deleteUser } = require('../controllers/user_controller');
 
 // User Signup Route
 router.post("/signup", signUp);
@@ -12,7 +13,7 @@ router.post("/login", login);
 router.post("/logout", logout);
 
 // Refresh Token Route
-router.get("/refresh", refreshToken);
+router.post("/refresh", refreshToken);
 
 // Verify Token Route
 router.get("/verify", verifyUser);
@@ -21,12 +22,14 @@ router.get("/verify", verifyUser);
 router.get("/getUser", getUser);
 
 // Update Username Route
-router.put("/updateUsername", updateUsername)
+router.put("/updateUsername", authenticate, updateUsername)
 
 // Update User Password Route
-router.put("/updatePassword", updatePassword)
+router.put("/updatePassword", authenticate, updatePassword)
 
 // Get User Reviews Route
-router.get("/getReviews", getReviews)
+router.get("/getReviews", authenticate, getReviews)
+
+router.delete("/delete", authenticate, deleteUser);
 
 module.exports = router;

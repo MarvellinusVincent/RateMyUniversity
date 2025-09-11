@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { authenticate } = require('../middleware/auth'); 
-const { submitReview, submitLike, checkIfLiked } = require('../controllers/review_controller.js');
+const { submitReview, submitLike, checkIfLiked, deleteReview } = require('../controllers/review_controller.js');
 
 // Route to submit a review
 router.post('/submit', submitReview);
@@ -12,5 +12,7 @@ router.post('/:id/like', authenticate, submitLike);
 // Route to check if the user has liked a review before
 router.get('/:id/hasLiked', authenticate, checkIfLiked);
 
+// Route to delete review
+router.delete('/delete/:id', authenticate, deleteReview);
 
 module.exports = router;

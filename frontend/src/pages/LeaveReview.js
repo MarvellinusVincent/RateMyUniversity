@@ -168,10 +168,7 @@ const LeaveReview = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
       <Helmet>
         <title>Review {universityName || 'University'} - RateMyUniversity</title>
-        <link 
-          rel="canonical" 
-          href={`https://ratemyuniversity.io/addReview/${universityId}`} 
-        />
+        <meta name="robots" content="noindex, nofollow" />
         <meta name="description" content={`Share your experience about ${universityName || 'this university'}. Help future students make informed decisions.`} />
       </Helmet>
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">

@@ -196,4 +196,75 @@ const checkIfLiked = async (req, res) => {
   }
 }
 
-module.exports = { submitReview, submitLike, checkIfLiked };
+
+const deleteReview = async (req, res) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ 
+        error: 'Authentication required',
+        message: 'You must be logged in to delete reviews'
+      });
+    }
+    
+    const { id } = req.params;
+    const userId = req.user.id;
+    
+    if (!id || isNaN(id)) {
+      return res.status(400).json({ 
+        error: 'Invalid review ID',
+        message: 'Review ID must be a valid number'
+      });
+    }
+    
+    const reviewCheck = await pool.query(
+      'SELECT id, user_id, university_name FROM reviews WHERE id = $1',
+      [id]
+    );
+    
+    if (reviewCheck.rows.length === 0) {
+      return res.status(404).json({ 
+        error: 'Review not found',
+        message: 'The review you are trying to delete does not exist'
+      });
+    }
+    
+    if (reviewCheck.rows[0].user_id !== userId) {
+      return res.status(403).json({ 
+        error: 'Access denied',
+        message: 'You can only delete your own reviews'
+      });
+    }
+    
+    await pool.query('DELETE FROM review_likes WHERE review_id = $1', [id]);
+    
+    const deleteResult = await pool.query(
+      'DELETE FROM reviews WHERE id = $1 AND user_id = $2 RETURNING id, university_name',
+      [id, userId]
+    );
+    
+    if (deleteResult.rows.length === 0) {
+      return res.status(404).json({ 
+        error: 'Review not found or already deleted',
+        message: 'The review could not be deleted'
+      });
+    }
+    
+    res.status(200).json({
+      success: true,
+      message: 'Review deleted successfully',
+      deleted_review: {
+        id: deleteResult.rows[0].id,
+        university_name: deleteResult.rows[0].university_name
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error deleting review:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete review',
+      message: error.message || 'Internal server error' 
+    });
+  }
+};
+
+module.exports = { submitReview, submitLike, checkIfLiked, deleteReview };

@@ -15,6 +15,11 @@ const signUp = async (req, res) => {
       return res.status(409).json({ error: "Email already in use" });
     }
 
+    const usernameCheck = await pool.query('SELECT id FROM users WHERE username = $1', [username]);
+    if (usernameCheck.rows.length > 0) {
+      return res.status(400).json({ error: "Username already taken" });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
@@ -84,21 +89,35 @@ const login = async (req, res) => {
 
 // Logout
 const logout = async (req, res) => {
-  const token = req.header('Authorization')?.replace('Bearer ', '');
-  const { refreshToken } = req.body;
-
   try {
+    const { refreshToken } = req.body;
+    let tokensDeleted = 0;
     if (refreshToken) {
-    await pool.query('DELETE FROM refresh_tokens WHERE token = $1', [refreshToken]);
+      const result = await pool.query(
+        'DELETE FROM refresh_tokens WHERE token = $1', 
+        [refreshToken]
+      );
+      tokensDeleted = result.rowCount;
     }
-    if (token) {
+    const cleanupResult = await pool.query(
+      'DELETE FROM refresh_tokens WHERE created_at < NOW() - INTERVAL \'7 days\''
+    );
+    if (cleanupResult.rowCount > 0) {
+      console.log(`Cleaned up ${cleanupResult.rowCount} expired refresh tokens`);
     }
-    res.json({ message: 'Logout successful' });
+    res.json({ 
+      message: 'Logout successful',
+      tokensDeleted: tokensDeleted,
+      expiredTokensCleanedUp: cleanupResult.rowCount
+    });
   } catch (error) {
     console.error('Logout error:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    res.json({ 
+      message: 'Logout completed',
+      warning: 'Token cleanup may have failed'
+    });
   }
- };
+};
 
 // Refresh Token
 const refreshToken = async (req, res) => {
@@ -107,7 +126,6 @@ const refreshToken = async (req, res) => {
     if (!refreshToken) {
       return res.status(400).json({ error: 'Refresh token required' });
     }
-
     const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
     const validToken = await pool.query(
       'SELECT * FROM refresh_tokens WHERE token = $1 AND user_id = $2',
@@ -136,19 +154,27 @@ const refreshToken = async (req, res) => {
       process.env.JWT_REFRESH_SECRET,
       { expiresIn: '7d' }
     );
+    
     await pool.query('BEGIN');
-    await pool.query('DELETE FROM refresh_tokens WHERE token = $1', [refreshToken]);
-    await pool.query(
-      'INSERT INTO refresh_tokens (user_id, token) VALUES ($1, $2)',
-      [user.rows[0].id, newRefreshToken]
-    );
-    await pool.query('COMMIT');
-    res.json({ 
-      token: newToken, 
-      refreshToken: newRefreshToken 
-    });
+    
+    try {
+      await pool.query('DELETE FROM refresh_tokens WHERE token = $1', [refreshToken]);
+      await pool.query(
+        'INSERT INTO refresh_tokens (user_id, token) VALUES ($1, $2)',
+        [user.rows[0].id, newRefreshToken]
+      );
+      await pool.query('COMMIT');
+      
+      res.json({ 
+        token: newToken, 
+        refreshToken: newRefreshToken 
+      });
+    } catch (transactionError) {
+      await pool.query('ROLLBACK');
+      throw transactionError;
+    }
+    
   } catch (error) {
-    await pool.query('ROLLBACK');
     console.error('Refresh error:', error);
     
     if (error.name === 'TokenExpiredError') {
@@ -212,28 +238,25 @@ const getUser = async (req, res) => {
 // Update Username
 const updateUsername = async (req, res) => {
   try {
-    const { username, userId } = req.body;
-    if (!username || !userId) {
-      ("Error: Missing username or userId.");
-      return res.status(400).json({ error: "Username and userId are required." });
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Authentication required" });
     }
-
-    const result = await pool.query('SELECT * FROM users WHERE username = $1', [username]);
+    const { username } = req.body;
+    const userId = req.user.id;
+    if (!username) {
+      return res.status(400).json({ error: "Username is required" });
+    }
+    const result = await pool.query('SELECT id FROM users WHERE username = $1 AND id != $2', [username, userId]);
     if (result.rows.length > 0) {
-      ("Error: Username already taken:", username);
-      return res.status(400).json({ error: "The new username must differ from your current username." });
+      return res.status(400).json({ error: "Username already taken" });
     }
-
     const updateResult = await pool.query(
-      'UPDATE users SET username = $1 WHERE id = $2 RETURNING *',
+      'UPDATE users SET username = $1 WHERE id = $2 RETURNING username',
       [username, userId]
     );
-
     if (updateResult.rows.length === 0) {
-      ("Error: User not found for userId:", userId);
-      return res.status(404).json({ error: "User not found." });
+      return res.status(404).json({ error: "User not found" });
     }
-
     res.status(200).json({
       message: "Username updated successfully",
       username: updateResult.rows[0].username,
@@ -247,17 +270,24 @@ const updateUsername = async (req, res) => {
 // Update User Password
 const updatePassword = async (req, res) => {
   try {
-    const { newPassword, retypeNewPassword, userId } = req.body;
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Authentication required" });
+    }
+    const { newPassword, retypeNewPassword } = req.body;
+    const userId = req.user.id;
     if (!newPassword || !retypeNewPassword) {
-      return res.status(400).json({ error: "Both password fields are required" });
+      return res.status(400).json({ error: "All password fields are required" });
     }
     if (newPassword !== retypeNewPassword) {
-      return res.status(400).json({ error: "Passwords do not match" });
+      return res.status(400).json({ error: "New passwords do not match" });
     }
-
+    const userResult = await pool.query('SELECT password_hash FROM users WHERE id = $1', [userId]);
+    if (userResult.rows.length === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
     const hashedNewPassword = await bcrypt.hash(newPassword, 10);
     await pool.query(
-      'UPDATE users SET password_hash = $1 WHERE id = $2 RETURNING *',
+      'UPDATE users SET password_hash = $1 WHERE id = $2',
       [hashedNewPassword, userId]
     );
     res.status(200).json({
@@ -271,18 +301,88 @@ const updatePassword = async (req, res) => {
 
 // Get User Reviews
 const getReviews = async (req, res) => {
-  const { userId } = req.query;
   try {
-    if (!userId) {
-      return res.status(400).json({ error: "User ID is required" });
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ error: "Authentication required" });
     }
-    const result = await pool.query('SELECT * FROM reviews WHERE user_id = $1', [userId]);
+    const userId = req.user.id;
+    const result = await pool.query('SELECT * FROM reviews WHERE user_id = $1 ORDER BY created_at DESC', [userId]);
     res.status(200).json({ reviews: result.rows });
   } catch (err) {
-    ("Error fetching reviews:", err);
+    console.error("Error fetching reviews:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 };
 
+// Delete User
+const deleteUser = async (req, res) => {
+  const client = await pool.connect();
+  
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ 
+        error: 'Authentication required',
+        message: 'You must be logged in to delete your account'
+      });
+    }
+    
+    const userId = req.user.id;
+    
+    await client.query('BEGIN');
+    
+    const userCheck = await client.query(
+      'SELECT id, username, email FROM users WHERE id = $1',
+      [userId]
+    );
+    
+    if (userCheck.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ 
+        error: 'User not found',
+        message: 'The user account does not exist'
+      });
+    }
+    
+    const user = userCheck.rows[0];
+    
+    const deleteResult = await client.query(
+      'DELETE FROM users WHERE id = $1 RETURNING id, username, email',
+      [userId]
+    );
+    
+    if (deleteResult.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(500).json({ 
+        error: 'Failed to delete user',
+        message: 'User could not be deleted'
+      });
+    }
+    
+    await client.query('COMMIT');
+    
+    console.log(`Successfully deleted user ${userId} (${user.username})`);
+    
+    res.status(200).json({
+      success: true,
+      message: 'Account deleted successfully',
+      deleted_user: {
+        id: deleteResult.rows[0].id,
+        username: deleteResult.rows[0].username,
+        email: deleteResult.rows[0].email
+      }
+    });
+    
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error deleting user account:', error);
+    res.status(500).json({ 
+      error: 'Failed to delete account',
+      message: 'Internal server error' 
+    });
+  } finally {
+    client.release();
+  }
+};
 
-module.exports = { signUp, login, logout, refreshToken, verifyUser, getUser, updateUsername, updatePassword, getReviews };
+
+module.exports = { signUp, login, logout, refreshToken, verifyUser, getUser, updateUsername, updatePassword, getReviews, deleteUser };

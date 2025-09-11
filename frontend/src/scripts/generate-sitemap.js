@@ -80,24 +80,7 @@ ${chunk.map(u => `  <url>
         allSitemapFiles.push(filename);
       });
 
-      // --- 3. Generate review sitemap chunks ---
-      universityChunks.forEach((chunk, index) => {
-        const chunkXml = `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${chunk.map(u => `  <url>
-    <loc>${BASE_URL}/addReview/${u.id}</loc>
-    <lastmod>${lastModDate}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.7</priority>
-  </url>`).join('\n')}
-</urlset>`;
-
-        const filename = `sitemap-reviews-${index}.xml`;
-        fs.writeFileSync(`public/${filename}`, chunkXml);
-        allSitemapFiles.push(filename);
-      });
-
-      console.log(`Generated ${universityChunks.length} university sitemaps and ${universityChunks.length} review sitemaps`);
+      console.log(`Generated ${universityChunks.length} university sitemaps`);
     }
 
     // --- 4. Generate main sitemap index ---

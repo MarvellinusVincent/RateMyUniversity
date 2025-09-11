@@ -20,13 +20,6 @@ CREATE SEQUENCE IF NOT EXISTS public.reviews_id_seq
     MAXVALUE 2147483647
     CACHE 1;
 
-CREATE SEQUENCE IF NOT EXISTS public.comments_id_seq
-    INCREMENT 1
-    START 1
-    MINVALUE 1
-    MAXVALUE 2147483647
-    CACHE 1;
-
 CREATE SEQUENCE IF NOT EXISTS public.refresh_tokens_id_seq
     INCREMENT 1
     START 1
@@ -124,22 +117,8 @@ CREATE TABLE IF NOT EXISTS public.review_likes
     CONSTRAINT review_likes_review_id_fkey FOREIGN KEY (review_id)
         REFERENCES public.reviews (id) MATCH SIMPLE
         ON UPDATE NO ACTION
-        ON DELETE NO ACTION,
+        ON DELETE CASCADE,
     CONSTRAINT review_likes_user_id_fkey FOREIGN KEY (user_id)
-        REFERENCES public.users (id) MATCH SIMPLE
-        ON UPDATE NO ACTION
-        ON DELETE NO ACTION
-);
-
-CREATE TABLE IF NOT EXISTS public.comments
-(
-    id integer NOT NULL DEFAULT nextval('comments_id_seq'::regclass),
-    review_id integer NOT NULL,
-    user_id integer NOT NULL,
-    comment_text text NOT NULL,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT comments_pkey PRIMARY KEY (id),
-    CONSTRAINT comments_user_id_fkey FOREIGN KEY (user_id)
         REFERENCES public.users (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE CASCADE
@@ -163,13 +142,43 @@ CREATE TABLE IF NOT EXISTS public.refresh_tokens
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 ALTER SEQUENCE public.universities_id_seq OWNED BY public.universities.id;
 ALTER SEQUENCE public.reviews_id_seq OWNED BY public.reviews.id;
-ALTER SEQUENCE public.comments_id_seq OWNED BY public.comments.id;
 ALTER SEQUENCE public.refresh_tokens_id_seq OWNED BY public.refresh_tokens.id;
 
--- Create functions
+CREATE OR REPLACE FUNCTION update_likes_count_on_delete()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE reviews 
+    SET likes = GREATEST(0, likes - 1) 
+    WHERE id = OLD.review_id;
+    
+    RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION update_likes_count_on_insert()
+RETURNS TRIGGER AS $$
+BEGIN
+    UPDATE reviews 
+    SET likes = likes + 1 
+    WHERE id = NEW.review_id;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_likes_on_delete
+    AFTER DELETE ON review_likes
+    FOR EACH ROW
+    EXECUTE FUNCTION update_likes_count_on_delete();
+
+CREATE TRIGGER trigger_update_likes_on_insert
+    AFTER INSERT ON review_likes
+    FOR EACH ROW
+    EXECUTE FUNCTION update_likes_count_on_insert();
+
 CREATE OR REPLACE FUNCTION public.like_review(
-	p_user_id integer,
-	p_review_id integer)
+    p_user_id integer,
+    p_review_id integer)
     RETURNS integer
     LANGUAGE 'plpgsql'
     COST 100
@@ -184,25 +193,17 @@ BEGIN
         WHERE review_likes.user_id = p_user_id 
         AND review_likes.review_id = p_review_id
     ) INTO v_exists;
-    
     IF v_exists THEN
         DELETE FROM review_likes 
         WHERE review_likes.user_id = p_user_id 
         AND review_likes.review_id = p_review_id;
-        
-        UPDATE reviews 
-        SET likes = GREATEST(0, likes - 1) 
-        WHERE id = p_review_id 
-        RETURNING likes INTO v_likes;
     ELSE
         INSERT INTO review_likes (user_id, review_id) 
         VALUES (p_user_id, p_review_id);
-        
-        UPDATE reviews 
-        SET likes = likes + 1 
-        WHERE id = p_review_id 
-        RETURNING likes INTO v_likes;
     END IF;
+    SELECT likes INTO v_likes
+    FROM reviews 
+    WHERE id = p_review_id;
     
     RETURN v_likes;
 END;

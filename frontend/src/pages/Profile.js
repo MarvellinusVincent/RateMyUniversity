@@ -62,6 +62,7 @@ const Profile = () => {
       if (response.data.success) {
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
+        await new Promise(resolve => setTimeout(resolve, 1000));
         logout();
         navigate('/', { replace: true });
       }

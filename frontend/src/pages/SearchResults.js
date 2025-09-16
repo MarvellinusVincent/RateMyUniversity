@@ -1,5 +1,6 @@
 import { useLocation, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { useDebounce } from 'react-use';
 
 const SearchResults = () => {
   const location = useLocation();
@@ -9,12 +10,16 @@ const SearchResults = () => {
   const [loading, setLoading] = useState(true);
   const [minLoadingDone, setMinLoadingDone] = useState(false);
 
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(query);
+  
+  useDebounce(() => { setDebouncedSearchTerm(query); }, 500, [query]);
+
   useEffect(() => {
     let isMounted = true;
     let minLoadingTimer;
 
     const fetchResults = async () => {
-      if (!query) {
+      if (!debouncedSearchTerm) {
         if (isMounted) {
           setResults(null);
           setLoading(false);
@@ -26,11 +31,11 @@ const SearchResults = () => {
       try {
         minLoadingTimer = setTimeout(() => {
           if (isMounted) setMinLoadingDone(true);
-        });
+        }, 300);
 
         if (isMounted) setLoading(true);
 
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/searchUniversity/all?query=${query}`);
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/searchUniversity/all?query=${debouncedSearchTerm}`);
         const universities = await response.json();
 
         if (!isMounted) return;
@@ -92,7 +97,7 @@ const SearchResults = () => {
       isMounted = false;
       clearTimeout(minLoadingTimer);
     };
-  }, [query]);
+  }, [debouncedSearchTerm]);
 
   const RatingStars = ({ rating, className = "w-5 h-5" }) => {
     const fullStars = Math.floor(rating);

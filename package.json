@@ -6,6 +6,7 @@
     "start": "concurrently \"npm run start --prefix frontend\" \"npm run start --prefix backend\""
   },
   "dependencies": {
-    "react-loader-spinner": "^6.1.6"
+    "react-loader-spinner": "^6.1.6",
+    "react-use": "^17.6.0"
   }
 }

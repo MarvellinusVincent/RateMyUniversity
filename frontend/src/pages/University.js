@@ -385,7 +385,12 @@ const University = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
       <Helmet>
-        <title>{university.name} Reviews & Ratings - {university.country} | RateMyUniversity</title>
+        <title>
+          {university.name.length > 30 
+            ? `${university.name} Reviews | RateMyUniversity`
+            : `${university.name} Reviews - ${university.country} | RateMyUniversity`
+          }
+        </title>
         <link 
           rel="canonical" 
           href={`https://ratemyuniversity.io/university/${id}`}

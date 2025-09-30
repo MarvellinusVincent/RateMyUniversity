@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { pool } = require('../config/db');
+const { sendPasswordResetEmail } = require('./email_controller');
 
 // User Signup
 const signUp = async (req, res) => {
@@ -91,30 +92,19 @@ const login = async (req, res) => {
 const logout = async (req, res) => {
   try {
     const { refreshToken } = req.body;
-    let tokensDeleted = 0;
     if (refreshToken) {
-      const result = await pool.query(
+      await pool.query(
         'DELETE FROM refresh_tokens WHERE token = $1', 
         [refreshToken]
       );
-      tokensDeleted = result.rowCount;
-    }
-    const cleanupResult = await pool.query(
-      'DELETE FROM refresh_tokens WHERE created_at < NOW() - INTERVAL \'7 days\''
-    );
-    if (cleanupResult.rowCount > 0) {
-      console.log(`Cleaned up ${cleanupResult.rowCount} expired refresh tokens`);
     }
     res.json({ 
-      message: 'Logout successful',
-      tokensDeleted: tokensDeleted,
-      expiredTokensCleanedUp: cleanupResult.rowCount
+      message: 'Logout successful'
     });
   } catch (error) {
     console.error('Logout error:', error);
-    res.json({ 
-      message: 'Logout completed',
-      warning: 'Token cleanup may have failed'
+    res.status(500).json({ 
+      error: 'Logout failed'
     });
   }
 };
@@ -360,8 +350,8 @@ const deleteUser = async (req, res) => {
     
     await client.query('COMMIT');
     
-    console.log(`Successfully deleted user ${userId} (${user.username})`);
-    
+    console.log(`Successfully deleted user ${userId}`);
+
     res.status(200).json({
       success: true,
       message: 'Account deleted successfully',
@@ -384,5 +374,132 @@ const deleteUser = async (req, res) => {
   }
 };
 
+// Forgot Password
+const forgotPassword = async (req, res) => {
+  try {
+    const {email}  = req.body;
+    if (!email) {
+      return res.status(400).json({error: "Email is required"});
+    }
+    const userResult = await pool.query('SELECT id, username, email FROM users WHERE email = $1', [email]);
+    if (userResult.rows.length > 0) {
+      const user = userResult.rows[0];
+      const resetToken = jwt.sign(
+        {
+          id: user.id,
+          email: user.email,
+          type: 'password_reset'
+        },
+        process.env.JWT_RESET_SECRET,
+        { expiresIn: '15m'}
+      );
+      await pool.query(
+        `INSERT INTO password_reset_tokens (user_id, token, expires_at) 
+         VALUES ($1, $2, NOW() + INTERVAL '15 minutes') 
+         ON CONFLICT (user_id) 
+         DO UPDATE SET token = $2, expires_at = NOW() + INTERVAL '15 minutes', created_at = NOW()`,
+        [user.id, resetToken]
+      );
+      const resetLink = `${process.env.FRONTEND_URL}/resetPassword?token=${resetToken}`;
+      try {
+        await sendPasswordResetEmail(user.email, user.username, resetLink);
+      } catch (emailError) {
+        console.error('Failed to send password reset email:', emailError);
+      }
+      console.log(`Password reset requested for user ${user.id}`);
+    } else {
+      await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
+      console.log(`Password reset requested for non-existent email`);
+    }
+    res.status(200).json({ 
+      message: "If an account with that email exists, we've sent you a password reset link." 
+    });
+  } catch (error) {
+    console.error("Error during forgot password:", error);
+    res.status(500).json({error: "Internal server error"});
+  }
+}
 
-module.exports = { signUp, login, logout, refreshToken, verifyUser, getUser, updateUsername, updatePassword, getReviews, deleteUser };
+// Reset Password
+const resetPassword = async (req, res) => {
+  try {
+    const { token, newPassword, confirmPassword } = req.body;
+    if (!token || !newPassword || !confirmPassword) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+    if (newPassword !== confirmPassword) {
+      return res.status(400).json({ error: "Passwords do not match" });
+    }
+    let decoded;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_RESET_SECRET);
+      if (decoded.type !== 'password_reset') {
+        return res.status(400).json({ error: "Invalid reset token" });
+      }
+    } catch (tokenError) {
+      if (tokenError.name === 'TokenExpiredError') {
+        return res.status(400).json({ error: "Reset token has expired. Please request a new one." });
+      }
+      return res.status(400).json({ error: "Invalid reset token" });
+    }
+    const tokenResult = await pool.query(
+      'SELECT user_id FROM password_reset_tokens WHERE token = $1 AND user_id = $2 AND expires_at > NOW()',
+      [token, decoded.id]
+    );
+    if (tokenResult.rows.length === 0) {
+      return res.status(400).json({ error: "Invalid or expired reset token" });
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await pool.query('BEGIN');
+    try {
+      await pool.query(
+        'UPDATE users SET password_hash = $1 WHERE id = $2',
+        [hashedPassword, decoded.id]
+      );
+      await pool.query(
+        'DELETE FROM password_reset_tokens WHERE user_id = $1',
+        [decoded.id]
+      );
+      await pool.query(
+        'DELETE FROM refresh_tokens WHERE user_id = $1',
+        [decoded.id]
+      );
+      await pool.query('COMMIT');
+      console.log(`Password reset successful for user ${decoded.id}`);
+      res.status(200).json({ 
+        message: "Password reset successfully. Please login with your new password." 
+      });
+    } catch (transactionError) {
+      await pool.query('ROLLBACK');
+      throw transactionError;
+    }
+  } catch (error) {
+    console.error("Error during password reset:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+};
+
+const validateResetToken = async (req, res) => {
+  try {
+    const { token } = req.body;
+    if (!token) {
+      return res.status(400).json({ error: "Token is required" });
+    }
+    const decoded = jwt.verify(token, process.env.JWT_RESET_SECRET);
+    const tokenResult = await pool.query(
+      'SELECT expires_at FROM password_reset_tokens WHERE token = $1 AND user_id = $2 AND expires_at > NOW()',
+      [token, decoded.id]
+    );
+    if (tokenResult.rows.length === 0) {
+      return res.status(400).json({ error: "Invalid or expired reset token" });
+    }
+    res.status(200).json({ message: "Token is valid" });
+  } catch (error) {
+    if (error.name === 'TokenExpiredError') {
+      return res.status(400).json({ error: "Reset link has expired" });
+    }
+    return res.status(400).json({ error: "Invalid reset token" });
+  }
+};
+
+module.exports = { signUp, login, logout, refreshToken, verifyUser, getUser, updateUsername, updatePassword, getReviews, deleteUser, forgotPassword, resetPassword, validateResetToken };

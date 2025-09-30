@@ -27,6 +27,13 @@ CREATE SEQUENCE IF NOT EXISTS public.refresh_tokens_id_seq
     MAXVALUE 2147483647
     CACHE 1;
 
+CREATE SEQUENCE IF NOT EXISTS public.password_reset_tokens_id_seq
+    INCREMENT 1
+    START 1
+    MINVALUE 1
+    MAXVALUE 2147483647
+    CACHE 1;
+
 -- Create tables
 CREATE TABLE IF NOT EXISTS public.users
 (
@@ -138,11 +145,37 @@ CREATE TABLE IF NOT EXISTS public.refresh_tokens
         ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS public.password_reset_tokens
+(
+    id integer NOT NULL DEFAULT nextval('password_reset_tokens_id_seq'::regclass),
+    user_id integer NOT NULL,
+    token text NOT NULL,
+    expires_at timestamp with time zone NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT password_reset_tokens_pkey PRIMARY KEY (id),
+    CONSTRAINT password_reset_tokens_token_key UNIQUE (token),
+    CONSTRAINT password_reset_tokens_user_id_key UNIQUE (user_id),
+    CONSTRAINT password_reset_tokens_user_id_fkey FOREIGN KEY (user_id)
+        REFERENCES public.users (id) MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS token_cleanup_log (
+    id SERIAL PRIMARY KEY,
+    reset_tokens_deleted INTEGER NOT NULL DEFAULT 0,
+    refresh_tokens_deleted INTEGER NOT NULL DEFAULT 0,
+    cleanup_timestamp TIMESTAMP NOT NULL DEFAULT NOW(),
+    error_message TEXT NULL
+);
+
 -- Set sequence ownership
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 ALTER SEQUENCE public.universities_id_seq OWNED BY public.universities.id;
 ALTER SEQUENCE public.reviews_id_seq OWNED BY public.reviews.id;
 ALTER SEQUENCE public.refresh_tokens_id_seq OWNED BY public.refresh_tokens.id;
+ALTER SEQUENCE public.password_reset_tokens_id_seq OWNED BY public.password_reset_tokens.id;
+
 
 CREATE OR REPLACE FUNCTION update_likes_count_on_delete()
 RETURNS TRIGGER AS $$
@@ -208,3 +241,42 @@ BEGIN
     RETURN v_likes;
 END;
 $BODY$;
+
+CREATE OR REPLACE FUNCTION cleanup_expired_tokens()
+RETURNS TABLE(
+    reset_tokens_deleted INTEGER,
+    refresh_tokens_deleted INTEGER,
+    cleanup_timestamp TIMESTAMP
+) 
+LANGUAGE plpgsql
+AS $$
+DECLARE
+    reset_count INTEGER := 0;
+    refresh_count INTEGER := 0;
+BEGIN
+    DELETE FROM password_reset_tokens 
+    WHERE expires_at <= NOW();
+    
+    GET DIAGNOSTICS reset_count = ROW_COUNT;
+    
+    DELETE FROM refresh_tokens 
+    WHERE created_at < NOW() - INTERVAL '7 days';
+    
+    GET DIAGNOSTICS refresh_count = ROW_COUNT;
+    
+    INSERT INTO token_cleanup_log (reset_tokens_deleted, refresh_tokens_deleted, cleanup_timestamp)
+    VALUES (reset_count, refresh_count, NOW());
+    
+    RETURN QUERY SELECT reset_count, refresh_count, NOW()::TIMESTAMP;
+END;
+$$;
+
+-- Create indexes for better performance
+CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_expires_at 
+ON password_reset_tokens(expires_at);
+
+CREATE INDEX IF NOT EXISTS idx_refresh_tokens_created_at 
+ON refresh_tokens(created_at);
+
+
+

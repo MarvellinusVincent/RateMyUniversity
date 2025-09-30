@@ -163,8 +163,7 @@ const Login = () => {
                 </svg>
               </button>
             </form>
-
-            <div className="mt-8 text-center">
+            <div className="mt-8 text-center space-y-4">
               <p className="text-sm text-blue-600/90">
                 Don't have an account?{' '}
                 <Link 
@@ -172,6 +171,16 @@ const Login = () => {
                   className="font-medium text-blue-700 hover:text-blue-800 transition-colors duration-200 underline underline-offset-4"
                 >
                   Sign Up
+                </Link>
+              </p>
+              
+              <p className="text-sm text-blue-600/90">
+                Forgot your password?{' '}
+                <Link 
+                  to="/forgotPassword" 
+                  className="font-medium text-blue-700 hover:text-blue-800 transition-colors duration-200 underline underline-offset-4"
+                >
+                  Reset it here
                 </Link>
               </p>
             </div>

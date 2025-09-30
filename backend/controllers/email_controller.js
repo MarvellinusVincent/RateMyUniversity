@@ -81,6 +81,59 @@ const submitContactForm = async (req, res) => {
     res.status(500).json({ error: 'Failed to send email' });
   }
 };
+
+const sendPasswordResetEmail = async (email, username, resetLink) => {
+  try {
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Password Reset Request - RateMyUniversity',
+      text: `
+        Hi ${username},
+        
+        You requested a password reset for your RateMyUniversity account.
+        
+        Click the link below to reset your password:
+        ${resetLink}
+        
+        This link will expire in 15 minutes for security reasons.
+        
+        If you didn't request this password reset, please ignore this email.
+        
+        Best regards,
+        RateMyUniversity Team
+      `,
+      html: `
+        <h2>Password Reset Request</h2>
+        <p>Hi <strong>${username}</strong>,</p>
+        <p>You requested a password reset for your RateMyUniversity account.</p>
+        <p>Click the button below to reset your password:</p>
+        <div style="text-align: center; margin: 20px 0;">
+          <a href="${resetLink}" 
+             style="background-color: #3B82F6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; display: inline-block;">
+            Reset Password
+          </a>
+        </div>
+        <p>Or copy and paste this link into your browser:</p>
+        <p><a href="${resetLink}">${resetLink}</a></p>
+        <p><strong>This link will expire in 15 minutes</strong> for security reasons.</p>
+        <p>If you didn't request this password reset, please ignore this email.</p>
+        <hr>
+        <p style="color: #666; font-size: 12px;">
+          Best regards,<br>
+          RateMyUniversity Team
+        </p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log(`Password reset email sent successfully`);
+    return true;
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    throw error;
+  }
+};
   
   
-module.exports = { submitSchool, submitContactForm };
+module.exports = { submitSchool, submitContactForm, sendPasswordResetEmail };

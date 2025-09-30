@@ -55,7 +55,7 @@ const Navbar = forwardRef((props, ref) => {
                             <img 
                                 src={logo} 
                                 alt="Logo" 
-                                className="h-[2rem] w-[2rem] sm:h-[2.5rem] sm:w-[2.5rem] mr-2" 
+                                className="h-[2rem] w-[2rem] sm:h-[2.5rem] sm:w-[2.5rem] mr-4" 
                             />
                             <Link 
                                 to="/" 

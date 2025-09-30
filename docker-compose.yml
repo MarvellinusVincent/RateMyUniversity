@@ -4,8 +4,8 @@ services:
     image: postgres:15
     environment:
       POSTGRES_DB: ratemystudentlife
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: marvell
+      POSTGRES_PASSWORD: 12321
     ports:
       - "5432:5432"
     volumes:
@@ -41,3 +41,7 @@ services:
 
 volumes:
   postgres_data:
+
+
+# Postgres username: postgres
+# Postgres password: postgres

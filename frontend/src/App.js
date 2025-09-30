@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useRef, useState, useEffect } from "react";
 import Login from "./pages/Login";
 import SignUp from "./pages/SignUp";
+import ForgotPassword from "./pages/ForgotPassword";
 import Profile from "./pages/Profile";
 import Navbar from "./pages/NavBar";
 import Footer from "./pages/Footer";
@@ -20,6 +21,7 @@ import CopyrightPolicy from "./pages/CopyrightPolicy";
 import ContactUs from "./pages/ContactUs";
 import FAQ from "./pages/FAQ";
 import { HelmetProvider } from "react-helmet-async";
+import ResetPassword from "./pages/ResetPassword";
 
 function NavbarWrapper() {
   const navbarRef = useRef(null);
@@ -104,6 +106,8 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signUp" element={<SignUp />} />
+            <Route path="/forgotPassword" element={<ForgotPassword />} />
+            <Route path="/resetPassword" element={<ResetPassword />} />
             <Route path="*" element={<AuthRoutes />} />
           </Routes>
         </Router>

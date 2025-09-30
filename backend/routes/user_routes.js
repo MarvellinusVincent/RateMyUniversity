@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { authenticate } = require('../middleware/auth');
-const { signUp, login, logout, refreshToken, verifyUser, getUser, updateUsername, updatePassword, getReviews, deleteUser } = require('../controllers/user_controller');
+const { signUp, login, logout, refreshToken, verifyUser, getUser, updateUsername, updatePassword, getReviews, deleteUser, forgotPassword, resetPassword, validateResetToken } = require('../controllers/user_controller');
 
 // User Signup Route
 router.post("/signup", signUp);
@@ -30,6 +30,16 @@ router.put("/updatePassword", authenticate, updatePassword)
 // Get User Reviews Route
 router.get("/getReviews", authenticate, getReviews)
 
+// Delete User
 router.delete("/delete", authenticate, deleteUser);
+
+// Forget Password (Check if the user exists and sends link with expired time to reset password)
+router.post("/forgotPassword", forgotPassword);
+
+// Reset Password
+router.post("/resetPassword", resetPassword);
+
+// Validate Reset Token
+router.post("/validateResetToken", validateResetToken);
 
 module.exports = router;

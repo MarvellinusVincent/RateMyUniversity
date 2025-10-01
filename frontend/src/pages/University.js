@@ -485,16 +485,16 @@ const University = () => {
               {/* Top Categories */}
               <div className="lg:w-2/3 lg:pl-10">
                 <h3 className="text-3xl font-bold text-gray-800 mb-8">Best-Rated Features</h3>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="grid grid-cols-2 gap-4 sm:gap-6">
                   {topCategories.map((category, index) => (
                     <div 
                       key={index}
                       className="bg-white/90 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-white/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                     >
                       <div className="flex items-start">
-                        <span className="text-4xl mr-4">{category.icon}</span>
+                        <span className="text-3xl mr-2 sm:text-4xl sm:mr-4">{category.icon}</span>
                         <div>
-                          <h4 className="text-xl font-bold text-gray-800 mb-1">{category.label}</h4>
+                          <h4 className="text-base font-bold text-gray-800 mb-1 sm:text-xl">{category.label}</h4>
                           <div className="flex items-center">
                             <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden mr-3">
                               <div 

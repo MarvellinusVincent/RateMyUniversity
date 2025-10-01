@@ -12,11 +12,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U marvell"]
       interval: 5s
       timeout: 5s
       retries: 5
-
+  
   backend:
     build: ./backend
     ports:
@@ -25,13 +25,20 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://postgres:password@postgres:5432/ratemystudentlife
+      DATABASE_URL: postgresql://marvell:12321@postgres:5432/ratemystudentlife
       DB_HOST: postgres
       DB_PORT: 5432
       DB_DATABASE: ratemystudentlife
-      DB_USER: postgres
-      DB_PASSWORD: password
-
+      DB_USER: marvell
+      DB_PASSWORD: 12321
+      PORT: 1234
+      JWT_SECRET: aa9c2e87ecc8eb45d2b596e42b045ed18dcb9c8c663fdd1e68dded5cc14bbb1d
+      JWT_RESET_SECRET: bcdd1ea07185362759d15038cb3888105d96cd04a900cc91ebf1fff31502f102
+      JWT_REFRESH_SECRET: 99e9dded9c0d573c36d7d1baedecc192bd8754613d964e40c93ddfa655dcac099e2665e744da8ada924198a8f5b8b856dca6684b40f53cfad75ded3334f72484
+      EMAIL_USER: ratemyuniversitymv@gmail.com
+      EMAIL_PASS: vvyvyifnkuhglspl
+      FRONTEND_URL: http://localhost:3000
+  
   frontend:
     build: ./frontend
     ports:

@@ -99,7 +99,7 @@ const SearchResults = () => {
     };
   }, [debouncedSearchTerm]);
 
-  const RatingStars = ({ rating, className = "w-5 h-5" }) => {
+  const RatingStars = ({ rating, className = "w-4 h-4 sm:w-5 sm:h-5" }) => {
     const fullStars = Math.floor(rating);
     const partialStar = rating - fullStars;
     const emptyStars = 5 - Math.ceil(rating);
@@ -139,101 +139,99 @@ const SearchResults = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-20 w-96 h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
-        <div className="absolute bottom-1/3 -right-20 w-80 h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-tr from-yellow-100 to-transparent opacity-10 rounded-full blur-2xl"></div>
+        <div className="absolute top-1/4 -left-20 w-64 h-64 sm:w-96 sm:h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
+        <div className="absolute bottom-1/3 -right-20 w-56 h-56 sm:w-80 sm:h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 sm:w-64 sm:h-64 bg-gradient-to-tr from-yellow-100 to-transparent opacity-10 rounded-full blur-2xl"></div>
       </div>
 
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="flex justify-start mb-8">
+      <div className="relative max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-6 sm:py-12 md:py-16">
+        <div className="flex justify-start mb-4 sm:mb-6 md:mb-8">
           <Link 
             to="/" 
-            className="group flex items-center gap-2 bg-white/90 backdrop-blur-sm hover:bg-white px-4 py-3 rounded-xl shadow-sm hover:shadow-md border border-gray-200/70 hover:border-blue-300 transition-all duration-200"
+            className="group flex items-center gap-1.5 sm:gap-2 bg-white/90 backdrop-blur-sm hover:bg-white px-3 py-2 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl shadow-sm hover:shadow-md border border-gray-200/70 hover:border-blue-300 transition-all duration-200"
           >
             <svg 
-              className="w-5 h-5 text-blue-600 group-hover:text-blue-700 transition-colors" 
+              className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 group-hover:text-blue-700 transition-colors" 
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
-            <span className="font-medium text-gray-700 group-hover:text-gray-900">
+            <span className="text-sm sm:text-base font-medium text-gray-700 group-hover:text-gray-900">
               Back to Home
             </span>
           </Link>
         </div>
 
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative mb-12">
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative mb-8 sm:mb-12">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-pink-50/30 opacity-30"></div>
-          <div className="relative p-8 md:p-10">
-            <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 mb-2">
+          <div className="relative p-5 sm:p-8 md:p-10">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 mb-2">
               Search Results
             </h1>
-            <p className="text-xl text-gray-600 mb-6">
+            <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-4 sm:mb-6">
               Showing results for <span className="font-semibold text-gray-800">"{query}"</span>
             </p>
 
             {(!minLoadingDone || loading) ? (
               <div className="flex justify-center py-12">
                 <div className="flex flex-col items-center">
-                  <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-4"></div>
-                  <p className="text-gray-600">Finding matching universities...</p>
+                  <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-blue-500 mb-3 sm:mb-4"></div>
+                  <p className="text-sm sm:text-base text-gray-600">Finding matching universities...</p>
                 </div>
               </div>
             ) : results === null ? (
               <div className="text-center py-12">
-                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <h3 className="mt-2 text-lg font-medium text-gray-900">Ready to search</h3>
-                <p className="mt-1 text-gray-500">Enter a search term to find universities</p>
+                <h3 className="mt-2 text-base sm:text-lg font-medium text-gray-900">Ready to search</h3>
+                <p className="mt-1 text-sm sm:text-base text-gray-500">Enter a search term to find universities</p>
               </div>
             ) : results.length > 0 ? (
               <>
-                <div className="space-y-6">
+                <div className="space-y-4 sm:space-y-6">
                   {results.map(uni => (
                     <Link 
                       key={uni.id} 
                       to={`/university/${uni.id}`}
                       className="block group"
                     >
-                      <div className="bg-white/90 backdrop-blur-sm p-6 rounded-xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 group-hover:border-blue-300">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between">
-                          <div className="mb-4 md:mb-0">
-                            <h2 className="text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors">
+                      <div className="bg-white/90 backdrop-blur-sm p-4 sm:p-5 md:p-6 rounded-xl border border-gray-200/50 shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1 group-hover:border-blue-300">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+                          <div className="flex-1 min-w-0">
+                            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800 group-hover:text-blue-600 transition-colors truncate">
                               {uni.name}
                             </h2>
-                            <div className="flex items-center mt-2">
-                              <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div className="flex items-center mt-1.5 sm:mt-2">
+                              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500 mr-1.5 sm:mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
                               </svg>
-                              <span className="text-gray-600">{uni.country}</span>
+                              <span className="text-sm sm:text-base text-gray-600 truncate">{uni.country}</span>
                             </div>
                           </div>
-                          <div className="flex items-center">
+                          <div className="flex items-center justify-between md:justify-end gap-3 sm:gap-4">
                             {uni.review_count > 0 ? (
-                              <>
-                                <div className="text-center mr-6">
-                                  <div className="text-3xl font-bold text-gray-800">
-                                    {uni.average_rating.toFixed(1)}
-                                  </div>
-                                  <div className="flex flex-col items-center">
-                                    <RatingStars rating={uni.average_rating} className="w-4 h-4" />
-                                    <span className="text-xs text-gray-500 mt-1">
-                                      {uni.review_count} {uni.review_count === 1 ? 'review' : 'reviews'}
-                                    </span>
-                                  </div>
+                              <div className="text-center">
+                                <div className="text-2xl sm:text-3xl font-bold text-gray-800">
+                                  {uni.average_rating.toFixed(1)}
                                 </div>
-                              </>
+                                <div className="flex flex-col items-center">
+                                  <RatingStars rating={uni.average_rating} className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                  <span className="text-xs text-gray-500 mt-1">
+                                    {uni.review_count} {uni.review_count === 1 ? 'review' : 'reviews'}
+                                  </span>
+                                </div>
+                              </div>
                             ) : (
-                              <div className="text-center mr-6">
-                                <div className="text-sm text-gray-500 italic">No reviews yet</div>
+                              <div className="text-center">
+                                <div className="text-xs sm:text-sm text-gray-500 italic">No reviews yet</div>
                               </div>
                             )}
                             <svg 
-                              className="w-6 h-6 text-gray-400 group-hover:text-blue-500 transition-colors" 
+                              className="w-5 h-5 sm:w-6 sm:h-6 text-gray-400 group-hover:text-blue-500 transition-colors flex-shrink-0" 
                               fill="none" 
                               stroke="currentColor" 
                               viewBox="0 0 24 24"
@@ -246,39 +244,39 @@ const SearchResults = () => {
                     </Link>
                   ))}
                 </div>
-                <div className="text-center py-12">
-                  <h3 className="mt-2 text-lg font-medium text-gray-900">Missing your university?</h3>
-                  <p className="mt-1 text-gray-500">We'll add it to our database</p>
-                  <div className="mt-6">
-                  <Link
-                    to="/addSchool"
-                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                  >
-                    <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                    Add a School
-                  </Link>
+                <div className="text-center py-8 sm:py-12">
+                  <h3 className="mt-2 text-base sm:text-lg font-medium text-gray-900">Missing your university?</h3>
+                  <p className="mt-1 text-sm sm:text-base text-gray-500">We'll add it to our database</p>
+                  <div className="mt-4 sm:mt-6">
+                    <Link
+                      to="/addSchool"
+                      className="inline-flex items-center px-3.5 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                    >
+                      <svg className="-ml-0.5 sm:-ml-1 mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                      </svg>
+                      Add a School
+                    </Link>
                   </div>
                 </div>
               </>
             ) : (
               <div className="text-center py-12">
-                <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg className="mx-auto h-10 w-10 sm:h-12 sm:w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <h3 className="mt-2 text-lg font-medium text-gray-900">No universities found</h3>
-                <p className="mt-1 text-gray-500">Try a different search term or add your school</p>
-                <div className="mt-6">
-                <Link
-                  to="/addSchool"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                >
-                  <svg className="-ml-1 mr-2 h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                  </svg>
-                  Add a School
-                </Link>
+                <h3 className="mt-2 text-base sm:text-lg font-medium text-gray-900">No universities found</h3>
+                <p className="mt-1 text-sm sm:text-base text-gray-500">Try a different search term or add your school</p>
+                <div className="mt-4 sm:mt-6">
+                  <Link
+                    to="/addSchool"
+                    className="inline-flex items-center px-3.5 sm:px-4 py-2 border border-transparent text-xs sm:text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                  >
+                    <svg className="-ml-0.5 sm:-ml-1 mr-1.5 sm:mr-2 h-4 w-4 sm:h-5 sm:w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                    Add a School
+                  </Link>
                 </div>
               </div>
             )}

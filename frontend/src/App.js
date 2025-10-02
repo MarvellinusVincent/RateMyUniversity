@@ -1,3 +1,4 @@
+import { Analytics } from '@vercel/analytics/react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { useRef, useState, useEffect } from "react";
@@ -111,6 +112,7 @@ function App() {
             <Route path="*" element={<AuthRoutes />} />
           </Routes>
         </Router>
+        <Analytics />
       </AuthProvider>
     </HelmetProvider>
   );

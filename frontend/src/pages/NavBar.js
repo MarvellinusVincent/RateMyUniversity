@@ -49,31 +49,35 @@ const Navbar = forwardRef((props, ref) => {
                   paddingRight: 'env(safe-area-inset-right)'
                 }}
             >
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="flex justify-between items-center h-16">
-                        <div className="flex items-center flex-shrink-0">
+                <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+                    <div className="flex justify-between items-center h-14 sm:h-16">
+                        <div className="flex items-center flex-shrink-0 min-w-0">
                             <img 
                                 src={logo} 
                                 alt="Logo" 
-                                className="h-[2rem] w-[2rem] sm:h-[2.5rem] sm:w-[2.5rem] mr-4" 
+                                className="h-8 w-8 sm:h-10 sm:w-10 mr-2 sm:mr-4 flex-shrink-0" 
                             />
                             <Link 
                                 to="/" 
-                                className="text-lg sm:text-xl font-medium text-gray-900 whitespace-nowrap hover:text-gray-700"
+                                className="text-base sm:text-lg md:text-xl font-medium text-gray-900 hover:text-gray-700 truncate"
                             >
-                                Rate My University
+                                <span className="hidden sm:inline">Rate My University</span>
+                                <span className="sm:hidden">RMU</span>
                             </Link>
                         </div>
 
-                        <div className="relative ml-4">
+                        <div className="relative ml-2 sm:ml-4 flex-shrink-0">
                             {isAuthenticated() ? (
                                 <div className="relative" ref={dropdownRef}>
                                     <button 
                                         onClick={() => setIsDropdownOpen(!isDropdownOpen)} 
-                                        className="flex items-center space-x-1 text-gray-700 hover:text-gray-900 focus:outline-none px-4 py-2.5 sm:px-3 sm:py-2 rounded-md text-sm sm:text-base font-medium"
+                                        className="flex items-center space-x-1 text-gray-700 hover:text-gray-900 focus:outline-none px-2 py-2 sm:px-3 sm:py-2 rounded-md text-sm sm:text-base font-medium"
                                         aria-expanded={isDropdownOpen}
                                         aria-haspopup="true"
                                     >
+                                        <svg className="w-5 h-5 sm:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                        </svg>
                                         <span className="hidden sm:inline">Account</span>
                                         <svg 
                                             className={`w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-200 ${isDropdownOpen ? 'transform rotate-180' : ''}`} 
@@ -86,26 +90,26 @@ const Navbar = forwardRef((props, ref) => {
 
                                     {isDropdownOpen && (
                                         <div 
-                                            className="absolute right-0 mt-2 w-48 sm:w-56 md:w-64 bg-white rounded-md shadow-lg py-1 border border-gray-200 z-50"
+                                            className="absolute right-0 mt-2 w-44 sm:w-48 md:w-56 bg-white rounded-md shadow-lg py-1 border border-gray-200 z-50"
                                             role="menu"
                                         >
                                             <Link 
                                                 to="/profile" 
-                                                className="block px-4 py-2 text-sm sm:text-base text-gray-700 hover:bg-gray-100"
+                                                className="block px-3 sm:px-4 py-2 text-sm sm:text-base text-gray-700 hover:bg-gray-100"
                                                 onClick={() => setIsDropdownOpen(false)}
                                             >
                                                 Profile
                                             </Link>
                                             <Link 
                                                 to="/savedReviews" 
-                                                className="block px-4 py-2 text-sm sm:text-base text-gray-700 hover:bg-gray-100"
+                                                className="block px-3 sm:px-4 py-2 text-sm sm:text-base text-gray-700 hover:bg-gray-100"
                                                 onClick={() => setIsDropdownOpen(false)}
                                             >
                                                 Saved Reviews
                                             </Link>
                                             <button 
                                                 onClick={handleLogoutClick}
-                                                className="block w-full text-left px-4 py-2 text-sm sm:text-base text-gray-700 hover:bg-gray-100"
+                                                className="block w-full text-left px-3 sm:px-4 py-2 text-sm sm:text-base text-gray-700 hover:bg-gray-100"
                                             >
                                                 Logout
                                             </button>
@@ -113,16 +117,16 @@ const Navbar = forwardRef((props, ref) => {
                                     )}
                                 </div>
                             ) : (
-                                <div className="flex items-center space-x-2 sm:space-x-4">
+                                <div className="flex items-center space-x-1.5 sm:space-x-2 md:space-x-4">
                                     <Link 
                                         to="/login" 
-                                        className="text-gray-700 hover:text-gray-900 px-3 py-2 rounded-md text-sm sm:text-base font-medium"
+                                        className="text-gray-700 hover:text-gray-900 px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm md:text-base font-medium"
                                     >
                                         Login
                                     </Link>
                                     <Link 
                                         to="/signUp" 
-                                        className="bg-blue-600 text-white px-3 py-2 rounded-md text-sm sm:text-base font-medium hover:bg-blue-700 whitespace-nowrap"
+                                        className="bg-blue-600 text-white px-2 sm:px-3 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm md:text-base font-medium hover:bg-blue-700 whitespace-nowrap"
                                     >
                                         Sign Up
                                     </Link>
@@ -134,26 +138,26 @@ const Navbar = forwardRef((props, ref) => {
             </nav>
 
             {showLogoutModal && (
-                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 border border-white/20">
-                        <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-blue-100 rounded-full">
-                            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-3 sm:p-4">
+                    <div className="bg-white/95 backdrop-blur-lg rounded-xl sm:rounded-2xl shadow-2xl p-5 sm:p-6 max-w-md w-full mx-3 sm:mx-4 border border-white/20">
+                        <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 bg-blue-100 rounded-full">
+                            <svg className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>
                         </div>
                         
-                        <h3 className="text-lg font-bold text-gray-900 text-center mb-2">
+                        <h3 className="text-base sm:text-lg font-bold text-gray-900 text-center mb-2">
                             Logout
                         </h3>
                         
-                        <p className="text-gray-600 text-center mb-6">
+                        <p className="text-gray-600 text-center mb-5 sm:mb-6 text-sm sm:text-base px-2">
                             Are you sure you want to log out? You'll need to sign in again to access your account.
                         </p>
                         
-                        <div className="flex gap-3 justify-between">
+                        <div className="flex gap-2 sm:gap-3 justify-between">
                             <button
                                 onClick={handleLogoutCancel}
-                                className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-all duration-200"
+                                className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-all duration-200"
                                 disabled={isLoggingOut}
                             >
                                 Cancel
@@ -161,12 +165,13 @@ const Navbar = forwardRef((props, ref) => {
                             <button
                                 onClick={handleLogoutConfirm}
                                 disabled={isLoggingOut}
-                                className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                                className="flex-1 px-3 sm:px-4 py-2 text-sm sm:text-base bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                             >
                                 {isLoggingOut ? (
                                     <>
-                                        <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
-                                        Logging out...
+                                        <div className="animate-spin rounded-full h-3 w-3 sm:h-4 sm:w-4 border-t-2 border-b-2 border-white"></div>
+                                        <span className="hidden sm:inline">Logging out...</span>
+                                        <span className="sm:hidden">...</span>
                                     </>
                                 ) : (
                                     "Logout"

@@ -87,9 +87,9 @@ const SignUp = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-tr from-blue-100 to-transparent opacity-20 rounded-full blur-2xl"></div>
       </div>
 
-      <div className="relative flex items-center justify-center min-h-screen p-6">
+      <div className="relative flex items-center justify-center min-h-screen p-4 sm:p-6">
         <div className="bg-white/90 backdrop-blur-lg rounded-2xl shadow-2xl overflow-hidden w-full max-w-md border border-white/30">
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20">
             <Link 
               to="/" 
               className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 hover:bg-blue-100 transition-colors duration-200 text-blue-500"
@@ -100,21 +100,21 @@ const SignUp = () => {
               </svg>
             </Link>
           </div>
-          <div className="p-8 sm:p-10">
-            <div className="relative mb-8 text-center">
+          <div className="p-6 sm:p-8 md:p-10">
+            <div className="relative mb-6 sm:mb-8 text-center">
               <div className="absolute -top-8 -left-8 w-16 h-16 rounded-full bg-blue-400/20 blur-xl"></div>
               <div className="absolute -bottom-8 -right-8 w-16 h-16 rounded-full bg-cyan-400/20 blur-xl"></div>
-              <h2 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 relative z-10">
+              <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 relative z-10">
                 Create Account
               </h2>
-              <p className="text-center text-blue-600/80 mt-2">Join our academic community</p>
+              <p className="text-center text-blue-600/80 mt-1 sm:mt-2 text-sm sm:text-base">Join our academic community</p>
             </div>
 
             {error && (
-              <div className="relative bg-red-50/90 backdrop-blur-sm border border-red-200 rounded-xl p-3 sm:p-4 mb-6 shadow-sm">
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="relative bg-red-50/90 backdrop-blur-sm border border-red-200 rounded-xl p-3 mb-4 sm:mb-6 shadow-sm">
+                <div className="flex items-start sm:items-center gap-2">
+                  <div className="flex-shrink-0 mt-0.5 sm:mt-0">
+                    <svg className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
@@ -135,14 +135,14 @@ const SignUp = () => {
             )}
 
             {successMessage && (
-              <div className="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg">
-                <p>{successMessage}</p>
+              <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg">
+                <p className="text-sm sm:text-base">{successMessage}</p>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div className="space-y-2">
-                <label htmlFor="username" className="block text-sm font-medium text-blue-800/90">Username</label>
+            <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
+              <div className="space-y-1.5 sm:space-y-2">
+                <label htmlFor="username" className="block text-xs sm:text-sm font-medium text-blue-800/90">Username</label>
                 <div className="relative">
                   <input
                     id="username"
@@ -150,19 +150,19 @@ const SignUp = () => {
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     required
-                    className="w-full px-4 py-3 bg-white/80 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-blue-300/70"
+                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base bg-white/80 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-blue-300/70"
                     placeholder="Enter your username"
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                     </svg>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="email" className="block text-sm font-medium text-blue-800/90">Email</label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <label htmlFor="email" className="block text-xs sm:text-sm font-medium text-blue-800/90">Email</label>
                 <div className="relative">
                   <input
                     id="email"
@@ -170,19 +170,19 @@ const SignUp = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    className="w-full px-4 py-3 bg-white/80 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-blue-300/70"
+                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base bg-white/80 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-blue-300/70"
                     placeholder="your.email@example.com"
                   />
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                     </svg>
                   </div>
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <label htmlFor="password" className="block text-sm font-medium text-blue-800/90">Password</label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <label htmlFor="password" className="block text-xs sm:text-sm font-medium text-blue-800/90">Password</label>
                 <div className="relative">
                   <input
                     id="password"
@@ -190,7 +190,7 @@ const SignUp = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full px-4 py-3 bg-white/80 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-blue-300/70"
+                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base bg-white/80 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-blue-300/70"
                     placeholder="••••••••"
                   />
                   <button
@@ -198,7 +198,7 @@ const SignUp = () => {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   >
-                    <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       {showPassword ? (
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       ) : (
@@ -227,8 +227,8 @@ const SignUp = () => {
                 )}
               </div>
                 
-              <div className="space-y-2">
-                <label htmlFor="retypePassword" className="block text-sm font-medium text-blue-800/90">Retype Password</label>
+              <div className="space-y-1.5 sm:space-y-2">
+                <label htmlFor="retypePassword" className="block text-xs sm:text-sm font-medium text-blue-800/90">Retype Password</label>
                 <div className="relative">
                   <input
                     id="retypePassword"
@@ -236,7 +236,7 @@ const SignUp = () => {
                     value={retypePassword}
                     onChange={(e) => setRetypePassword(e.target.value)}
                     required
-                    className="w-full px-4 py-3 bg-white/80 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-blue-300/70"
+                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base bg-white/80 border border-blue-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 placeholder-blue-300/70"
                     placeholder="••••••••"
                   />
                   <button
@@ -244,7 +244,7 @@ const SignUp = () => {
                     onClick={() => setShowRetypePassword(!showRetypePassword)}
                     className="absolute inset-y-0 right-0 pr-3 flex items-center"
                   >
-                    <svg className="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       {showRetypePassword ? (
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                       ) : (
@@ -270,17 +270,17 @@ const SignUp = () => {
 
               <button 
                 type="submit" 
-                className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:from-blue-700 hover:to-cyan-600 transform hover:-translate-y-1"
+                className="w-full py-3 sm:py-4 px-4 sm:px-6 text-sm sm:text-base bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 hover:from-blue-700 hover:to-cyan-600 transform hover:-translate-y-1"
               >
                 Sign Up
-                <svg className="w-5 h-5 ml-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 sm:w-5 sm:h-5 ml-2 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path>
                 </svg>
               </button>
             </form>
 
-            <div className="mt-8 text-center">
-              <p className="text-sm text-blue-600/90">
+            <div className="mt-6 sm:mt-8 text-center">
+              <p className="text-xs sm:text-sm text-blue-600/90">
                 Already have an account?{' '}
                 <Link 
                   to="/login" 

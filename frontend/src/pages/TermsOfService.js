@@ -15,28 +15,28 @@ const TermsOfService = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-gradient-to-tr from-gray-100 to-transparent opacity-10 rounded-full blur-2xl"></div>
       </div>
 
-      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="bg-white/90 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative">
+      <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+        <div className="bg-white/90 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative">
           <div className="absolute inset-0 bg-gradient-to-br from-gray-50/30 to-blue-50/30 opacity-30"></div>
           
-          <div className="relative p-8 md:p-10">
-            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6 text-center border-b-2 border-gray-200 pb-4">
+          <div className="relative p-4 sm:p-6 md:p-8 lg:p-10">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-800 mb-4 sm:mb-6 text-center border-b-2 border-gray-200 pb-3 sm:pb-4">
               TERMS OF SERVICE
             </h1>
             
-            <div className="space-y-8">
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <div className="space-y-4 sm:space-y-6 md:space-y-8">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   1. AGREEMENT TO TERMS
                 </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4">
                   THESE TERMS OF USE CONTAIN AN ARBITRATION CLAUSE AND A CLASS ACTION WAIVER CLAUSE. 
                   BY USING THIS SITE, YOU ARE ACCEPTING THE TERMS OF USE AND, WHILE YOU MAY STILL PURSUE 
                   CLAIMS AGAINST US, WITH A FEW EXCEPTIONS, YOU ARE AGREEING THAT YOU MUST PURSUE YOUR 
                   CLAIMS IN A BINDING ARBITRATION PROCEEDING (AND NOT IN A COURT) AND ONLY ON AN INDIVIDUAL 
                   (AND NOT A CLASS ACTION) BASIS.
                 </p>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   This is the official Terms of Use Agreement ("Agreement") for the RateMyUniversity.io website, 
                   application or other interactive service ("Site"). This Agreement describes your rights and 
                   responsibilities relating to the Site and is a legally binding agreement between you and 
@@ -44,33 +44,33 @@ const TermsOfService = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   2. ELIGIBILITY
                 </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4">
                   You must reside in or attend, have attended or teach 
                   at a university to use this Site. If you are not yet the required age, do not meet these requirements, 
                   or do not agree with all of the terms and conditions contained in this Agreement, please discontinue 
                   using the Site immediately.
                 </p>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   By using or attempting to use the Site, you certify that you 
                   meet all eligibility requirements, and agree to all of the terms and conditions of this Agreement.
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   3. INTELLECTUAL PROPERTY RIGHTS
                 </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4">
                   Unless otherwise indicated, the Site is our proprietary property and all source code, databases, 
                   functionality, software, website designs, audio, video, text, photographs, and graphics on the 
                   Site (collectively, the "Content") and the trademarks, service marks, and logos contained therein 
                   (the "Marks") are owned or controlled by us or licensed to us.
                 </p>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   The Content and Marks are provided on the Site "AS IS" for your information and personal use only. 
                   Except as expressly provided in these Terms of Use, no part of the Site and no Content or Marks may 
                   be copied, reproduced, aggregated, republished, uploaded, posted, publicly displayed, encoded, 
@@ -79,14 +79,14 @@ const TermsOfService = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   4. USER REPRESENTATIONS
                 </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4">
                   By using the Site, you represent and warrant that:
                 </p>
-                <ul className="list-disc pl-5 text-gray-700 space-y-2">
+                <ul className="list-disc pl-4 sm:pl-5 text-sm sm:text-base text-gray-700 space-y-1.5 sm:space-y-2">
                   <li>All registration information you submit will be true, accurate, current, and complete</li>
                   <li>You will maintain the accuracy of such information and promptly update such registration information as necessary</li>
                   <li>You have the legal capacity and you agree to comply with these Terms of Use</li>
@@ -96,19 +96,19 @@ const TermsOfService = () => {
                 </ul>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   5. PROHIBITED ACTIVITIES
                 </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4">
                   You may not access or use the Site for any purpose other than that for which we make the Site available. 
                   The Site may not be used in connection with any commercial endeavors except those that are specifically 
                   endorsed or approved by us.
                 </p>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4">
                   As a user of the Site, you agree not to:
                 </p>
-                <ul className="list-disc pl-5 text-gray-700 space-y-2">
+                <ul className="list-disc pl-4 sm:pl-5 text-sm sm:text-base text-gray-700 space-y-1.5 sm:space-y-2">
                   <li>Systematically retrieve data or other content from the Site to create or compile, directly or indirectly, a collection, compilation, database, or directory without written permission from us</li>
                   <li>Make any unauthorized use of the Site, including collecting usernames and/or email addresses of users by electronic or other means for the purpose of sending unsolicited email</li>
                   <li>Use the Site to advertise or offer to sell goods and services</li>
@@ -134,11 +134,11 @@ const TermsOfService = () => {
                 </ul>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   6. CONTRIBUTION LICENSE
                 </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4">
                   By posting your Contributions to any part of the Site, you automatically grant, and you represent 
                   and warrant that you have the right to grant, to us an unrestricted, unlimited, irrevocable, perpetual, 
                   non-exclusive, transferable, royalty-free, fully-paid, worldwide right, and license to host, use, copy, 
@@ -148,7 +148,7 @@ const TermsOfService = () => {
                   advertising, or otherwise, and to prepare derivative works of, or incorporate into other works, 
                   such Contributions, and grant and authorize sublicenses of the foregoing.
                 </p>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   This license will apply to any form, media, or technology now known or hereafter developed, and 
                   includes our use of your name, company name, and franchise name, as applicable, and any of the 
                   trademarks, service marks, trade names, logos, and personal and commercial images you provide. 
@@ -157,11 +157,11 @@ const TermsOfService = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   7. SUBMISSIONS
                 </h2>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   You acknowledge and agree that any questions, comments, suggestions, ideas, feedback, or other 
                   information regarding the Site ("Submissions") provided by you to us are non-confidential and 
                   shall become our sole property. We shall own exclusive rights, including all intellectual property 
@@ -170,14 +170,14 @@ const TermsOfService = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   8. SITE MANAGEMENT
                 </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4">
                   We reserve the right, but not the obligation, to:
                 </p>
-                <ul className="list-disc pl-5 text-gray-700 space-y-2">
+                <ul className="list-disc pl-4 sm:pl-5 text-sm sm:text-base text-gray-700 space-y-1.5 sm:space-y-2">
                   <li>Monitor the Site for violations of these Terms of Use</li>
                   <li>Take appropriate legal action against anyone who, in our sole discretion, violates the law or these Terms of Use, including without limitation, reporting such user to law enforcement authorities</li>
                   <li>In our sole discretion and without limitation, refuse, restrict access to, limit the availability of, or disable (to the extent technologically feasible) any of your Contributions or any portion thereof</li>
@@ -186,11 +186,11 @@ const TermsOfService = () => {
                 </ul>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   9. COPYRIGHT INFRINGEMENTS
                 </h2>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   We respect the intellectual property rights of others. If you believe that any material available 
                   on or through the Site infringes upon any copyright you own or control, please immediately notify 
                   us using the contact information provided below (a "Notification"). A copy of your Notification 
@@ -198,11 +198,11 @@ const TermsOfService = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   10. TERM AND TERMINATION
                 </h2>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   These Terms of Use shall remain in full force and effect while you use the Site. WITHOUT LIMITING 
                   ANY OTHER PROVISION OF THESE TERMS OF USE, WE RESERVE THE RIGHT TO, IN OUR SOLE DISCRETION AND 
                   WITHOUT NOTICE OR LIABILITY, DENY ACCESS TO AND USE OF THE SITE (INCLUDING BLOCKING CERTAIN IP 
@@ -212,45 +212,45 @@ const TermsOfService = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   11. MODIFICATIONS AND INTERRUPTIONS
                 </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4">
                   We reserve the right to change, modify, or remove the contents of the Site at any time or for any 
                   reason at our sole discretion without notice. However, we have no obligation to update any information 
                   on our Site. We also reserve the right to modify or discontinue all or part of the Site without notice 
                   at any time.
                 </p>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   We will not be liable to you or any third party for any modification, price change, suspension, 
                   or discontinuance of the Site.
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   12. GOVERNING LAW
                 </h2>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   These Terms of Use and your use of the Site are governed by and construed in accordance with the 
                   laws of the State of New York applicable to agreements made and to be entirely performed within 
                   the State of New York, without regard to its conflict of law principles.
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   13. DISCLAIMER
                 </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4">
                   THE SITE IS PROVIDED ON AN AS-IS AND AS-AVAILABLE BASIS. YOU AGREE THAT YOUR USE OF THE SITE AND 
                   OUR SERVICES WILL BE AT YOUR SOLE RISK. TO THE FULLEST EXTENT PERMITTED BY LAW, WE DISCLAIM ALL 
                   WARRANTIES, EXPRESS OR IMPLIED, IN CONNECTION WITH THE SITE AND YOUR USE THEREOF, INCLUDING, WITHOUT 
                   LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND 
                   NON-INFRINGEMENT.
                 </p>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   WE MAKE NO WARRANTIES OR REPRESENTATIONS ABOUT THE ACCURACY OR COMPLETENESS OF THE SITE'S CONTENT 
                   OR THE CONTENT OF ANY WEBSITES LINKED TO THE SITE AND WE WILL ASSUME NO LIABILITY OR RESPONSIBILITY 
                   FOR ANY (1) ERRORS, MISTAKES, OR INACCURACIES OF CONTENT AND MATERIALS, (2) PERSONAL INJURY OR 
@@ -264,28 +264,28 @@ const TermsOfService = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   14. LIMITATIONS OF LIABILITY
                 </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4">
                   IN NO EVENT WILL WE OR OUR DIRECTORS, EMPLOYEES, OR AGENTS BE LIABLE TO YOU OR ANY THIRD PARTY FOR 
                   ANY DIRECT, INDIRECT, CONSEQUENTIAL, EXEMPLARY, INCIDENTAL, SPECIAL, OR PUNITIVE DAMAGES, INCLUDING 
                   LOST PROFIT, LOST REVENUE, LOSS OF DATA, OR OTHER DAMAGES ARISING FROM YOUR USE OF THE SITE, EVEN 
                   IF WE HAVE BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
                 </p>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   NOTWITHSTANDING ANYTHING TO THE CONTRARY CONTAINED HEREIN, OUR LIABILITY TO YOU FOR ANY CAUSE 
                   WHATSOEVER AND REGARDLESS OF THE FORM OF THE ACTION, WILL AT ALL TIMES BE LIMITED TO THE AMOUNT 
                   PAID, IF ANY, BY YOU TO US DURING THE SIX (6) MONTH PERIOD PRIOR TO ANY CAUSE OF ACTION ARISING.
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   15. INDEMNIFICATION
                 </h2>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   You agree to defend, indemnify, and hold us harmless, including our subsidiaries, affiliates, 
                   and all of our respective officers, agents, partners, and employees, from and against any loss, 
                   damage, liability, claim, or demand, including reasonable attorneys' fees and expenses, made by 
@@ -297,11 +297,11 @@ const TermsOfService = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   16. USER DATA
                 </h2>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   We will maintain certain data that you transmit to the Site for the purpose of managing the 
                   performance of the Site, as well as data relating to your use of the Site. Although we perform 
                   regular routine backups of data, you are solely responsible for all data that you transmit or that 
@@ -311,11 +311,11 @@ const TermsOfService = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   17. ELECTRONIC COMMUNICATIONS, TRANSACTIONS, AND SIGNATURES
                 </h2>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   Visiting the Site, sending us emails, and completing online forms constitute electronic communications. 
                   You consent to receive electronic communications, and you agree that all agreements, notices, disclosures, 
                   and other communications we provide to you electronically, via email and on the Site, satisfy any legal 
@@ -325,17 +325,17 @@ const TermsOfService = () => {
                 </p>
               </div>
 
-              <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <div className="bg-white p-4 sm:p-5 md:p-6 rounded-lg sm:rounded-xl border border-gray-200 shadow-sm">
+                <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4 flex items-center">
                   18. MISCELLANEOUS
                 </h2>
-                <p className="text-gray-700 leading-relaxed mb-4">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed mb-3 sm:mb-4">
                   These Terms of Use and any policies or operating rules posted by us on the Site or in respect to 
                   the Site constitute the entire agreement and understanding between you and us. Our failure to exercise 
                   or enforce any right or provision of these Terms of Use shall not operate as a waiver of such right 
                   or provision.
                 </p>
-                <p className="text-gray-700 leading-relaxed">
+                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
                   We may assign any or all of our rights and obligations to others at any time. We shall not be 
                   responsible or liable for any loss, damage, delay, or failure to act caused by any cause beyond 
                   our reasonable control. If any provision or part of a provision of these Terms of Use is determined 
@@ -344,7 +344,7 @@ const TermsOfService = () => {
                 </p>
               </div>
 
-              <p className="text-sm text-gray-500 text-center mb-8">
+              <p className="text-xs sm:text-sm text-gray-500 text-center mb-4 sm:mb-8">
                 Last Updated: September 1, 2025
               </p>
             </div>

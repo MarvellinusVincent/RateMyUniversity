@@ -174,42 +174,42 @@ const Profile = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-48 md:w-64 md:h-64 bg-gradient-to-tr from-yellow-100 to-transparent opacity-10 rounded-full blur-2xl"></div>
       </div>
 
-      <div className="relative max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
-        <div className="mb-6">
+      <div className="relative max-w-2xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8 md:py-12">
+        <div className="mb-4 sm:mb-6">
           <Link 
             to="/" 
-            className="inline-flex items-center gap-2 bg-white/90 backdrop-blur-sm hover:bg-white px-4 py-2 rounded-xl shadow-sm hover:shadow-md border border-gray-200/70 hover:border-blue-300 transition-all duration-200"
+            className="inline-flex items-center gap-1.5 sm:gap-2 bg-white/90 backdrop-blur-sm hover:bg-white px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg sm:rounded-xl shadow-sm hover:shadow-md border border-gray-200/70 hover:border-blue-300 transition-all duration-200"
           >
-            <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
             </svg>
-            <span className="font-medium text-gray-700">Back to Home</span>
+            <span className="text-sm sm:text-base font-medium text-gray-700">Back to Home</span>
           </Link>
         </div>
         
-        <div className="bg-white/80 backdrop-blur-lg rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative">
+        <div className="bg-white/80 backdrop-blur-lg rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden border border-white/20 relative">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-50/30 to-pink-50/30 opacity-30"></div>
           
-          <div className="relative p-8 md:p-10">
-            <div className="flex justify-between items-start mb-6">
+          <div className="relative p-4 sm:p-8 md:p-10">
+            <div className="flex justify-between items-start mb-4 sm:mb-6">
               <div>
-                <h1 className="text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 mb-2">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-teal-500 mb-1 sm:mb-2">
                   Your Profile
                 </h1>
-                <p className="text-gray-600">
+                <p className="text-sm sm:text-base text-gray-600">
                   Manage your account details
                 </p>
               </div>
               <button
                 onClick={handleDeleteAccount}
                 disabled={isDeleting}
-                className="p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="p-1.5 sm:p-2 text-red-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Delete account"
               >
                 {isDeleting ? (
-                  <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-red-500"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 sm:h-5 sm:w-5 border-t-2 border-b-2 border-red-500"></div>
                 ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                   </svg>
                 )}
@@ -241,53 +241,53 @@ const Profile = () => {
             )}
 
             {!isEditingDetails ? (
-              <div className="space-y-6">
-                <div className="bg-white/90 backdrop-blur-sm p-6 rounded-xl border border-gray-200/50 shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Account Information</h3>
-                  <div className="space-y-4">
+              <div className="space-y-4 sm:space-y-6">
+                <div className="bg-white/90 backdrop-blur-sm p-4 sm:p-6 rounded-xl border border-gray-200/50 shadow-sm">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Account Information</h3>
+                  <div className="space-y-3 sm:space-y-4">
                     <div>
-                      <p className="text-sm text-gray-500">Username</p>
-                      <p className="text-lg font-medium text-gray-800">{user.username}</p>
+                      <p className="text-xs sm:text-sm text-gray-500">Username</p>
+                      <p className="text-base sm:text-lg font-medium text-gray-800">{user.username}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Email</p>
-                      <p className="text-lg font-medium text-gray-800">{user.email}</p>
+                      <p className="text-xs sm:text-sm text-gray-500">Email</p>
+                      <p className="text-base sm:text-lg font-medium text-gray-800">{user.email}</p>
                     </div>
                     <div>
-                      <p className="text-sm text-gray-500">Password</p>
-                      <p className="text-lg font-medium text-gray-800">••••••••</p>
+                      <p className="text-xs sm:text-sm text-gray-500">Password</p>
+                      <p className="text-base sm:text-lg font-medium text-gray-800">••••••••</p>
                     </div>
                   </div>
                 </div>
 
                 <button
                   onClick={() => setIsEditingDetails(true)}
-                  className="w-full py-2 md:py-3 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
+                  className="w-full py-2.5 sm:py-3 bg-gradient-to-r from-blue-500 to-teal-500 hover:from-blue-600 hover:to-teal-600 text-white text-sm sm:text-base font-semibold rounded-xl hover:shadow-lg transition-all duration-300 transform hover:-translate-y-0.5">
                   Edit Details
                 </button>
               </div>
             ) : (
-              <div className="space-y-6">
-                <div className="bg-white/90 backdrop-blur-sm p-6 rounded-xl border border-gray-200/50 shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-800 mb-4">Edit Information</h3>
+              <div className="space-y-4 sm:space-y-6">
+                <div className="bg-white/90 backdrop-blur-sm p-4 sm:p-6 rounded-xl border border-gray-200/50 shadow-sm">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-4">Edit Information</h3>
                   
-                  <div className="space-y-4">
+                  <div className="space-y-3 sm:space-y-4">
                     {/* Username Section */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">Username</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Username</label>
                       {isEditingUsername ? (
-                        <div className="space-y-3">
+                        <div className="space-y-2 sm:space-y-3">
                           <input
                             type="text"
                             value={newName}
                             onChange={(e) => setNewName(e.target.value)}
-                            className="w-full p-2 md:p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                            className="w-full p-2 sm:p-3 text-sm sm:text-base bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
                           />
-                          <div className="flex space-x-3">
+                          <div className="flex space-x-2 sm:space-x-3">
                             <button
                               onClick={() => saveDetails("username")}
                               disabled={loading}
-                              className="flex-1 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-md"
+                              className="flex-1 py-2 text-sm sm:text-base bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-md"
                             >
                               {loading ? 'Saving...' : 'Save'}
                             </button>
@@ -297,7 +297,7 @@ const Profile = () => {
                                 setErrorMessage("");
                                 setNewName(user.username);
                               }}
-                              className="flex-1 py-2 bg-gray-200/90 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
+                              className="flex-1 py-2 text-sm sm:text-base bg-gray-200/90 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
                             >
                               Cancel
                             </button>
@@ -305,10 +305,10 @@ const Profile = () => {
                         </div>
                       ) : (
                         <div className="flex items-center justify-between">
-                          <p className="text-lg font-medium text-gray-800">{user.username}</p>
+                          <p className="text-base sm:text-lg font-medium text-gray-800">{user.username}</p>
                           <button
                             onClick={() => setIsEditingUsername(true)}
-                            className="py-1 px-3 bg-blue-100/90 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors shadow-sm"
+                            className="py-1 px-2.5 sm:px-3 text-xs sm:text-sm bg-blue-100/90 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors shadow-sm"
                           >
                             Edit
                           </button>
@@ -318,26 +318,26 @@ const Profile = () => {
 
                     {/* Password Section */}
                     <div>
-                      <label className="block text-sm font-medium text-gray-600 mb-1">Password</label>
+                      <label className="block text-xs sm:text-sm font-medium text-gray-600 mb-1">Password</label>
                       {isEditingPassword ? (
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                           <div>
-                            <label className="block text-sm text-gray-500 mb-1">New Password</label>
+                            <label className="block text-xs sm:text-sm text-gray-500 mb-1">New Password</label>
                             <div className="relative">
                               <input
                                 type={showNewPassword ? "text" : "password"}
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
-                                className="w-full p-2 md:p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                                className="w-full p-2 sm:p-3 text-sm sm:text-base bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
                                 placeholder="Enter new password"
                               />
                               <button
                                 type="button"
                                 onClick={() => setShowNewPassword(!showNewPassword)}
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                className="absolute inset-y-0 right-0 pr-2 sm:pr-3 flex items-center"
                                 aria-label={showNewPassword ? "Hide password" : "Show password"}
                               >
-                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   {showNewPassword ? (
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                   ) : (
@@ -348,22 +348,22 @@ const Profile = () => {
                             </div>
                           </div>
                           <div>
-                            <label className="block text-sm text-gray-500 mb-1">Confirm Password</label>
+                            <label className="block text-xs sm:text-sm text-gray-500 mb-1">Confirm Password</label>
                             <div className="relative">
                               <input
                                 type={showRetypePassword ? "text" : "password"}
                                 value={retypeNewPassword}
                                 onChange={(e) => setRetypeNewPassword(e.target.value)}
-                                className="w-full p-2 md:p-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
+                                className="w-full p-2 sm:p-3 text-sm sm:text-base bg-white/90 backdrop-blur-sm border border-gray-200/50 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
                                 placeholder="Confirm new password"
                               />
                               <button
                                 type="button"
                                 onClick={() => setShowRetypePassword(!showRetypePassword)}
-                                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                                className="absolute inset-y-0 right-0 pr-2 sm:pr-3 flex items-center"
                                 aria-label={showRetypePassword ? "Hide password" : "Show password"}
                               >
-                                <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   {showRetypePassword ? (
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                   ) : (
@@ -373,11 +373,11 @@ const Profile = () => {
                               </button>
                             </div>
                           </div>
-                          <div className="flex space-x-3">
+                          <div className="flex space-x-2 sm:space-x-3">
                             <button
                               onClick={() => saveDetails("password")}
                               disabled={loading}
-                              className="flex-1 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-md"
+                              className="flex-1 py-2 text-sm sm:text-base bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all shadow-md"
                             >
                               {loading ? 'Saving...' : 'Save'}
                             </button>
@@ -388,7 +388,7 @@ const Profile = () => {
                                 setRetypeNewPassword("");
                                 setErrorMessage("");
                               }}
-                              className="flex-1 py-2 bg-gray-200/90 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
+                              className="flex-1 py-2 text-sm sm:text-base bg-gray-200/90 hover:bg-gray-300 text-gray-700 rounded-lg transition-colors"
                             >
                               Cancel
                             </button>
@@ -396,10 +396,10 @@ const Profile = () => {
                         </div>
                       ) : (
                         <div className="flex items-center justify-between">
-                          <p className="text-lg font-medium text-gray-800">••••••••</p>
+                          <p className="text-base sm:text-lg font-medium text-gray-800">••••••••</p>
                           <button
                             onClick={() => setIsEditingPassword(true)}
-                            className="py-1 px-3 bg-blue-100/90 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors shadow-sm"
+                            className="py-1 px-2.5 sm:px-3 text-xs sm:text-sm bg-blue-100/90 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors shadow-sm"
                           >
                             Edit
                           </button>
@@ -418,7 +418,7 @@ const Profile = () => {
                     setRetypeNewPassword("");
                     setErrorMessage("");
                   }}
-                  className="w-full py-3 bg-white/90 backdrop-blur-sm border border-gray-200/50 text-gray-700 font-semibold rounded-xl hover:bg-gray-100/90 transition-all shadow-sm hover:shadow-md"
+                  className="w-full py-2.5 sm:py-3 text-sm sm:text-base bg-white/90 backdrop-blur-sm border border-gray-200/50 text-gray-700 font-semibold rounded-xl hover:bg-gray-100/90 transition-all shadow-sm hover:shadow-md"
                 >
                   Back to Profile
                 </button>
@@ -429,25 +429,25 @@ const Profile = () => {
 
         {showDeleteModal && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-6 max-w-md w-full mx-4 border border-white/20">
-              <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white/95 backdrop-blur-lg rounded-2xl shadow-2xl p-5 sm:p-6 max-w-md w-full mx-4 border border-white/20">
+              <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-3 sm:mb-4 bg-red-100 rounded-full">
+                <svg className="w-5 h-5 sm:w-6 sm:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
                 </svg>
               </div>
               
-              <h3 className="text-lg font-bold text-gray-900 text-center mb-2">
+              <h3 className="text-base sm:text-lg font-bold text-gray-900 text-center mb-2">
                 Delete Account
               </h3>
               
-              <p className="text-gray-600 text-center mb-6">
+              <p className="text-sm sm:text-base text-gray-600 text-center mb-5 sm:mb-6">
                 Are you sure you want to permanently delete your account? This will remove all your data, including reviews and profile information. This action cannot be undone.
               </p>
               
-              <div className="flex gap-3 justify-between">
+              <div className="flex gap-2 sm:gap-3 justify-between">
                 <button
                   onClick={handleDeleteCancel}
-                  className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-all duration-200"
+                  className="px-3 sm:px-4 py-2 text-sm sm:text-base text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg font-medium transition-all duration-200"
                   disabled={isDeleting}
                 >
                   Cancel
@@ -455,12 +455,13 @@ const Profile = () => {
                 <button
                   onClick={handleDeleteConfirm}
                   disabled={isDeleting}
-                  className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-3 sm:px-4 py-2 text-sm sm:text-base bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                 >
                   {isDeleting ? (
                     <>
                       <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-white"></div>
-                      Deleting...
+                      <span className="hidden xs:inline">Deleting...</span>
+                      <span className="xs:hidden">...</span>
                     </>
                   ) : (
                     "Delete Account"

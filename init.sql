@@ -278,5 +278,18 @@ ON password_reset_tokens(expires_at);
 CREATE INDEX IF NOT EXISTS idx_refresh_tokens_created_at 
 ON refresh_tokens(created_at);
 
+CREATE INDEX IF NOT EXISTS idx_reviews_university_id 
+ON reviews(university_id);
+
+CREATE INDEX IF NOT EXISTS idx_reviews_created_at 
+ON reviews(created_at DESC);
+
+CREATE INDEX IF NOT EXISTS idx_review_likes_review_id 
+ON review_likes(review_id);
+
+CREATE INDEX IF NOT EXISTS idx_review_likes_user_review 
+ON review_likes(user_id, review_id);
+
+
 
 

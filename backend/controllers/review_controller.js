@@ -267,4 +267,31 @@ const deleteReview = async (req, res) => {
   }
 };
 
-module.exports = { submitReview, submitLike, checkIfLiked, deleteReview };
+const getBulkLikeStatus = async (req, res) => {
+  const { reviewIds } = req.query;
+  const userId = req.user.id;
+  
+  try {
+    const ids = reviewIds.split(',').map(id => parseInt(id));
+    
+    const query = `
+      SELECT review_id, true as has_liked
+      FROM review_likes
+      WHERE user_id = $1 AND review_id = ANY($2)
+    `;
+    
+    const result = await pool.query(query, [userId, ids]);
+    
+    const likeMap = {};
+    ids.forEach(id => likeMap[id] = false);
+    result.rows.forEach(row => likeMap[row.review_id] = true);
+    
+    res.json({ likes: likeMap });
+  } catch (error) {
+    console.error('Error fetching bulk like status:', error);
+    res.status(500).json({ error: 'Failed to fetch like status' });
+  }
+};
+
+
+module.exports = { submitReview, submitLike, checkIfLiked, deleteReview, getBulkLikeStatus};

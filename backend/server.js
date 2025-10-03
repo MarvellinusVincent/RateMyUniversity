@@ -19,7 +19,7 @@ app.use(cors(corsOptions));
 
 const userRoutes = require('./routes/user_routes');
 const reviewRoutes = require('./routes/review_route');
-const specificUniversityRoutes = require('./routes/university');
+const specificUniversityRoutes = require('./routes/university_route');
 const searchUniversityRoutes = require('./routes/search_university');
 const emailRoutes = require('./routes/email_route');
 

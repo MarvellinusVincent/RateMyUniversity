@@ -1,8 +1,9 @@
 import { useParams } from 'react-router-dom';
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { Helmet } from 'react-helmet-async';
+import React from 'react';
 import useClickOutside from '../contexts/UseClickOutside';
 import { useAuth } from '../contexts/AuthContext';
 import { useAuthStore } from '../stores/authStore';
@@ -11,10 +12,14 @@ const University = () => {
   const navigate = useNavigate();
   const [university, setUniversity] = useState(null);
   const [reviews, setReviews] = useState([]);
-  const [usernames, setUsernames] = useState({});
   const [sortOption, setSortOption] = useState('recent');
   const [isLoading, setIsLoading] = useState(true);
   const [showNotFound, setShowNotFound] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const REVIEWS_PER_PAGE = 20;
+  
   const [averageRatings, setAverageRatings] = useState({
     overall: 0,
     safety: 0,
@@ -40,122 +45,87 @@ const University = () => {
     const fetchUniversityDetails = async () => {
       setIsLoading(true);
       setShowNotFound(false);
+      
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/specificUni/${id}`);
-        const universityData = await response.json();
+        // Fetch university and reviews in parallel
+        const [universityResponse, reviewsResponse] = await Promise.all([
+          fetch(`${process.env.REACT_APP_API_URL}/specificUni/${id}`),
+          fetch(`${process.env.REACT_APP_API_URL}/specificUni/${id}/reviews?page=${currentPage}&limit=${REVIEWS_PER_PAGE}&sort=${sortOption}`)
+        ]);
+
+        const universityData = await universityResponse.json();
+        const reviewsData = await reviewsResponse.json();
+        
         setUniversity(universityData);
 
-        if (universityData.id) {
-          const fetchReviews = async () => {
+        if (reviewsData.reviews && reviewsData.reviews.length > 0) {
+          const { token } = useAuthStore.getState();
+          let processedReviews = reviewsData.reviews;
+          
+          // Batch fetch like status for all reviews at once
+          if (token) {
             try {
-              const response = await fetch(`${process.env.REACT_APP_API_URL}/specificUni/${universityData.id}/reviews`);
-              const reviewsData = await response.json();
-              
-              const { token } = useAuthStore.getState();
-              let processedReviews;
-              
-              if (token) {
-                processedReviews = await Promise.all(
-                  (reviewsData.reviews || []).map(async (review) => {
-                    try {
-                      const likeResponse = await fetch(`${process.env.REACT_APP_API_URL}/reviews/${review.id}/hasLiked`, {
-                        headers: {
-                          "Authorization": `Bearer ${token}`,
-                        }
-                      });
-                      const likeData = await likeResponse.json();
-                      return { ...review, isLiked: likeData.hasLiked };
-                    } catch (error) {
-                      console.error('Error checking like status:', error);
-                      return { ...review, isLiked: false };
-                    }
-                  })
-                );
-              } else {
-                processedReviews = (reviewsData.reviews || []).map(review => ({ ...review, isLiked: false }));
-              }
-              setReviews(processedReviews);
-              return reviewsData;
-            } catch (error) {
-              console.error('Error fetching reviews:', error);
-              setReviews([]);
-              return { reviews: [] };
-            }
-          };
-        
-          const reviewsData = await fetchReviews();
-
-          const users = {};
-          if (reviewsData.reviews) {
-            for (let review of reviewsData.reviews) {
-              if (review.user_id) {
-                try {
-                  const userResponse = await fetch(`${process.env.REACT_APP_API_URL}/users/getUser?userID=${review.user_id}`);
-                  const userData = await userResponse.json();
-                  users[review.user_id] = userData.username;
-                } catch (error) {
-                  console.error('Error fetching user:', error);
-                  users[review.user_id] = "Anonymous";
+              const reviewIds = reviewsData.reviews.map(r => r.id).join(',');
+              const likeResponse = await fetch(
+                `${process.env.REACT_APP_API_URL}/reviews/bulk-like-status?reviewIds=${reviewIds}`,
+                {
+                  headers: { "Authorization": `Bearer ${token}` }
                 }
-              } else {
-                users[review.id] = "Anonymous";
-              }
+              );
+              const likeData = await likeResponse.json();
+              
+              processedReviews = reviewsData.reviews.map(review => ({
+                ...review,
+                isLiked: likeData.likes[review.id] || false
+              }));
+            } catch (error) {
+              console.error('Error fetching like status:', error);
+              processedReviews = reviewsData.reviews.map(r => ({ ...r, isLiked: false }));
             }
-          }
-          setUsernames(users);
-
-          const defaultRatings = {
-            overall: 0,
-            facilities: 0,
-            happiness: 0,
-            social: 0,
-            opportunities: 0,
-            difficulty: 0,
-            clubs: 0,
-            location: 0,
-            internet: 0,
-            safety: 0,
-            food: 0,
-            academic: 0,
-            transportation: 0,
-            professors: 0,
-            athletics: 0,
-            housing: 0
-          };
-
-          if (reviewsData.reviews && reviewsData.reviews.length > 0) {
-            const totals = reviewsData.reviews.reduce((acc, review) => {
-              return {
-                overall: acc.overall + (review.overall_rating || 0),
-                facilities: acc.facilities + (review.facilities_rating || 0),
-                happiness: acc.happiness + (review.happiness_rating || 0),
-                social: acc.social + (review.social_life_rating || 0),
-                opportunities: acc.opportunities + (review.opportunities_rating || 0),
-                difficulty: acc.difficulty + (review.difficulty_rating || 0),
-                clubs: acc.clubs + (review.clubs_rating || 0),
-                location: acc.location + (review.location_rating || 0),
-                internet: acc.internet + (review.internet_rating || 0),
-                safety: acc.safety + (review.safety_rating || 0),
-                food: acc.food + (review.food_rating || 0),
-                academic: acc.academic + (review.academic_rating || 0),
-                transportation: acc.transportation + (review.transportation_rating || 0),
-                professors: acc.professors + (review.professors_rating || 0),
-                athletics: acc.athletics + (review.athletics_rating || 0),
-                housing: acc.housing + (review.housing_rating || 0)
-              };
-            }, defaultRatings);
-
-            const averages = {};
-            for (const key in totals) {
-              averages[key] = parseFloat((totals[key] / reviewsData.reviews.length).toFixed(1));
-            }
-            setAverageRatings(averages);
           } else {
-            setAverageRatings(defaultRatings);
+            processedReviews = reviewsData.reviews.map(r => ({ ...r, isLiked: false }));
           }
+          
+          setReviews(processedReviews);
+          
+          if (reviewsData.averages) {
+            setAverageRatings({
+              overall: Number(reviewsData.averages.overall) || 0,
+              safety: Number(reviewsData.averages.safety) || 0,
+              social: Number(reviewsData.averages.social) || 0,
+              clubs: Number(reviewsData.averages.clubs) || 0,
+              facilities: Number(reviewsData.averages.facilities) || 0,
+              athletics: Number(reviewsData.averages.athletics) || 0,
+              academic: Number(reviewsData.averages.academic) || 0,
+              professors: Number(reviewsData.averages.professors) || 0,
+              difficulty: Number(reviewsData.averages.difficulty) || 0,
+              opportunities: Number(reviewsData.averages.opportunities) || 0,
+              internet: Number(reviewsData.averages.internet) || 0,
+              location: Number(reviewsData.averages.location) || 0,
+              housing: Number(reviewsData.averages.housing) || 0,
+              food: Number(reviewsData.averages.food) || 0,
+              transportation: Number(reviewsData.averages.transportation) || 0,
+              happiness: Number(reviewsData.averages.happiness) || 0,
+            });
+          }
+          
+          // Update total pages from backend response
+          if (reviewsData.pagination) {
+            setTotalPages(reviewsData.pagination.totalPages);
+            setTotalReviews(reviewsData.pagination.totalReviews);
+          }
+        } else {
+          setReviews([]);
+          setAverageRatings({
+            overall: 0, safety: 0, social: 0, clubs: 0, facilities: 0,
+            athletics: 0, academic: 0, professors: 0, difficulty: 0,
+            opportunities: 0, internet: 0, location: 0, housing: 0,
+            food: 0, transportation: 0, happiness: 0,
+          });
         }
       } catch (error) {
         console.error('Error loading university details:', error);
+        setShowNotFound(true);
       } finally {
         setIsLoading(false);
       }
@@ -164,14 +134,13 @@ const University = () => {
     if (id) {
       fetchUniversityDetails();
     }
-
-  }, [id]);
+  }, [id, currentPage, sortOption]);
 
   const handleRateClick = () => {
     navigate(`/addReview/${university.id}`);
   };
 
-  const handleLikeReview = async (reviewId) => {
+  const handleLikeReview = useCallback(async (reviewId) => {
     const { token, refresh } = useAuthStore.getState();
     if (!token) {
       return { needsLogin: true };
@@ -199,7 +168,7 @@ const University = () => {
   
       const data = await response.json();
   
-      setReviews(reviews.map(review =>
+      setReviews(prev => prev.map(review =>
         review.id === reviewId
           ? { 
               ...review, 
@@ -213,17 +182,10 @@ const University = () => {
       console.error("Error liking review:", error);
       return { error: true };
     }
-  };
+  }, []);
 
-  const sortedReviews = [...reviews].sort((a, b) => {
-    if (sortOption === 'recent') {
-      return new Date(b.created_at) - new Date(a.created_at);
-    } else {
-      return (b.likes || 0) - (a.likes || 0);
-    }
-  });
-
-  const getTopRatedCategories = () => {
+  // Memoize top categories calculation
+  const topCategories = useMemo(() => {
     const { overall, ...categories } = averageRatings;
     return Object.entries(categories)
       .sort((a, b) => b[1] - a[1])
@@ -266,94 +228,7 @@ const University = () => {
           difficulty: "🧠"
         }[key]
       }));
-  };
-
-  const LikeButton = ({ review, onLike }) => {
-    const { isAuthenticated } = useAuth();
-    const [showLoginPrompt, setShowLoginPrompt] = useState(false);
-    const [isLiking, setIsLiking] = useState(false);
-    const promptRef = useRef(null);
-    
-    useClickOutside(promptRef, () => {
-      setShowLoginPrompt(false);
-    });
-
-    const handleClick = async () => {
-      if (!isAuthenticated) {
-        setShowLoginPrompt(true);
-        return;
-      }
-
-      setIsLiking(true);
-      try {
-        const result = await onLike(review.id);
-        if (result?.needsLogin) {
-          setShowLoginPrompt(true);
-        }
-      } finally {
-        setIsLiking(false);
-      }
-    };
-
-    return (
-      <div className="relative" ref={promptRef}>
-        <button
-          onClick={handleClick}
-          disabled={isLiking}
-          className={`flex items-center transition-colors ${
-            review.isLiked 
-              ? 'text-red-500' 
-              : 'text-gray-400 hover:text-red-500'
-          } ${isLiking ? 'opacity-50' : ''}`}
-        >
-          <svg
-            className="w-4 h-4 sm:w-5 sm:h-5 mr-1"
-            fill={review.isLiked ? "currentColor" : "none"}
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={review.isLiked ? "2" : "1.5"}
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
-            />
-          </svg>
-          <span className="text-xs sm:text-sm font-medium">{review.likes || 0}</span>
-        </button>
-
-        {showLoginPrompt && (
-          <div className="absolute z-10 w-56 sm:w-64 p-3 mt-2 -left-24 sm:-left-32 bg-white rounded-lg shadow-lg border border-gray-200">
-            <div className="flex items-start">
-              <div className="flex-shrink-0 pt-0.5">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-              </div>
-              <div className="ml-2 sm:ml-3">
-                <p className="text-xs sm:text-sm font-medium text-gray-700">Please log in</p>
-                <p className="mt-1 text-xs sm:text-sm text-gray-500">You need to be logged in to like reviews</p>
-                <div className="mt-2 flex space-x-2">
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
-                  >
-                    Log In
-                  </button>
-                  <button
-                    onClick={() => setShowLoginPrompt(false)}
-                    className="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
+  }, [averageRatings]);
 
   if (showNotFound) {
     return (
@@ -372,13 +247,10 @@ const University = () => {
   if (isLoading || !university) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 flex items-center justify-center">
-        <div className="text-center">
-        </div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
       </div>
     );
   }
-
-  const topCategories = getTopRatedCategories();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
@@ -393,7 +265,7 @@ const University = () => {
           rel="canonical" 
           href={`https://ratemyuniversity.io/university/${id}`}
         />
-        <meta name="description" content={`${reviews.length} student reviews of ${university.name} in ${university.country}. Average rating: ${averageRatings.overall.toFixed(1)}/5.0. Read about academics, campus life, safety, and more.`} />
+        <meta name="description" content={`${totalReviews} student reviews of ${university.name} in ${university.country}. Average rating: ${averageRatings.overall.toFixed(1)}/5.0. Read about academics, campus life, safety, and more.`} />
         <meta name="robots" content="index, follow" />
         <script type="application/ld+json">
           {JSON.stringify({
@@ -404,7 +276,7 @@ const University = () => {
             "aggregateRating": {
               "@type": "AggregateRating",
               "ratingValue": averageRatings.overall,
-              "reviewCount": reviews.length
+              "reviewCount": totalReviews
             }
           })}
         </script>
@@ -584,10 +456,15 @@ const University = () => {
         {/* Reviews Section */}
         <div className="bg-white rounded-xl sm:rounded-2xl shadow-sm p-4 sm:p-8 mb-8 sm:mb-16">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 sm:mb-8 gap-3 sm:gap-4">
-            <h3 className="text-xl sm:text-3xl font-bold text-gray-800">Student Reviews</h3>
+            <h3 className="text-xl sm:text-3xl font-bold text-gray-800">
+              Student Reviews ({totalReviews})
+            </h3>
             <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1 w-full sm:w-auto">
               <button
-                onClick={() => setSortOption('recent')}
+                onClick={() => {
+                  setSortOption('recent');
+                  setCurrentPage(1);
+                }}
                 className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                   sortOption === 'recent' 
                     ? 'bg-white shadow-sm text-blue-600' 
@@ -597,7 +474,10 @@ const University = () => {
                 Most Recent
               </button>
               <button
-                onClick={() => setSortOption('popular')}
+                onClick={() => {
+                  setSortOption('popular');
+                  setCurrentPage(1);
+                }}
                 className={`flex-1 sm:flex-none px-3 sm:px-4 py-1.5 sm:py-2 rounded-md text-xs sm:text-sm font-medium transition-colors ${
                   sortOption === 'popular' 
                     ? 'bg-white shadow-sm text-blue-600' 
@@ -616,94 +496,243 @@ const University = () => {
               <p className="mt-3 sm:mt-4 text-base sm:text-lg text-gray-600">No reviews yet. Be the first to share your experience!</p>
             </div>
           ) : (
-            <div className="space-y-4 sm:space-y-8">
-              {sortedReviews.map((review, index) => {
-                const username = usernames[review.user_id] || "Anonymous";
-                const reviewDate = review.created_at ? new Date(review.created_at) : null;
-                const formattedDate = reviewDate ? reviewDate.toLocaleDateString('en-US', { 
-                  month: 'short', 
-                  day: 'numeric', 
-                  year: 'numeric' 
-                }) : "No date";
-                
-                const ratingCategories = [
-                  { label: "Academics", value: review.academic_rating, color: "green" },
-                  { label: "Professors", value: review.professors_rating, color: "green" },
-                  { label: "Difficulty", value: review.difficulty_rating, color: "green" },
-                  { label: "Opportunities", value: review.opportunities_rating, color: "green" },
-                  { label: "Social Life", value: review.social_life_rating, color: "purple" },
-                  { label: "Clubs", value: review.clubs_rating, color: "purple" },
-                  { label: "Athletics", value: review.athletics_rating, color: "purple" },
-                  { label: "Happiness", value: review.happiness_rating, color: "purple" },
-                  { label: "Facilities", value: review.facilities_rating, color: "blue" },
-                  { label: "Internet", value: review.internet_rating, color: "blue" },
-                  { label: "Location", value: review.location_rating, color: "blue" },
-                  { label: "Housing", value: review.housing_rating, color: "blue" },
-                  { label: "Food", value: review.food_rating, color: "amber" },
-                  { label: "Safety", value: review.safety_rating, color: "amber" },
-                  { label: "Transportation", value: review.transportation_rating, color: "amber" }
-                ].filter(category => category.value !== undefined);
+            <>
+              <div className="space-y-4 sm:space-y-8">
+                {reviews.map((review) => (
+                  <ReviewCard 
+                    key={review.id}
+                    review={review}
+                    onLike={handleLikeReview}
+                  />
+                ))}
+              </div>
 
-                return (
-                  <div key={index} className="bg-white p-4 sm:p-6 rounded-lg sm:rounded-xl border border-gray-100 shadow-xs hover:shadow-sm transition-shadow duration-200">
-                    {/* Header with rating and date */}
-                    <div className="flex flex-col xs:flex-row justify-between items-start gap-2 mb-3 sm:mb-4">
-                      <div>
-                        <div className="flex items-center mb-1">
-                          <span className="text-xl sm:text-2xl font-bold text-gray-900 mr-2 sm:mr-3">
-                            {review.overall_rating?.toFixed(1) || "N/A"}
-                          </span>
-                          <RatingStars rating={review.overall_rating || 0} className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
-                        </div>
-                        <span className="text-xs sm:text-sm text-gray-500">by {username}</span>
-                      </div>
-                        <div className="flex flex-col items-start xs:items-end">
-                          <span className="text-xs sm:text-sm text-gray-400">{formattedDate}</span>
-                        </div>
-                    </div>
-
-                    {/* Review Text */}
-                    {review.review_text && (
-                      <p className="text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg leading-relaxed">
-                        {review.review_text}
-                      </p>
-                    )}
-
-                    {/* All Rating Categories */}
-                    <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
-                      {ratingCategories.map((category, idx) => (
-                        <RatingPill 
-                          key={idx} 
-                          label={category.label} 
-                          value={category.value} 
-                          color={category.color} 
-                        />
-                      ))}
-                    </div>
-
-                    {/* Like Button */}
-                    <div className="flex items-center mt-3 sm:mt-4">
-                    <LikeButton 
-                        review={review} 
-                        onLike={handleLikeReview}
-                      />
-                    </div>
-
-                    {/* Optional Comments */}
-                    {review.comments && (
-                      <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-100">
-                        <p className="text-gray-500 italic text-sm sm:text-base">"{review.comments}"</p>
-                      </div>
-                    )}
+              {/* Pagination Controls */}
+              {totalPages > 1 && (
+                <div className="mt-8 flex justify-center items-center gap-2">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+                  >
+                    Previous
+                  </button>
+                  
+                  <div className="flex gap-1">
+                    {[...Array(Math.min(totalPages, 7))].map((_, i) => {
+                      let pageNum;
+                      if (totalPages <= 7) {
+                        pageNum = i + 1;
+                      } else if (currentPage <= 4) {
+                        pageNum = i + 1;
+                      } else if (currentPage >= totalPages - 3) {
+                        pageNum = totalPages - 6 + i;
+                      } else {
+                        pageNum = currentPage - 3 + i;
+                      }
+                      
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => setCurrentPage(pageNum)}
+                          className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                            currentPage === pageNum
+                              ? 'bg-blue-600 text-white'
+                              : 'bg-gray-100 hover:bg-gray-200'
+                          }`}
+                        >
+                          {pageNum}
+                        </button>
+                      );
+                    })}
                   </div>
-                );
-              })}
-            </div>
+
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed text-sm font-medium transition-colors"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
       </main>
     </div>
   );  
+};
+
+// Extract ReviewCard into separate memoized component
+const ReviewCard = React.memo(({ review, onLike }) => {
+  const username = review.username || "Anonymous";
+  const reviewDate = review.created_at ? new Date(review.created_at) : null;
+  const formattedDate = reviewDate ? reviewDate.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric', 
+    year: 'numeric' 
+  }) : "No date";
+  
+  const ratingCategories = [
+    { label: "Academics", value: review.academic_rating, color: "green" },
+    { label: "Professors", value: review.professors_rating, color: "green" },
+    { label: "Difficulty", value: review.difficulty_rating, color: "green" },
+    { label: "Opportunities", value: review.opportunities_rating, color: "green" },
+    { label: "Social Life", value: review.social_life_rating, color: "purple" },
+    { label: "Clubs", value: review.clubs_rating, color: "purple" },
+    { label: "Athletics", value: review.athletics_rating, color: "purple" },
+    { label: "Happiness", value: review.happiness_rating, color: "purple" },
+    { label: "Facilities", value: review.facilities_rating, color: "blue" },
+    { label: "Internet", value: review.internet_rating, color: "blue" },
+    { label: "Location", value: review.location_rating, color: "blue" },
+    { label: "Housing", value: review.housing_rating, color: "blue" },
+    { label: "Food", value: review.food_rating, color: "amber" },
+    { label: "Safety", value: review.safety_rating, color: "amber" },
+    { label: "Transportation", value: review.transportation_rating, color: "amber" }
+  ].filter(category => category.value !== undefined);
+
+  return (
+    <div className="bg-white p-4 sm:p-6 rounded-lg sm:rounded-xl border border-gray-100 shadow-xs hover:shadow-sm transition-shadow duration-200">
+      {/* Header with rating and date */}
+      <div className="flex flex-col xs:flex-row justify-between items-start gap-2 mb-3 sm:mb-4">
+        <div>
+          <div className="flex items-center mb-1">
+            <span className="text-xl sm:text-2xl font-bold text-gray-900 mr-2 sm:mr-3">
+              {review.overall_rating?.toFixed(1) || "N/A"}
+            </span>
+            <RatingStars rating={review.overall_rating || 0} className="w-3.5 h-3.5 sm:w-5 sm:h-5" />
+          </div>
+          <span className="text-xs sm:text-sm text-gray-500">by {username}</span>
+        </div>
+        <div className="flex flex-col items-start xs:items-end">
+          <span className="text-xs sm:text-sm text-gray-400">{formattedDate}</span>
+        </div>
+      </div>
+
+      {/* Review Text */}
+      {review.review_text && (
+        <p className="text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg leading-relaxed">
+          {review.review_text}
+        </p>
+      )}
+
+      {/* All Rating Categories */}
+      <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
+        {ratingCategories.map((category, idx) => (
+          <RatingPill 
+            key={idx} 
+            label={category.label} 
+            value={category.value} 
+            color={category.color} 
+          />
+        ))}
+      </div>
+
+      {/* Like Button */}
+      <div className="flex items-center mt-3 sm:mt-4">
+        <LikeButton 
+          review={review} 
+          onLike={onLike}
+        />
+      </div>
+
+      {/* Optional Comments */}
+      {review.comments && (
+        <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-100">
+          <p className="text-gray-500 italic text-sm sm:text-base">"{review.comments}"</p>
+        </div>
+      )}
+    </div>
+  );
+});
+
+const LikeButton = ({ review, onLike }) => {
+  const { isAuthenticated } = useAuth();
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
+  const [isLiking, setIsLiking] = useState(false);
+  const promptRef = useRef(null);
+  const navigate = useNavigate();
+  
+  useClickOutside(promptRef, () => {
+    setShowLoginPrompt(false);
+  });
+
+  const handleClick = async () => {
+    if (!isAuthenticated) {
+      setShowLoginPrompt(true);
+      return;
+    }
+
+    setIsLiking(true);
+    try {
+      const result = await onLike(review.id);
+      if (result?.needsLogin) {
+        setShowLoginPrompt(true);
+      }
+    } finally {
+      setIsLiking(false);
+    }
+  };
+
+  return (
+    <div className="relative" ref={promptRef}>
+      <button
+        onClick={handleClick}
+        disabled={isLiking}
+        className={`flex items-center transition-colors ${
+          review.isLiked 
+            ? 'text-red-500' 
+            : 'text-gray-400 hover:text-red-500'
+        } ${isLiking ? 'opacity-50' : ''}`}
+      >
+        <svg
+          className="w-4 h-4 sm:w-5 sm:h-5 mr-1"
+          fill={review.isLiked ? "currentColor" : "none"}
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={review.isLiked ? "2" : "1.5"}
+            d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+          />
+        </svg>
+        <span className="text-xs sm:text-sm font-medium">{review.likes || 0}</span>
+      </button>
+
+      {showLoginPrompt && (
+        <div className="absolute z-10 w-56 sm:w-64 p-3 mt-2 -left-24 sm:-left-32 bg-white rounded-lg shadow-lg border border-gray-200">
+          <div className="flex items-start">
+            <div className="flex-shrink-0 pt-0.5">
+              <svg className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div className="ml-2 sm:ml-3">
+              <p className="text-xs sm:text-sm font-medium text-gray-700">Please log in</p>
+              <p className="mt-1 text-xs sm:text-sm text-gray-500">You need to be logged in to like reviews</p>
+              <div className="mt-2 flex space-x-2">
+                <button
+                  onClick={() => navigate('/login')}
+                  className="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+                >
+                  Log In
+                </button>
+                <button
+                  onClick={() => setShowLoginPrompt(false)}
+                  className="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 };
 
 const CategoryCard = ({ title, icon, ratings, colorFrom, colorTo }) => (

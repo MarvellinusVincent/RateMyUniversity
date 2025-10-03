@@ -47,7 +47,6 @@ const University = () => {
       setShowNotFound(false);
       
       try {
-        // Fetch university and reviews in parallel
         const [universityResponse, reviewsResponse] = await Promise.all([
           fetch(`${process.env.REACT_APP_API_URL}/specificUni/${id}`),
           fetch(`${process.env.REACT_APP_API_URL}/specificUni/${id}/reviews?page=${currentPage}&limit=${REVIEWS_PER_PAGE}&sort=${sortOption}`)
@@ -62,7 +61,6 @@ const University = () => {
           const { token } = useAuthStore.getState();
           let processedReviews = reviewsData.reviews;
           
-          // Batch fetch like status for all reviews at once
           if (token) {
             try {
               const reviewIds = reviewsData.reviews.map(r => r.id).join(',');
@@ -184,7 +182,6 @@ const University = () => {
     }
   }, []);
 
-  // Memoize top categories calculation
   const topCategories = useMemo(() => {
     const { overall, ...categories } = averageRatings;
     return Object.entries(categories)
@@ -564,7 +561,6 @@ const University = () => {
   );  
 };
 
-// Extract ReviewCard into separate memoized component
 const ReviewCard = React.memo(({ review, onLike }) => {
   const username = review.username || "Anonymous";
   const reviewDate = review.created_at ? new Date(review.created_at) : null;

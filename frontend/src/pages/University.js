@@ -20,6 +20,12 @@ const University = () => {
   const [totalReviews, setTotalReviews] = useState(0);
   const REVIEWS_PER_PAGE = 20;
   
+  const [showCompareModal, setShowCompareModal] = useState(false);
+  const [compareSearchTerm, setCompareSearchTerm] = useState('');
+  const [compareSearchResults, setCompareSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const compareModalRef = useRef(null);
+  
   const [averageRatings, setAverageRatings] = useState({
     overall: 0,
     safety: 0,
@@ -40,6 +46,15 @@ const University = () => {
   });
 
   const { id } = useParams();
+
+  // Close compare modal when clicking outside
+  useClickOutside(compareModalRef, () => {
+    if (showCompareModal) {
+      setShowCompareModal(false);
+      setCompareSearchTerm('');
+      setCompareSearchResults([]);
+    }
+  });
 
   useEffect(() => {
     const fetchUniversityDetails = async () => {
@@ -107,7 +122,6 @@ const University = () => {
             });
           }
           
-          // Update total pages from backend response
           if (reviewsData.pagination) {
             setTotalPages(reviewsData.pagination.totalPages);
             setTotalReviews(reviewsData.pagination.totalReviews);
@@ -134,8 +148,45 @@ const University = () => {
     }
   }, [id, currentPage, sortOption]);
 
+  // Search universities for comparison
+  useEffect(() => {
+    const searchUniversities = async () => {
+      if (compareSearchTerm.length < 2) {
+        setCompareSearchResults([]);
+        return;
+      }
+
+      setIsSearching(true);
+      try {
+        const response = await fetch(
+          `${process.env.REACT_APP_API_URL}/searchUniversity/all?query=${compareSearchTerm}`
+        );
+        const universities = await response.json();
+        
+        const filtered = universities.filter(uni => uni.id !== parseInt(id));
+        setCompareSearchResults(filtered.slice(0, 5));
+      } catch (error) {
+        console.error('Error searching universities:', error);
+        setCompareSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+
+    const timeoutId = setTimeout(searchUniversities, 300);
+    return () => clearTimeout(timeoutId);
+  }, [compareSearchTerm, id]);
+
   const handleRateClick = () => {
     navigate(`/addReview/${university.id}`);
+  };
+
+  const handleCompareClick = () => {
+    setShowCompareModal(true);
+  };
+
+  const handleCompareSelect = (compareUniId) => {
+    navigate(`/compare?uni1=${id}&uni2=${compareUniId}`);
   };
 
   const handleLikeReview = useCallback(async (reviewId) => {
@@ -310,16 +361,27 @@ const University = () => {
             </button>
             
             <a
-              href={university.web_pages[0]?.replace(/^['"]+|['"]+$/g, '')}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex-1 bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-blue-300 text-gray-800 hover:text-blue-600 py-3 sm:py-4 px-6 sm:px-8 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 sm:gap-3"
+                href={university.web_pages[0]?.replace(/^['"]+|['"]+$/g, '')}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 bg-teal-500 hover:bg-teal-600 text-white py-3 sm:py-4 px-6 sm:px-8 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2 sm:gap-3"
+              >
+                <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                </svg>
+                <span className="hidden sm:inline">Visit Website</span>
+                <span className="sm:hidden">Website</span>
+              </a>
+
+            <button
+              onClick={handleCompareClick}
+              className="flex-1 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 text-white py-3 sm:py-4 px-4 sm:px-6 rounded-xl sm:rounded-2xl font-bold text-sm sm:text-base lg:text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
             >
-              <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+              <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
               </svg>
-              Visit Website
-            </a>
+              <span>Compare</span>
+            </button>
           </div>
         </div>
 
@@ -556,6 +618,81 @@ const University = () => {
             </>
           )}
         </div>
+
+        {/* Compare Modal */}
+        {showCompareModal && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div ref={compareModalRef} className="bg-white rounded-2xl shadow-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-2xl font-bold text-gray-800">Compare With...</h3>
+                <button
+                  onClick={() => {
+                    setShowCompareModal(false);
+                    setCompareSearchTerm('');
+                    setCompareSearchResults([]);
+                  }}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              
+              <p className="text-gray-600 mb-4">
+                Search for another university to compare with <span className="font-semibold">{university.name}</span>
+              </p>
+              
+              <div className="relative mb-4">
+                <input
+                  type="text"
+                  value={compareSearchTerm}
+                  onChange={(e) => setCompareSearchTerm(e.target.value)}
+                  placeholder="Search universities..."
+                  className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                  autoFocus
+                />
+                {isSearching && (
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-blue-500"></div>
+                  </div>
+                )}
+              </div>
+              
+              {compareSearchResults.length > 0 ? (
+                <div className="space-y-2">
+                  {compareSearchResults.map((uni) => (
+                    <button
+                      key={uni.id}
+                      onClick={() => handleCompareSelect(uni.id)}
+                      className="w-full text-left p-4 bg-gray-50 hover:bg-blue-50 rounded-lg transition-colors border border-gray-200 hover:border-blue-300"
+                    >
+                      <div className="font-semibold text-gray-800">{uni.name}</div>
+                      <div className="text-sm text-gray-600 flex items-center mt-1">
+                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        {uni.country}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              ) : compareSearchTerm.length >= 2 && !isSearching ? (
+                <div className="text-center py-8 text-gray-500">
+                  <svg className="mx-auto h-12 w-12 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  No universities found
+                </div>
+              ) : compareSearchTerm.length < 2 ? (
+                <div className="text-center py-8 text-gray-500">
+                  Start typing to search universities
+                </div>
+              ) : null}
+            </div>
+          </div>
+        )}
       </main>
     </div>
   );  
@@ -590,7 +727,6 @@ const ReviewCard = React.memo(({ review, onLike }) => {
 
   return (
     <div className="bg-white p-4 sm:p-6 rounded-lg sm:rounded-xl border border-gray-100 shadow-xs hover:shadow-sm transition-shadow duration-200">
-      {/* Header with rating and date */}
       <div className="flex flex-col xs:flex-row justify-between items-start gap-2 mb-3 sm:mb-4">
         <div>
           <div className="flex items-center mb-1">
@@ -606,14 +742,12 @@ const ReviewCard = React.memo(({ review, onLike }) => {
         </div>
       </div>
 
-      {/* Review Text */}
       {review.review_text && (
         <p className="text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base md:text-lg leading-relaxed">
           {review.review_text}
         </p>
       )}
 
-      {/* All Rating Categories */}
       <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-2">
         {ratingCategories.map((category, idx) => (
           <RatingPill 
@@ -625,7 +759,6 @@ const ReviewCard = React.memo(({ review, onLike }) => {
         ))}
       </div>
 
-      {/* Like Button */}
       <div className="flex items-center mt-3 sm:mt-4">
         <LikeButton 
           review={review} 
@@ -633,7 +766,6 @@ const ReviewCard = React.memo(({ review, onLike }) => {
         />
       </div>
 
-      {/* Optional Comments */}
       {review.comments && (
         <div className="mt-4 sm:mt-6 pt-3 sm:pt-4 border-t border-gray-100">
           <p className="text-gray-500 italic text-sm sm:text-base">"{review.comments}"</p>

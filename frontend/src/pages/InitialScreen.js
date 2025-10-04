@@ -11,14 +11,32 @@ const InitialScreen = () => {
   const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
   const [showNoResultsPrompt, setShowNoResultsPrompt] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
+  
+  // Compare widget states
+  const [showCompareWidget, setShowCompareWidget] = useState(false);
+  const [compareUni1, setCompareUni1] = useState('');
+  const [compareUni2, setCompareUni2] = useState('');
+  const [compareResults1, setCompareResults1] = useState([]);
+  const [compareResults2, setCompareResults2] = useState([]);
+  const [showCompareDropdown1, setShowCompareDropdown1] = useState(false);
+  const [showCompareDropdown2, setShowCompareDropdown2] = useState(false);
+  const [selectedCompareUni1, setSelectedCompareUni1] = useState(null);
+  const [selectedCompareUni2, setSelectedCompareUni2] = useState(null);
+  
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
+  const compareWidgetRef = useRef(null);
+  const compareDropdown1Ref = useRef(null);
+  const compareDropdown2Ref = useRef(null);
   const navigate = useNavigate();
 
   UseClickOutside(dropdownRef, () => {
     setShowDropdown(false);
     setShowNoResultsPrompt(false);
   });
+
+  UseClickOutside(compareDropdown1Ref, () => setShowCompareDropdown1(false));
+  UseClickOutside(compareDropdown2Ref, () => setShowCompareDropdown2(false));
 
   useEffect(() => {
     const loadFeaturedUniversities = async () => {
@@ -56,31 +74,10 @@ const InitialScreen = () => {
         if (!response.ok) {
           throw new Error('Failed to fetch universities');
         }
-        let data = await response.json();
-        
-        const universitiesWithReviews = await Promise.all(
-          data.map(async (uni) => {
-            try {
-              const reviewsResponse = await fetch(`${process.env.REACT_APP_API_URL}/specificUni/${uni.id}/reviews`);
-              const reviewsData = await reviewsResponse.json();
-              const reviews = reviewsData.reviews || [];
-              return {
-                ...uni,
-                review_count: reviews.length
-              };
-            } catch (error) {
-              console.error(`Error fetching reviews for university ${uni.id}:`, error);
-              return {
-                ...uni,
-                review_count: 0
-              };
-            }
-          })
-        );
-        
-        data = universitiesWithReviews.sort((a, b) => b.review_count - a.review_count);
-        
+        const data = await response.json();
+  
         setFilteredUniversities(data);
+        
         if (data.length === 0) {
           noResultsTimer = setTimeout(() => {
             setShowNoResultsPrompt(true);
@@ -95,7 +92,6 @@ const InitialScreen = () => {
         setIsLoading(false);
       }
     };
-    
     const timer = setTimeout(() => {
       loadUniversities();
     }, 300);
@@ -106,6 +102,57 @@ const InitialScreen = () => {
     }
   }, [searchQuery]);
 
+  // Compare search functionality
+  useEffect(() => {
+    const searchCompareUni = async (query, setResults) => {
+      if (!query.trim() || query.length < 2) {
+        setResults([]);
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/searchUniversity/limit?query=${query}`);
+        if (!response.ok) return;
+        const data = await response.json();
+        setResults(data.slice(0, 5));
+      } catch (error) {
+        console.error('Error searching universities:', error);
+        setResults([]);
+      }
+    };
+
+    const timer1 = setTimeout(() => {
+      searchCompareUni(compareUni1, setCompareResults1);
+    }, 300);
+
+    return () => clearTimeout(timer1);
+  }, [compareUni1]);
+
+  useEffect(() => {
+    const searchCompareUni = async (query, setResults) => {
+      if (!query.trim() || query.length < 2) {
+        setResults([]);
+        return;
+      }
+      
+      try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/searchUniversity/limit?query=${query}`);
+        if (!response.ok) return;
+        const data = await response.json();
+        setResults(data.slice(0, 5));
+      } catch (error) {
+        console.error('Error searching universities:', error);
+        setResults([]);
+      }
+    };
+
+    const timer2 = setTimeout(() => {
+      searchCompareUni(compareUni2, setCompareResults2);
+    }, 300);
+
+    return () => clearTimeout(timer2);
+  }, [compareUni2]);
+
   const handleSearchClick = () => {
     if (!searchQuery.trim()) return;
     navigate(`/search/university?name=${searchQuery}`);
@@ -115,6 +162,24 @@ const InitialScreen = () => {
     if (filteredUniversities.length > 0) {
       setShowDropdown(true);
     }
+  };
+
+  const handleCompare = () => {
+    if (selectedCompareUni1 && selectedCompareUni2) {
+      navigate(`/compare?uni1=${selectedCompareUni1.id}&uni2=${selectedCompareUni2.id}`);
+    }
+  };
+
+  const handleSelectCompareUni1 = (uni) => {
+    setSelectedCompareUni1(uni);
+    setCompareUni1(uni.name);
+    setShowCompareDropdown1(false);
+  };
+
+  const handleSelectCompareUni2 = (uni) => {
+    setSelectedCompareUni2(uni);
+    setCompareUni2(uni.name);
+    setShowCompareDropdown2(false);
   };
 
   return (
@@ -324,6 +389,101 @@ const InitialScreen = () => {
               {!isLoadingFeatured && featuredUniversities.length === 0 && (
                 <div className="text-center py-2 text-xs sm:text-sm text-gray-500">
                   No top rated universities found
+                </div>
+              )}
+            </div>
+            {/* Quick Compare Widget */}
+            <div className="mt-8 sm:mt-10 mb-6 sm:mb-8">
+              <button
+                onClick={() => setShowCompareWidget(!showCompareWidget)}
+                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-gray-50 border-2 border-gray-200 hover:border-teal-400 rounded-xl font-semibold text-gray-700 hover:text-teal-600 transition-all"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                </svg>
+                Quick Compare Universities
+                <svg className={`w-5 h-5 transition-transform ${showCompareWidget ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+
+              {showCompareWidget && (
+                <div className="mt-4 p-4 bg-white/50 rounded-xl border border-teal-200">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* First University Search */}
+                    <div className="relative" ref={compareDropdown1Ref}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">First University</label>
+                      <input
+                        type="text"
+                        className="w-full p-3 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        placeholder="Search university..."
+                        value={compareUni1}
+                        onChange={(e) => {
+                          setCompareUni1(e.target.value);
+                          setShowCompareDropdown1(true);
+                          if (e.target.value === '') {
+                            setSelectedCompareUni1(null);
+                          }
+                        }}
+                        onFocus={() => compareResults1.length > 0 && setShowCompareDropdown1(true)}
+                      />
+                      {showCompareDropdown1 && compareResults1.length > 0 && (
+                        <div className="absolute z-30 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                          {compareResults1.map((uni) => (
+                            <button
+                              key={uni.id}
+                              onClick={() => handleSelectCompareUni1(uni)}
+                              className="w-full text-left p-3 hover:bg-teal-50 transition text-sm"
+                            >
+                              <div className="font-medium text-gray-800">{uni.name}</div>
+                              <div className="text-xs text-gray-500">{uni.country}</div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Second University Search */}
+                    <div className="relative" ref={compareDropdown2Ref}>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Second University</label>
+                      <input
+                        type="text"
+                        className="w-full p-3 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent"
+                        placeholder="Search university..."
+                        value={compareUni2}
+                        onChange={(e) => {
+                          setCompareUni2(e.target.value);
+                          setShowCompareDropdown2(true);
+                          if (e.target.value === '') {
+                            setSelectedCompareUni2(null);
+                          }
+                        }}
+                        onFocus={() => compareResults2.length > 0 && setShowCompareDropdown2(true)}
+                      />
+                      {showCompareDropdown2 && compareResults2.length > 0 && (
+                        <div className="absolute z-30 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                          {compareResults2.map((uni) => (
+                            <button
+                              key={uni.id}
+                              onClick={() => handleSelectCompareUni2(uni)}
+                              className="w-full text-left p-3 hover:bg-teal-50 transition text-sm"
+                            >
+                              <div className="font-medium text-gray-800">{uni.name}</div>
+                              <div className="text-xs text-gray-500">{uni.country}</div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={handleCompare}
+                    disabled={!selectedCompareUni1 || !selectedCompareUni2}
+                    className="w-full mt-4 px-4 py-3 bg-gradient-to-r from-teal-500 to-blue-600 hover:from-teal-600 hover:to-blue-700 disabled:from-gray-400 disabled:to-gray-400 text-white rounded-lg font-medium transition-colors disabled:cursor-not-allowed"
+                  >
+                    Compare Now
+                  </button>
                 </div>
               )}
             </div>

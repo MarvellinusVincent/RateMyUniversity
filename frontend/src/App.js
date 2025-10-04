@@ -24,6 +24,7 @@ import ContactUs from "./pages/ContactUs";
 import FAQ from "./pages/FAQ";
 import { HelmetProvider } from "react-helmet-async";
 import ResetPassword from "./pages/ResetPassword";
+import Compare from "./pages/Compare";
 
 function NavbarWrapper() {
   const navbarRef = useRef(null);
@@ -64,6 +65,7 @@ function NavbarWrapper() {
             <Route path="/addReview/:universityId" element={<LeaveReview />} />
             <Route path="/savedReviews" element={<SavedReviews />} />
             <Route path="/addSchool" element={<AddSchool />} />
+            <Route path="/compare" element={<Compare />} />
 
             {/* Footer Links */} 
          

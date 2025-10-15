@@ -12,7 +12,6 @@ const LeaveReview = () => {
   const [isLoadingUniversity, setIsLoadingUniversity] = useState(true);
   const { universityId } = useParams();
 
-  // Refs for scrolling to errors
   const ratingRefs = useRef({});
 
   useEffect(() => {
@@ -82,7 +81,6 @@ const LeaveReview = () => {
       [field]: rating
     }));
     
-    // Clear error for this field when user rates it
     if (errorMessages[field]) {
       setErrorMessages((prev) => {
         const newErrors = { ...prev };
@@ -114,7 +112,6 @@ const LeaveReview = () => {
     setErrorMessages(errors);
 
     if (!isValid) {
-      // Find first error field and scroll to it
       const firstErrorField = Object.keys(errors)[0];
       if (firstErrorField && ratingRefs.current[firstErrorField]) {
         ratingRefs.current[firstErrorField].scrollIntoView({ 
@@ -123,7 +120,6 @@ const LeaveReview = () => {
         });
       }
 
-      // Show toast with missing ratings
       showToast(
         `Please provide ratings for: ${missingRatings.slice(0, 5).join(', ')}${missingRatings.length > 5 ? '...' : ''}`,
         'error'

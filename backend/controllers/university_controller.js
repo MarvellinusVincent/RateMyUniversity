@@ -37,12 +37,11 @@ const getReviewFromUniversity = async (req, res) => {
   } else if (sort === 'popular') {
     orderBy = 'COALESCE(l.like_count, 0) DESC, r.created_at DESC';
   } else {
-    orderBy = 'r.created_at DESC'; // default
+    orderBy = 'r.created_at DESC';
   }
 
   try {
     const [reviewsResult, countResult, statsResult] = await Promise.all([
-      // Fetch paginated reviews
       pool.query(`
         SELECT r.*, u.username, COALESCE(l.like_count, 0) as likes
         FROM reviews r
@@ -57,14 +56,12 @@ const getReviewFromUniversity = async (req, res) => {
         LIMIT $2 OFFSET $3
       `, [university_id, limit, offset]),
       
-      // Get total count for pagination
       pool.query(`
         SELECT COUNT(*) as total
         FROM reviews
         WHERE university_id = $1
       `, [university_id]),
       
-      // Get averages (same as before)
       pool.query(`
         SELECT 
           COALESCE(ROUND(AVG(overall_rating)::numeric, 1), 0) as overall,
@@ -124,7 +121,6 @@ const getAllUniversityIDs = async (req, res) =>  {
   }
 };
 
-// Get the university's name
 const getUniversityName = async (req, res) => {
   const { id } = req.params;
   
@@ -179,7 +175,6 @@ const getUniversityName = async (req, res) => {
   }
 };
 
-// Get Top 3 Universities To Show On Home Screen
 const FeaturedUniversities = async(req, res) => {
   try {
     const result = await pool.query(`

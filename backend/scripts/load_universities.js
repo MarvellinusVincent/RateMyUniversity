@@ -24,7 +24,6 @@ async function loadUniversities() {
     for (const university of data) {
       const { name, country, web_pages, domains, alpha_two_code, 'state-province': stateProvince } = university;
       
-      // Handle arrays properly for PostgreSQL
       const formattedWebPages = web_pages || [];
       const formattedDomains = domains || [];
       
@@ -50,7 +49,6 @@ async function loadUniversities() {
   }
 }
 
-// Add a delay to ensure database is ready
 setTimeout(() => {
   loadUniversities();
-}, 3000); // Wait 3 seconds for database to be ready
+}, 3000);

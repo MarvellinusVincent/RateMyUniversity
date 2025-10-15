@@ -33,16 +33,15 @@ const submitReview = async (req, res) => {
     comments = null
   } = req.body;
 
-  if (!university_id || !university_name || !overall_rating || !review_text) {
+  if (!university_id || !university_name || !overall_rating) {
     return res.status(400).json({ 
       error: 'Missing required fields',
       details: {
-        required: ['university_id', 'university_name', 'overall_rating', 'review_text'],
+        required: ['university_id', 'university_name', 'overall_rating'],
         received: {
           university_id: !!university_id,
           university_name: !!university_name,
           overall_rating: !!overall_rating,
-          review_text: !!review_text
         }
       }
     });
@@ -108,7 +107,7 @@ const submitReview = async (req, res) => {
         validatedRatings.housing_rating,
         validatedRatings.food_rating,
         validatedRatings.transportation_rating,
-        review_text.trim(),
+        review_text ? review_text.trim() : null,
         comments ? comments.trim() : null
       ]
     );

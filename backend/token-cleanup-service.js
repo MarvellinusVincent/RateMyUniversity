@@ -81,7 +81,6 @@ class TokenCleanupService {
   }
 
   getNextRunTime() {
-    // Calculate next run (top of next hour)
     const now = new Date();
     const nextRun = new Date(now);
     nextRun.setHours(now.getHours() + 1, 0, 0, 0);

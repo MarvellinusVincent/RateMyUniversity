@@ -12,7 +12,6 @@ const InitialScreen = () => {
   const [showNoResultsPrompt, setShowNoResultsPrompt] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
   
-  // Compare widget states
   const [showCompareWidget, setShowCompareWidget] = useState(false);
   const [compareUni1, setCompareUni1] = useState('');
   const [compareUni2, setCompareUni2] = useState('');
@@ -25,7 +24,6 @@ const InitialScreen = () => {
   
   const dropdownRef = useRef(null);
   const inputRef = useRef(null);
-  const compareWidgetRef = useRef(null);
   const compareDropdown1Ref = useRef(null);
   const compareDropdown2Ref = useRef(null);
   const navigate = useNavigate();
@@ -102,7 +100,6 @@ const InitialScreen = () => {
     }
   }, [searchQuery]);
 
-  // Compare search functionality
   useEffect(() => {
     const searchCompareUni = async (query, setResults) => {
       if (!query.trim() || query.length < 2) {
@@ -360,11 +357,11 @@ const InitialScreen = () => {
                 </div>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-3">
-                  {featuredUniversities.map((university) => (
+                  {featuredUniversities.slice(0, 3).map((university, index) => (
                     <Link
                       key={university.id}
                       to={`/university/${university.id}`}
-                      className="group flex flex-col p-2.5 sm:p-3 bg-white rounded-lg border border-gray-200 hover:border-yellow-300 transition-colors duration-200"
+                      className={`group flex flex-col p-2.5 sm:p-3 bg-white rounded-lg border border-gray-200 hover:border-yellow-300 transition-colors duration-200 ${index === 2 ? 'hidden sm:flex' : ''}`}
                     >
                       <span className="text-xs sm:text-sm font-medium text-gray-700 group-hover:text-blue-600 transition-colors mb-1 truncate">
                         {university.name}

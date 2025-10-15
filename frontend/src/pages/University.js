@@ -44,10 +44,9 @@ const University = () => {
     transportation: 0,
     happiness: 0,
   });
-
+  
   const { id } = useParams();
 
-  // Close compare modal when clicking outside
   useClickOutside(compareModalRef, () => {
     if (showCompareModal) {
       setShowCompareModal(false);
@@ -148,7 +147,6 @@ const University = () => {
     }
   }, [id, currentPage, sortOption]);
 
-  // Search universities for comparison
   useEffect(() => {
     const searchUniversities = async () => {
       if (compareSearchTerm.length < 2) {
@@ -759,7 +757,7 @@ const ReviewCard = React.memo(({ review, onLike }) => {
         ))}
       </div>
 
-      <div className="flex items-center mt-3 sm:mt-4">
+      <div className="flex items-center gap-4 mt-3 sm:mt-4">
         <LikeButton 
           review={review} 
           onLike={onLike}

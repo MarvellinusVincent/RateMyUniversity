@@ -44,7 +44,6 @@ const submitSchool = async (req, res) => {
 const submitContactForm = async (req, res) => {
   const { name, email, subject, message } = req.body;
 
-  // Validate input
   if (!name || !email || !subject || !message) {
     return res.status(400).json({ error: 'All fields are required' });
   }

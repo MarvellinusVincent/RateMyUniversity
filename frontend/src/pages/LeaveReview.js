@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, useParams } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { authAxios } from '../stores/authStore';
@@ -11,6 +11,9 @@ const LeaveReview = () => {
   const [universityName, setUniversityName] = useState('');
   const [isLoadingUniversity, setIsLoadingUniversity] = useState(true);
   const { universityId } = useParams();
+
+  // Refs for scrolling to errors
+  const ratingRefs = useRef({});
 
   useEffect(() => {
     const fetchUniversityName = async () => {
@@ -63,6 +66,7 @@ const LeaveReview = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessages, setErrorMessages] = useState({});
   const [hoverRatings, setHoverRatings] = useState({});
+  const [toast, setToast] = useState({ show: false, message: '', type: '' });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -77,20 +81,55 @@ const LeaveReview = () => {
       ...prevState,
       [field]: rating
     }));
+    
+    // Clear error for this field when user rates it
+    if (errorMessages[field]) {
+      setErrorMessages((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+  };
+
+  const showToast = (message, type = 'error') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => setToast({ show: false, message: '', type: '' }), 5000);
   };
 
   const validateForm = () => {
     const errors = {};
+    const missingRatings = [];
     let isValid = true;
 
     for (const field in formData) {
-      if (field !== 'comments' && formData[field] === '') {
-        errors[field] = `${field.replace('_', ' ')} is required.`;
+      if (field !== 'comments' && field !== 'review_text' && formData[field] === '') {
+        const fieldLabel = field.replace(/_/g, ' ').replace(/rating/i, '').trim();
+        errors[field] = `Required`;
+        missingRatings.push(fieldLabel.charAt(0).toUpperCase() + fieldLabel.slice(1));
         isValid = false;
       }
     }
 
     setErrorMessages(errors);
+
+    if (!isValid) {
+      // Find first error field and scroll to it
+      const firstErrorField = Object.keys(errors)[0];
+      if (firstErrorField && ratingRefs.current[firstErrorField]) {
+        ratingRefs.current[firstErrorField].scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center' 
+        });
+      }
+
+      // Show toast with missing ratings
+      showToast(
+        `Please provide ratings for: ${missingRatings.slice(0, 5).join(', ')}${missingRatings.length > 5 ? '...' : ''}`,
+        'error'
+      );
+    }
+
     return isValid;
   };
 
@@ -115,14 +154,17 @@ const LeaveReview = () => {
       const response = await authAxios.post(`${process.env.REACT_APP_API_URL}/reviews/submit`, reviewData);
 
       if (response.status === 200) {
-        navigate(`/university/${universityId}`);
+        showToast('Review submitted successfully!', 'success');
+        setTimeout(() => {
+          navigate(`/university/${universityId}`);
+        }, 3000);
       } else {
         const errorData = response.data;
-        alert(`Error: ${errorData.message}`);
+        showToast(errorData.message || 'Failed to submit review', 'error');
       }
     } catch (error) {
       console.error('Error submitting review:', error);
-      alert('An error occurred while submitting your review.');
+      showToast(error.response?.data?.message || 'An error occurred while submitting your review.', 'error');
     } finally {
       setIsSubmitting(false);
     }
@@ -151,18 +193,34 @@ const LeaveReview = () => {
     );
   };
 
-  const renderRatingCategory = (field, label, icon) => (
-    <div className="bg-white/90 backdrop-blur-sm p-3 sm:p-4 rounded-lg border border-gray-200/50 shadow-sm mb-3 sm:mb-4">
-      <div className="flex items-center mb-2">
-        <span className="text-lg sm:text-2xl mr-2">{icon}</span>
-        <h3 className="font-medium text-gray-800 text-sm sm:text-base">{label}</h3>
+  const renderRatingCategory = (field, label, icon) => {
+    const hasError = errorMessages[field];
+    
+    return (
+      <div 
+        ref={el => ratingRefs.current[field] = el}
+        className={`p-3 sm:p-4 rounded-lg mb-3 sm:mb-4 transition-all duration-300 ${
+          hasError 
+            ? 'bg-red-50 border-2 border-red-500 shadow-md' 
+            : 'bg-white/90 backdrop-blur-sm border border-gray-200/50 shadow-sm'
+        }`}
+      >
+        <div className="flex items-center mb-2">
+          <span className="text-lg sm:text-2xl mr-2">{icon}</span>
+          <h3 className="font-medium text-gray-800 text-sm sm:text-base">{label}</h3>
+        </div>
+        {renderStars(field)}
+        {hasError && (
+          <p className="text-red-600 text-xs sm:text-sm mt-2 flex items-center">
+            <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+            {errorMessages[field]}
+          </p>
+        )}
       </div>
-      {renderStars(field)}
-      {errorMessages[field] && (
-        <p className="text-red-500 text-xs sm:text-sm mt-1">{errorMessages[field]}</p>
-      )}
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
@@ -172,6 +230,24 @@ const LeaveReview = () => {
         <meta name="description" content={`Share your experience about ${universityName || 'this university'}. Help future students make informed decisions.`} />
       </Helmet>
       
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className={`fixed top-4 right-4 z-50 ${
+          toast.type === 'success' ? 'bg-green-500' : 'bg-red-500'
+        } text-white px-4 sm:px-6 py-3 sm:py-4 rounded-lg shadow-2xl flex items-center gap-3 max-w-xs sm:max-w-md animate-slide-in`}>
+          {toast.type === 'success' ? (
+            <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+            </svg>
+          ) : (
+            <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+          )}
+          <span className="font-medium text-sm sm:text-base">{toast.message}</span>
+        </div>
+      )}
+
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-64 sm:w-96 h-64 sm:h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
         <div className="absolute bottom-1/3 -right-20 w-56 sm:w-80 h-56 sm:h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>
@@ -224,13 +300,25 @@ const LeaveReview = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-              <div className="bg-white/90 backdrop-blur-sm p-4 sm:p-6 rounded-lg sm:rounded-xl border border-gray-200/50 shadow-sm">
+              <div 
+                ref={el => ratingRefs.current['overall_rating'] = el}
+                className={`p-4 sm:p-6 rounded-lg sm:rounded-xl transition-all duration-300 ${
+                  errorMessages.overall_rating
+                    ? 'bg-red-50 border-2 border-red-500 shadow-md'
+                    : 'bg-white/90 backdrop-blur-sm border border-gray-200/50 shadow-sm'
+                }`}
+              >
                 <h2 className="text-lg sm:text-xl font-semibold text-gray-800 mb-3 sm:mb-4">Overall Rating</h2>
                 <div className="flex justify-center">
                   <div className="text-center">
                     {renderStars('overall_rating')}
                     {errorMessages.overall_rating && (
-                      <p className="text-red-500 text-xs sm:text-sm mt-1">{errorMessages.overall_rating}</p>
+                      <p className="text-red-600 text-xs sm:text-sm mt-2 flex items-center justify-center">
+                        <svg className="w-3 h-3 sm:w-4 sm:h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                        </svg>
+                        {errorMessages.overall_rating}
+                      </p>
                     )}
                   </div>
                 </div>
@@ -272,13 +360,9 @@ const LeaveReview = () => {
                   value={formData.review_text}
                   onChange={handleInputChange}
                   rows="5"
-                  required
                   className="w-full p-3 sm:p-4 text-sm sm:text-base bg-white/80 border border-gray-200/70 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent shadow-sm"
                   placeholder="Share your detailed experience..."
                 />
-                {errorMessages.review_text && (
-                  <p className="text-red-500 text-xs sm:text-sm mt-1">{errorMessages.review_text}</p>
-                )}
               </div>
 
               <div className="bg-white/90 backdrop-blur-sm p-4 sm:p-6 rounded-lg sm:rounded-xl border border-gray-200/50 shadow-sm">
@@ -318,6 +402,22 @@ const LeaveReview = () => {
           </div>
         </div>
       </div>
+
+      <style>{`
+        @keyframes slide-in {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-slide-in {
+          animation: slide-in 0.3s ease-out;
+        }
+      `}</style>
     </div>
   );
 };

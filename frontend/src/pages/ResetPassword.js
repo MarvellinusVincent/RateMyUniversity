@@ -92,7 +92,6 @@ const ResetPassword = () => {
     setError(null);
     setMessage(null);
 
-    // Validation
     if (!newPassword || !confirmPassword) {
       setError("Please fill in all fields");
       setIsSubmitting(false);
@@ -133,7 +132,6 @@ const ResetPassword = () => {
         setNewPassword("");
         setConfirmPassword("");
         
-        // Redirect to login after 3 seconds
         setTimeout(() => {
           navigate('/login');
         }, 3000);
@@ -156,7 +154,6 @@ const ResetPassword = () => {
     navigate('/login');
   };
 
-  // Show loading state while validating token
   if (tokenValid === null) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 relative overflow-hidden flex items-center justify-center p-4">
@@ -176,7 +173,6 @@ const ResetPassword = () => {
     );
   }
 
-  // Show expired/invalid token screen
   if (tokenValid === false) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 relative overflow-hidden flex items-center justify-center p-4">
@@ -214,7 +210,6 @@ const ResetPassword = () => {
     );
   }
 
-  // Show the main password reset form only if token is valid
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 relative overflow-hidden">
       <Helmet>

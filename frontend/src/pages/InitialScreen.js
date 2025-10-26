@@ -181,12 +181,13 @@ const InitialScreen = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
-      <Helmet>
-        <title>Rate My University - Discover & Share University Reviews</title>
-        <link rel="canonical" href="https://ratemyuniversity.io/" />
-        <meta name="description" content="Discover and rate universities. Read authentic reviews from students about academics, campus life, and more." />
-      </Helmet>
-      
+    <Helmet>
+      <title>Rate My University - Discover & Share University Reviews</title>
+      <link rel="canonical" href="https://ratemyuniversity.io/" />
+      <meta name="description" content="Discover and rate universities. Read authentic reviews from students about academics, campus life, and more." />
+      <meta name="robots" content="index, follow" />
+    </Helmet>
+          
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-64 sm:w-96 h-64 sm:h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
         <div className="absolute bottom-1/3 -right-20 w-56 sm:w-80 h-56 sm:h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>

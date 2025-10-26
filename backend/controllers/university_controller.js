@@ -4,6 +4,9 @@ const { pool } = require('../config/db');
 const getSpecificUniversity = async (req, res) => {
   const { id } = req.params;
   try {
+    if (isNaN(id)) {
+      return res.status(404).json({ error: 'University not found' });
+    }
     const result = await pool.query('SELECT * FROM universities WHERE id = $1', [id]);
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'University not found' });
@@ -111,16 +114,25 @@ const getReviewFromUniversity = async (req, res) => {
   }
 };
 
-const getAllUniversityIDs = async (req, res) =>  {
+const getAllUniversityIDs = async (req, res) => {
   try {
-    const result = await pool.query('SELECT id, name FROM universities');
+    const result = await pool.query(`
+      SELECT 
+        u.id, 
+        u.name,
+        COUNT(r.id) as review_count
+      FROM universities u
+      LEFT JOIN reviews r ON u.id = r.university_id
+      GROUP BY u.id, u.name
+      ORDER BY u.id
+    `);
+    
     res.json(result.rows);
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Server error');
+    console.error('Error fetching university IDs:', error);
+    res.status(500).json({ error: 'Server error' });
   }
 };
-
 const getUniversityName = async (req, res) => {
   const { id } = req.params;
   

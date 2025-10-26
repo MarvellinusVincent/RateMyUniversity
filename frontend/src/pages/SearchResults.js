@@ -1,6 +1,7 @@
 import { useLocation, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { useDebounce } from 'react-use';
+import { Helmet } from 'react-helmet-async';
 
 const SearchResults = () => {
   const location = useLocation();
@@ -138,6 +139,12 @@ const SearchResults = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
+      <Helmet>
+        <title>{query ? `${query} - University Search Results | RateMyUniversity` : 'Search Universities | RateMyUniversity'}</title>
+        <link rel="canonical" href={`https://ratemyuniversity.io/search/university${query ? `?name=${encodeURIComponent(query)}` : ''}`} />
+        <meta name="description" content={query ? `Search results for "${query}". Find honest student reviews and ratings.` : 'Search thousands of universities and read authentic student reviews.'} />
+        <meta name="robots" content="index, follow" />
+      </Helmet>
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-64 h-64 sm:w-96 sm:h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
         <div className="absolute bottom-1/3 -right-20 w-56 h-56 sm:w-80 sm:h-80 rounded-full bg-gradient-to-l from-blue-200 to-transparent opacity-20 blur-3xl"></div>

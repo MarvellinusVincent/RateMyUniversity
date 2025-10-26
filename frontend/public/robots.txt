@@ -1,10 +1,22 @@
 User-agent: *
 Allow: /
 
-# Private pages
+# Block private pages
 Disallow: /profile
 Disallow: /savedReviews
+Disallow: /addReview/
+Disallow: /resetPassword
+Disallow: /forgotPassword
+
+# Block form submission pages
+Disallow: /addSchool
+
+# Allow CSS, JS, and images
+Allow: /*.css
+Allow: /*.js
+Allow: /*.png
+Allow: /*.jpg
+Allow: /*.svg
 
 # Sitemaps
 Sitemap: https://ratemyuniversity.io/sitemap.xml
-Sitemap: https://ratemyuniversity.io/sitemap-static.xml

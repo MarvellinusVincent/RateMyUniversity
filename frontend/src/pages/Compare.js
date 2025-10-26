@@ -105,10 +105,12 @@ const Compare = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 relative overflow-hidden">
-      <Helmet>
-        <title>{`Compare ${uni1.name} vs ${uni2.name} | RateMyUniversity`}</title>
-        <meta name="description" content={`Compare student reviews of ${uni1.name} and ${uni2.name}. See ratings for academics, campus life, facilities, and more.`} />
-      </Helmet>
+    <Helmet>
+      <title>{`Compare ${uni1.name} vs ${uni2.name} | RateMyUniversity`}</title>
+      <link rel="canonical" href={`https://ratemyuniversity.io/compare?uni1=${uni1Id}&uni2=${uni2Id}`} />
+      <meta name="robots" content="index, follow" />
+      <meta name="description" content={`Compare student reviews of ${uni1.name} and ${uni2.name}. See ratings for academics, campus life, facilities, and more.`} />
+    </Helmet>
 
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-64 h-64 sm:w-96 sm:h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>

@@ -4,6 +4,8 @@ require('dotenv').config();
 
 const CHUNK_SIZE = 2000;
 const BASE_URL = 'https://ratemyuniversity.io';
+// Use production API URL or fallback to env variable
+const API_URL = process.env.REACT_APP_API_URL || 'https://api.ratemyuniversity.io';
 
 // Static pages to include in sitemap
 const staticPages = [
@@ -67,12 +69,19 @@ ${staticPages.map(page => `  <url>
       universityChunks.forEach((chunk, index) => {
         const chunkXml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${chunk.map(u => `  <url>
+${chunk.map(u => {
+  // Dynamic priority based on review count
+  // More reviews = higher priority for Google
+  const reviewCount = parseInt(u.review_count) || 0;
+  const priority = reviewCount >= 10 ? '0.9' : reviewCount > 0 ? '0.8' : '0.6';
+  
+  return `  <url>
     <loc>${BASE_URL}/university/${u.id}</loc>
     <lastmod>${lastModDate}</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
-  </url>`).join('\n')}
+    <changefreq>weekly</changefreq>
+    <priority>${priority}</priority>
+  </url>`;
+}).join('\n')}
 </urlset>`;
 
         const filename = `sitemap-universities-${index}.xml`;
@@ -83,7 +92,7 @@ ${chunk.map(u => `  <url>
       console.log(`Generated ${universityChunks.length} university sitemaps`);
     }
 
-    // --- 4. Generate main sitemap index ---
+    // --- 3. Generate main sitemap index ---
     const mainSitemap = `<?xml version="1.0" encoding="UTF-8"?>
 <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${allSitemapFiles.map(filename => `  <sitemap>

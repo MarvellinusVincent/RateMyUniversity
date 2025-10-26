@@ -279,6 +279,10 @@ const University = () => {
   if (showNotFound) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-gray-900 to-blue-900 flex items-center justify-center px-4">
+        <Helmet>
+          <title>University Not Found - RateMyUniversity</title>
+          <meta name="robots" content="noindex, follow" />
+        </Helmet>
         <div className="text-center">
           <div className="text-6xl sm:text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-500 to-yellow-500 mb-4 sm:mb-6">
             404
@@ -311,21 +315,41 @@ const University = () => {
           rel="canonical" 
           href={`https://ratemyuniversity.io/university/${id}`}
         />
-        <meta name="description" content={`${totalReviews} student reviews of ${university.name} in ${university.country}. Average rating: ${averageRatings.overall.toFixed(1)}/5.0. Read about academics, campus life, safety, and more.`} />
-        <meta name="robots" content="index, follow" />
-        <script type="application/ld+json">
-          {JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "EducationalOrganization",
-            "name": university.name,
-            "url": university.web_pages?.[0],
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": averageRatings.overall,
-              "reviewCount": totalReviews
-            }
-          })}
-        </script>
+        <meta name="description" content={
+          totalReviews > 0 
+            ? `${totalReviews} student reviews of ${university.name} in ${university.country}. Average rating: ${averageRatings.overall.toFixed(1)}/5.0. Read about academics, campus life, safety, and more.`
+            : `${university.name} in ${university.country}. Be the first to review and share your experience about academics, campus life, and more.`
+        } />
+        
+        {/* SEO FIX: Add noindex for paginated/sorted pages */}
+        <meta name="robots" content={
+          currentPage > 1 || sortOption !== 'recent' 
+            ? "noindex, follow" 
+            : "index, follow"
+        } />
+        
+        {/* SEO FIX: Only add schema if reviews exist and rating is valid */}
+        {totalReviews > 0 && averageRatings.overall > 0 && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "EducationalOrganization",
+              "name": university.name,
+              "url": university.web_pages?.[0],
+              "address": {
+                "@type": "PostalAddress",
+                "addressCountry": university.country
+              },
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": Math.max(1, Math.min(5, averageRatings.overall)).toFixed(1),
+                "bestRating": "5",
+                "worstRating": "1",
+                "reviewCount": totalReviews
+              }
+            })}
+          </script>
+        )}
       </Helmet>
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 -left-20 w-48 h-48 sm:w-64 sm:h-64 md:w-96 md:h-96 rounded-full bg-gradient-to-r from-pink-200 to-transparent opacity-20 blur-3xl"></div>
